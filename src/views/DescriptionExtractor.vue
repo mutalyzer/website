@@ -2,7 +2,7 @@
   <v-container>
     <v-layout>
       <v-flex xs12>
-        <h1 class="display-1">About Page</h1>
+        <h1 class="display-1">Description Extractor</h1>
         <p>
           Lorem ipsum dolor, sit amet consectetur adipisicing elit. Excepturi
           obcaecati tempora sunt debitis, minima deleniti ex inventore
