@@ -29,6 +29,7 @@ const routes = [
     path: "/positionconverter",
     name: "PositionConverter",
     component: PositionConverter
+    // Readd the lazy loading stuff
   },
   {
     path: "/descriptionextractor",
