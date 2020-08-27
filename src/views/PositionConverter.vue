@@ -4,7 +4,7 @@
       <v-flex xs12>
         <h1 class="display-1 mt-10">Position Converter</h1>
         <p>
-          Convert reference positions to selector orientated positions and vice
+          Converts reference positions to selector orientated positions and vice
           versa.
         </p>
         <v-sheet elevation="2" class="mt-10 pa-10">
@@ -145,6 +145,9 @@
           <v-row v-if="otherSelectors">
             <v-col>
               <div class="overline mb-4">Other Selectors</div>
+              <div v-if="!otherSelectors || !otherSelectors.length">
+                No other selectors overlap with the provided position.
+              </div>
               <div v-for="(selector, i) in otherSelectors" :key="i">
                 <span class="description">
                   {{ summary.reference.id }}({{ selector.id }}):{{
@@ -173,10 +176,6 @@ export default {
     relativeTo: "",
     includeOverlapping: false,
     rules: [value => !!value || "Required."],
-    // positionRules: [
-    //   value => !!value || "Required.",
-    //   this.positionRule
-    // ],
     summary: null,
     responseApi: null,
     errorMessages: null,
@@ -239,22 +238,15 @@ export default {
     ]
   }),
   created: function() {
-    console.log("Created");
-    console.log(this.$route);
+    // console.log("Created");
+    // console.log(this.$route);
     this.run();
   },
   watch: {
     $route() {
-      console.log("Watch");
-      console.log(this.$route.params);
+      // console.log("Watch");
+      // console.log(this.$route.params);
       this.run();
-    },
-    summary() {
-      console.log("Summary changed");
-    },
-    responseApi() {
-      console.log("responseApi changed");
-      console.log(this.responseApi);
     },
     referenceId() {
       this.handleEretr();
@@ -264,17 +256,11 @@ export default {
       this.handleEnoselector();
     },
     position() {
-      console.log("watchposition");
       this.updatePositionErrorMessage();
-    },
-    errorPosition() {
-      console.log("watch error position");
     }
   },
   methods: {
     run: function() {
-      console.log("this.includeOverlapping");
-      console.log(this.includeOverlapping);
       if (
         this.$route.query.referenceId &&
         0 !== this.$route.query.referenceId.length
@@ -302,7 +288,6 @@ export default {
       if (this.$route.query.includeOverlapping) {
         this.includeOverlapping = this.$route.query.includeOverlapping;
       }
-
       if (
         this.$route.query.referenceId &&
         0 !== this.$route.query.referenceId.length &&
@@ -354,20 +339,20 @@ export default {
               // The request was made and the server responded with a status code
               // that falls out of the range of 2xx
               this.errorMessages = "Some response error.";
-              console.log(error.response.data);
-              console.log(error.response.status);
-              console.log(error.response.headers);
+              // console.log(error.response.data);
+              // console.log(error.response.status);
+              // console.log(error.response.headers);
             } else if (error.request) {
               this.errorMessages = "Some request error.";
               // The request was made but no response was received
               // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
               // http.ClientRequest in node.js
-              console.log(error.request);
+              // console.log(error.request);
             } else {
               this.errorMessages = "Some error.";
-              console.log(error);
+              // console.log(error);
               // Something happened in setting up the request that triggered an Error
-              console.log("Error", error.message);
+              // console.log("Error", error.message);
             }
             // console.log(error.config);
           });
@@ -379,7 +364,6 @@ export default {
       } else {
         this.summary = response;
         if (this.summary.other_selectors) {
-          console.log("SHOULD NOT");
           this.otherSelectors = this.summary.other_selectors;
         }
       }
@@ -406,10 +390,18 @@ export default {
         } else if (entry.code === "ESYNTAX") {
           this.errorMessages = "Position syntax error.";
         } else if (entry.code === "ERANGELOCATION") {
-          this.errorMessages = "Range locations not supported.";
+          this.errorMessages = "";
           this.errorPosition = this.position;
-          console.log(this.errorPosition);
-          this.updatePositionErrorMessage();
+          this.updatePositionErrorMessage("Range locations not supported.");
+        } else if (entry.code === "EOUTOFBOUNDARY") {
+          this.errorPosition = this.position;
+          this.updatePositionErrorMessage(
+            "Position out of sequence boundaries."
+          );
+        } else {
+          if (entry.code) {
+            this.errorMessages = entry.code + " occurred.";
+          }
         }
       }
     },
@@ -437,9 +429,9 @@ export default {
         this.errorSelectorIdMessage = null;
       }
     },
-    updatePositionErrorMessage() {
+    updatePositionErrorMessage(message) {
       if (this.errorPosition && this.errorPosition === this.position) {
-        this.errorPositionMessage = "Range not supported";
+        this.errorPositionMessage = message;
       } else {
         this.errorPositionMessage = null;
       }
@@ -459,6 +451,7 @@ export default {
 .description:hover {
   color: #0d47a1;
 }
+
 .v-text-field {
   font-family: monospace;
 }

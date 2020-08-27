@@ -61,8 +61,8 @@
         <v-sheet elevation="2" class="pa-10 mt-10" v-if="summary">
           <div v-if="normalizedDescription">
             <h4>Normalized Description</h4>
-            <code
-              ><span class="example-item">
+            <code>
+              <span class="example-item">
                 <router-link
                   :to="{
                     name: 'NameChecker',
