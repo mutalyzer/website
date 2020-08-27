@@ -55,6 +55,15 @@
                 ></v-select>
               </v-col>
             </v-row>
+            <v-row class="mt--10">
+              <v-col>
+                <v-switch
+                  v-model="includeOverlapping"
+                  label="Include overlapping"
+                  color="primary"
+                ></v-switch>
+              </v-col>
+            </v-row>
           </v-form>
           <v-row>
             <v-btn
@@ -68,7 +77,8 @@
                   referenceId: referenceId,
                   selectorId: selectorId,
                   position: position,
-                  relativeTo: relativeTo
+                  relativeTo: relativeTo,
+                  includeOverlapping: includeOverlapping
                 }
               }"
             >
@@ -132,6 +142,18 @@
               </div>
             </v-col>
           </v-row>
+          <v-row v-if="otherSelectors">
+            <v-col>
+              <div class="overline mb-4">Other Selectors</div>
+              <div v-for="(selector, i) in otherSelectors" :key="i">
+                <span class="description">
+                  {{ summary.reference.id }}({{ selector.id }}):{{
+                    selector.coordinate_system
+                  }}.{{ selector.position }}
+                </span>
+              </div>
+            </v-col>
+          </v-row>
         </v-sheet>
       </v-flex>
     </v-layout>
@@ -149,6 +171,7 @@ export default {
     selectorId: "",
     position: "",
     relativeTo: "",
+    includeOverlapping: false,
     rules: [value => !!value || "Required."],
     // positionRules: [
     //   value => !!value || "Required.",
@@ -164,6 +187,7 @@ export default {
     errorPosition: null,
     errorPositionMessage: null,
     referenceErrors: null,
+    otherSelectors: null,
     examples: [
       {
         item: "LRG_24:g.100 -> t1",
@@ -175,7 +199,27 @@ export default {
         }
       },
       {
-        item: "NG_012337.1(NM_003002):c.274 -> NG_012337.1",
+        item: "NG_007485.1(NR_047542.1):n.274 -> NR_047542.1",
+        fields: {
+          referenceId: "NG_007485.1",
+          selectorId: "NR_047542.1",
+          position: "274",
+          relativeTo: "Selector"
+        }
+      },
+
+      {
+        item: "NG_017013.2(NM_000546.5):c.274 -> NM_000546.5",
+        fields: {
+          referenceId: "NG_017013.2",
+          selectorId: "NM_000546.5",
+          position: "274",
+          relativeTo: "Selector"
+        }
+      },
+
+      {
+        item: "NG_012337.1(NM_003002.2):c.274 -> NG_012337.1",
         fields: {
           referenceId: "NG_012337.1",
           selectorId: "NM_003002.2",
@@ -229,6 +273,8 @@ export default {
   },
   methods: {
     run: function() {
+      console.log("this.includeOverlapping");
+      console.log(this.includeOverlapping);
       if (
         this.$route.query.referenceId &&
         0 !== this.$route.query.referenceId.length
@@ -253,6 +299,10 @@ export default {
       ) {
         this.relativeTo = this.$route.query.relativeTo;
       }
+      if (this.$route.query.includeOverlapping) {
+        this.includeOverlapping = this.$route.query.includeOverlapping;
+      }
+
       if (
         this.$route.query.referenceId &&
         0 !== this.$route.query.referenceId.length &&
@@ -280,12 +330,14 @@ export default {
         this.position !== null
       ) {
         this.summary = null;
+        this.otherSelectors = null;
         this.responseApi = null;
         const params = {
           reference_id: this.referenceId,
           selector_id: this.selectorId,
           position: this.position,
-          relative_to: this.relativeTo
+          relative_to: this.relativeTo,
+          include_overlapping: this.includeOverlapping
         };
         axios
           // .get('http://145.88.35.44/api/name_check/' + this.description, {
@@ -326,6 +378,10 @@ export default {
         this.errorsHandler(response.errors);
       } else {
         this.summary = response;
+        if (this.summary.other_selectors) {
+          console.log("SHOULD NOT");
+          this.otherSelectors = this.summary.other_selectors;
+        }
       }
     },
     errorsHandler: function(errors) {
