@@ -35,6 +35,7 @@
             ref="nameCheck"
             :disabled="!valid"
             class="mt-5"
+            color="primary"
             :to="{
               name: 'NameChecker',
               params: { descriptionRouter: description }

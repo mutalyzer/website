@@ -88,7 +88,7 @@ export default {
           observed: this.observed
         };
         axios
-          // .get('http://145.88.35.44/api/name_check/' + this.description, {
+          // .get('http://145.88.35.44/api/description_extract/', { params }, {})
           .get("http://127.0.0.1:5000/api/description_extract/", { params }, {})
           .then(response => {
             if (response.data) {

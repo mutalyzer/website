@@ -29,12 +29,17 @@ const routes = [
     path: "/positionconverter",
     name: "PositionConverter",
     component: PositionConverter
-    // Readd the lazy loading stuff
+    // Re-add the lazy loading stuff
   },
   {
     path: "/descriptionextractor",
     name: "DescriptionExtractor",
     component: DescriptionExtractor
+  },
+  {
+    path: "*",
+    name: "catchAll",
+    component: Home
   }
 ];
 

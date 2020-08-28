@@ -10,6 +10,10 @@
         <v-sheet elevation="2" class="mt-10 pa-10">
           <v-form ref="form" v-model="valid" :lazy-validation="lazy">
             <v-row>
+              <v-subheader>From</v-subheader>
+            </v-row>
+            <v-divider></v-divider>
+            <v-row>
               <v-col cols="12" sm="6" lg="3">
                 <v-text-field
                   :rules="rules"
@@ -24,15 +28,24 @@
               </v-col>
 
               <v-col cols="12" sm="6" lg="3">
-                <v-text-field
-                  :rules="rules"
-                  ref="selectorId"
-                  v-model="selectorId"
+                <v-combobox
+                  ref="fromSelectorId"
+                  v-model="fromSelectorId"
+                  :items="availableSelectors.selectors"
                   :label="'Selector ID'"
                   :hint="'E.g. NM_001232.3'"
                   :error-messages="errorSelectorIdMessage"
                   :clearable="true"
-                ></v-text-field>
+                  v-on:click="getAvailableSelectors()"
+                ></v-combobox>
+              </v-col>
+
+              <v-col cols="12" sm="6" lg="3">
+                <v-select
+                  :items="['Reference', 'Selector', 'g', 'c', 'n']"
+                  v-model="fromCoordinateSystem"
+                  label="Coordinate system"
+                ></v-select>
               </v-col>
 
               <v-col cols="12" sm="6" lg="3">
@@ -46,12 +59,25 @@
                   :clearable="true"
                 ></v-text-field>
               </v-col>
+            </v-row>
+            <v-row>
+              <v-subheader>To</v-subheader>
+            </v-row>
+            <v-divider></v-divider>
+            <v-row>
+              <v-col>
+                <v-combobox
+                  v-model="toSelectorId"
+                  :items="['Reference', this.availableSelectors.selectors]"
+                  label="Reference or selector ID"
+                ></v-combobox>
+              </v-col>
 
               <v-col cols="12" sm="6" lg="3">
                 <v-select
-                  :items="['Reference', 'Selector']"
-                  v-model="relativeTo"
-                  label="Relative to"
+                  :items="['Reference', 'Selector', 'g', 'c', 'n']"
+                  v-model="toCoordinateSystem"
+                  label="Coordinate system"
                 ></v-select>
               </v-col>
             </v-row>
@@ -75,9 +101,11 @@
                 name: 'PositionConverter',
                 query: {
                   referenceId: referenceId,
-                  selectorId: selectorId,
+                  fromSelectorId: fromSelectorId,
+                  fromCoordinateSystem: fromCoordinateSystem,
                   position: position,
-                  relativeTo: relativeTo,
+                  toSelectorId: toSelectorId,
+                  toCoordinateSystem: toCoordinateSystem,
                   includeOverlapping: includeOverlapping
                 }
               }"
@@ -170,11 +198,15 @@ export default {
   data: () => ({
     valid: true,
     lazy: false,
+
     referenceId: "",
-    selectorId: "",
+    fromSelectorId: "",
+    fromCoordinateSystem: "",
     position: "",
-    relativeTo: "",
+    toSelectorId: "",
+    toCoordinateSystem: "",
     includeOverlapping: false,
+
     rules: [value => !!value || "Required."],
     summary: null,
     responseApi: null,
@@ -187,6 +219,7 @@ export default {
     errorPositionMessage: null,
     referenceErrors: null,
     otherSelectors: null,
+    availableSelectors: {},
     examples: [
       {
         item: "LRG_24:g.100 -> t1",
@@ -249,6 +282,9 @@ export default {
       this.run();
     },
     referenceId() {
+      if (this.availableSelectors.reference !== this.referenceId) {
+        this.availableSelectors = {};
+      }
       this.handleEretr();
       this.handleEnoselector();
     },
@@ -325,7 +361,7 @@ export default {
           include_overlapping: this.includeOverlapping
         };
         axios
-          // .get('http://145.88.35.44/api/name_check/' + this.description, {
+          // .get('http://145.88.35.44/api/position_convert/', { params }, {})
           .get("http://127.0.0.1:5000/api/position_convert/", { params }, {})
           .then(response => {
             if (response.data) {
@@ -434,6 +470,27 @@ export default {
         this.errorPositionMessage = message;
       } else {
         this.errorPositionMessage = null;
+      }
+    },
+    getAvailableSelectors: function() {
+      if (this.referenceId !== null && 0 !== this.referenceId.length) {
+        if (
+          this.availableSelectors &&
+          this.availableSelectors.reference !== this.referenceId
+        ) {
+          console.log("getAvailableSelectorsCalled");
+          axios
+            // .get('http://145.88.35.44/api/position_convert/', { params }, {})
+            .get(
+              "http://127.0.0.1:5000/api/get_selectors/" + this.referenceId,
+              {}
+            )
+            .then(response => {
+              if (response.data) {
+                this.availableSelectors = response.data;
+              }
+            });
+        }
       }
     }
   }
