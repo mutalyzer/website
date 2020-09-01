@@ -31,9 +31,9 @@
                 <v-combobox
                   ref="fromSelectorId"
                   v-model="fromSelectorId"
-                  :items="availableSelectors.selectors"
                   :label="'Selector ID'"
                   :hint="'E.g. NM_001232.3'"
+                  :items="availableSelectors.selectors"
                   :error-messages="errorSelectorIdMessage"
                   :clearable="true"
                   v-on:click="getAvailableSelectors()"
@@ -68,15 +68,18 @@
               <v-col>
                 <v-combobox
                   v-model="toSelectorId"
-                  :items="['Reference', this.availableSelectors.selectors]"
-                  label="Reference or selector ID"
+                  :label="'Selector ID'"
+                  :hint="'E.g. NM_001232.3'"
+                  :items="availableSelectors.selectors"
+                  :clearable="true"
+                  v-on:click="getAvailableSelectors()"
                 ></v-combobox>
               </v-col>
 
               <v-col cols="12" sm="6" lg="3">
                 <v-select
-                  :items="['Reference', 'Selector', 'g', 'c', 'n']"
                   v-model="toCoordinateSystem"
+                  :items="['Reference', 'Selector', 'g', 'c', 'n']"
                   label="Coordinate system"
                 ></v-select>
               </v-col>
@@ -85,7 +88,7 @@
               <v-col>
                 <v-switch
                   v-model="includeOverlapping"
-                  label="Include overlapping"
+                  label="Include overlapping selectors"
                   color="primary"
                 ></v-switch>
               </v-col>
@@ -147,25 +150,31 @@
         <v-sheet elevation="2" class="pa-10 mt-10" v-if="summary">
           {{ summary }}
         </v-sheet>
-        <v-sheet elevation="2" class="pa-10 mt-10" v-if="summary">
+        <v-sheet elevation="2" class="pa-10 mt-10" v-if="conversion">
           <v-row>
             <v-col>
-              <div class="overline mb-4">Reference Position</div>
+              <div class="overline mb-4">Input Position</div>
               <div class="">
                 <span class="description">
-                  {{ summary.reference.id }}:{{
-                    summary.reference.coordinate_system
-                  }}.{{ summary.reference.position }}
+                  {{
+                    getDescription(
+                      conversion.reference_id,
+                      conversion.input_position
+                    )
+                  }}
                 </span>
               </div>
             </v-col>
             <v-col>
-              <div class="overline mb-4">Selector Position</div>
+              <div class="overline mb-4">Converted Position</div>
               <div>
                 <span class="description">
-                  {{ summary.reference.id }}({{ summary.selector.id }}):{{
-                    summary.selector.coordinate_system
-                  }}.{{ summary.selector.position }}
+                  {{
+                    getDescription(
+                      conversion.reference_id,
+                      conversion.converted_position
+                    )
+                  }}
                 </span>
               </div>
             </v-col>
@@ -178,9 +187,7 @@
               </div>
               <div v-for="(selector, i) in otherSelectors" :key="i">
                 <span class="description">
-                  {{ summary.reference.id }}({{ selector.id }}):{{
-                    selector.coordinate_system
-                  }}.{{ selector.position }}
+                  {{ getDescription(conversion.reference_id, selector) }}
                 </span>
               </div>
             </v-col>
@@ -209,6 +216,7 @@ export default {
 
     rules: [value => !!value || "Required."],
     summary: null,
+    conversion: null,
     responseApi: null,
     errorMessages: null,
     errorReferenceId: null,
@@ -224,48 +232,43 @@ export default {
       {
         item: "LRG_24:g.100 -> t1",
         fields: {
-          referenceId: "LRG_1",
-          selectorId: "t1",
+          referenceId: "LRG_24",
           position: "100",
-          relativeTo: "Reference"
+          toSelectorId: "t1"
         }
       },
       {
-        item: "NG_007485.1(NR_047542.1):n.274 -> NR_047542.1",
+        item: "NG_007485.1(NR_047542.1):n.274 -> g.",
         fields: {
           referenceId: "NG_007485.1",
-          selectorId: "NR_047542.1",
-          position: "274",
-          relativeTo: "Selector"
+          fromSelectorId: "NR_047542.1",
+          position: "274"
         }
       },
-
       {
         item: "NG_017013.2(NM_000546.5):c.274 -> NM_000546.5",
         fields: {
           referenceId: "NG_017013.2",
-          selectorId: "NM_000546.5",
-          position: "274",
-          relativeTo: "Selector"
+          fromSelectorId: "NM_000546.5",
+          fromCoordinateSystem: "Selector",
+          position: "274"
         }
       },
-
       {
-        item: "NG_012337.1(NM_003002.2):c.274 -> NG_012337.1",
+        item: "NG_012337.1:g.274 -> NG_012337.1(NM_003002.2)",
         fields: {
           referenceId: "NG_012337.1",
-          selectorId: "NM_003002.2",
           position: "274",
-          relativeTo: "Selector"
+          toSelectorId: "NM_003002.2"
         }
       },
       {
-        item: "NC_000001.11(NM_001232.3):c.274 -> NC_000001.11",
+        item: "NC_000001.11(NM_001232.4):c.274 -> NC_000001.11",
         fields: {
           referenceId: "NC_000001.11",
-          selectorId: "NM_001232.3",
-          position: "274",
-          relativeTo: "Selector"
+          fromSelectorId: "NM_001232.4",
+          fromCoordinateSystem: "Selector",
+          position: "274"
         }
       }
     ]
@@ -304,10 +307,16 @@ export default {
         this.referenceId = this.$route.query.referenceId;
       }
       if (
-        this.$route.query.selectorId &&
-        0 !== this.$route.query.selectorId.length
+        this.$route.query.fromSelectorId &&
+        0 !== this.$route.query.fromSelectorId.length
       ) {
-        this.selectorId = this.$route.query.selectorId;
+        this.fromSelectorId = this.$route.query.fromSelectorId;
+      }
+      if (
+        this.$route.query.fromCoordinateSystem &&
+        0 !== this.$route.query.fromCoordinateSystem.length
+      ) {
+        this.fromCoordinateSystem = this.$route.query.fromCoordinateSystem;
       }
       if (
         this.$route.query.position &&
@@ -316,48 +325,79 @@ export default {
         this.position = this.$route.query.position;
       }
       if (
-        this.$route.query.relativeTo &&
-        0 !== this.$route.query.relativeTo.length
+        this.$route.query.toSelectorId &&
+        0 !== this.$route.query.toSelectorId.length
       ) {
-        this.relativeTo = this.$route.query.relativeTo;
+        this.toSelectorId = this.$route.query.toSelectorId;
+      }
+      if (
+        this.$route.query.toCoordinateSystem &&
+        0 !== this.$route.query.toCoordinateSystem.length
+      ) {
+        this.toCoordinateSystem = this.$route.query.toCoordinateSystem;
       }
       if (this.$route.query.includeOverlapping) {
-        this.includeOverlapping = this.$route.query.includeOverlapping;
+        if (this.$route.query.includeOverlapping === "true") {
+          this.includeOverlapping = true;
+        } else if (this.$route.query.includeOverlapping === "false") {
+          this.includeOverlapping = false;
+        }
       }
       if (
         this.$route.query.referenceId &&
         0 !== this.$route.query.referenceId.length &&
-        this.$route.query.selectorId &&
-        0 !== this.$route.query.selectorId.length &&
         this.$route.query.position &&
-        0 !== this.$route.query.position.length &&
-        this.$route.query.relativeTo &&
-        0 !== this.$route.query.relativeTo.length
+        0 !== this.$route.query.position.length
       ) {
         this.positionConvert();
       }
     },
     setExample: function(fields) {
-      this.referenceId = fields.referenceId;
-      this.selectorId = fields.selectorId;
-      this.position = fields.position;
-      this.relativeTo = fields.relativeTo;
+      if (fields.referenceId) {
+        this.referenceId = fields.referenceId;
+      } else {
+        this.referenceId = "";
+      }
+      if (fields.fromSelectorId) {
+        this.fromSelectorId = fields.fromSelectorId;
+      } else {
+        this.fromSelectorId = "";
+      }
+      if (fields.fromCoordinateSystem) {
+        this.fromCoordinateSystem = fields.fromCoordinateSystem;
+      } else {
+        this.fromCoordinateSystem = "";
+      }
+      if (fields.position) {
+        this.position = fields.position;
+      } else {
+        this.position = "";
+      }
+      if (fields.toSelectorId) {
+        this.toSelectorId = fields.toSelectorId;
+      } else {
+        this.toSelectorId = "";
+      }
+      if (fields.toCoordinateSystem) {
+        this.toCoordinateSystem = fields.toCoordinateSystem;
+      } else {
+        this.toCoordinateSystem = "";
+      }
     },
     positionConvert: function() {
       this.errorMessages = null;
-      if (
-        this.referenceId !== null &&
-        this.selectorId !== null &&
-        this.position !== null
-      ) {
+      if (this.referenceId !== null && this.position !== null) {
         this.summary = null;
+        this.conversion = null;
         this.otherSelectors = null;
         this.responseApi = null;
         const params = {
           reference_id: this.referenceId,
-          selector_id: this.selectorId,
+          from_selector_id: this.fromSelectorId,
+          from_coordinate_system: this.fromCoordinateSystem,
           position: this.position,
-          relative_to: this.relativeTo,
+          to_selector_id: this.toSelectorId,
+          to_coordinate_system: this.toCoordinateSystem,
           include_overlapping: this.includeOverlapping
         };
         axios
@@ -399,8 +439,11 @@ export default {
         this.errorsHandler(response.errors);
       } else {
         this.summary = response;
-        if (this.summary.other_selectors) {
-          this.otherSelectors = this.summary.other_selectors;
+        if (this.summary.conversion) {
+          this.conversion = this.summary.conversion;
+          if (this.conversion.overlapping) {
+            this.otherSelectors = this.conversion.overlapping;
+          }
         }
       }
     },
@@ -480,7 +523,7 @@ export default {
         ) {
           console.log("getAvailableSelectorsCalled");
           axios
-            // .get('http://145.88.35.44/api/position_convert/', { params }, {})
+            // .get('http://145.88.35.44/api/get_selectors/" + this.referenceId, {})
             .get(
               "http://127.0.0.1:5000/api/get_selectors/" + this.referenceId,
               {}
@@ -492,6 +535,15 @@ export default {
             });
         }
       }
+    },
+    getDescription: function(reference_id, position) {
+      let output = reference_id;
+      if (position.selector_id) {
+        output += "(" + position.selector_id + ")";
+      }
+      output += ":" + position.coordinate_system + ".";
+      output += position.position;
+      return output;
     }
   }
 };
