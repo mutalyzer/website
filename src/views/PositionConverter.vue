@@ -13,7 +13,7 @@
               <v-subheader>From</v-subheader>
             </v-row>
             <v-divider></v-divider>
-            <v-row>
+            <v-row class="pl-2 pr-2">
               <v-col cols="12" sm="6" lg="3">
                 <v-text-field
                   :rules="rules"
@@ -23,7 +23,6 @@
                   :hint="'E.g. NC_000001.11'"
                   :clearable="true"
                   :error-messages="errorReferenceIdMessage"
-                  autofocus
                 ></v-text-field>
               </v-col>
 
@@ -64,8 +63,8 @@
               <v-subheader>To</v-subheader>
             </v-row>
             <v-divider></v-divider>
-            <v-row>
-              <v-col>
+            <v-row class="pl-2 pr-2">
+              <v-col cols="12" sm="6" lg="3">
                 <v-combobox
                   v-model="toSelectorId"
                   :label="'Selector ID'"
@@ -134,22 +133,34 @@
             </v-menu>
           </v-row>
         </v-sheet>
-        <v-alert
-          border="right"
-          color="red lighten-2"
-          dark
-          colored-border
-          type="error"
-          elevation="2"
-          tile
-          class="mt-10"
-          v-if="errorMessages"
-        >
-          {{ errorMessages }}
-        </v-alert>
-        <v-sheet elevation="2" class="pa-10 mt-10" v-if="summary">
-          {{ summary }}
-        </v-sheet>
+
+        <v-overlay :absolute="true" :value="loadingOverlay">
+          <div class="text-center">
+            <v-progress-circular :size="50" indeterminate></v-progress-circular>
+          </div>
+          <div class="text-center">
+            <v-btn @click="loadingOverlay = false" class="mt-5">
+              Cancel
+            </v-btn>
+          </div>
+        </v-overlay>
+
+        <div v-if="errorMessages">
+          <v-alert
+            border="right"
+            dark
+            colored-border
+            type="error"
+            elevation="2"
+            tile
+            class="mt-5"
+            v-for="(error, i) in errorMessages"
+            :key="i"
+          >
+            {{ getError(error) }}
+          </v-alert>
+        </div>
+
         <v-sheet elevation="2" class="pa-10 mt-10" v-if="conversion">
           <v-row>
             <v-col>
@@ -165,6 +176,8 @@
                 </span>
               </div>
             </v-col>
+          </v-row>
+          <v-row>
             <v-col>
               <div class="overline mb-4">Converted Position</div>
               <div>
@@ -193,6 +206,25 @@
             </v-col>
           </v-row>
         </v-sheet>
+
+        <div v-if="infos">
+          <v-alert
+            border="right"
+            colored-border
+            type="info"
+            elevation="2"
+            tile
+            class="mt-5"
+            v-for="(info, i) in infos"
+            :key="i"
+          >
+            {{ getInfo(info) }}
+          </v-alert>
+        </div>
+
+        <v-sheet elevation="2" class="pa-10 mt-10" v-if="summary">
+          <JsonPretty :summary="summary" />
+        </v-sheet>
       </v-flex>
     </v-layout>
   </v-container>
@@ -201,7 +233,12 @@
 <script>
 import axios from "axios";
 
+import JsonPretty from "../components/JsonPretty.vue";
+
 export default {
+  components: {
+    JsonPretty
+  },
   data: () => ({
     valid: true,
     lazy: false,
@@ -215,10 +252,13 @@ export default {
     includeOverlapping: false,
 
     rules: [value => !!value || "Required."],
+    loadingOverlay: false,
+
     summary: null,
     conversion: null,
+    infos: null,
     responseApi: null,
-    errorMessages: null,
+    errorMessages: [],
     errorReferenceId: null,
     errorReferenceIdMessage: null,
     errorSelectorId: null,
@@ -385,10 +425,12 @@ export default {
       }
     },
     positionConvert: function() {
-      this.errorMessages = null;
+      this.errorMessages = [];
       if (this.referenceId !== null && this.position !== null) {
+        this.loadingOverlay = true;
         this.summary = null;
         this.conversion = null;
+        this.infos = null;
         this.otherSelectors = null;
         this.responseApi = null;
         const params = {
@@ -405,27 +447,29 @@ export default {
           .get("http://127.0.0.1:5000/api/position_convert/", { params }, {})
           .then(response => {
             if (response.data) {
+              this.loadingOverlay = false;
               this.responseApi = response.data;
               this.responseHandler(response.data);
               this.loadingOverlay = false;
             }
           })
           .catch(error => {
+            this.loadingOverlay = false;
             if (error.response) {
               // The request was made and the server responded with a status code
               // that falls out of the range of 2xx
-              this.errorMessages = "Some response error.";
+              this.errorMessages = [{ details: "Some response error." }];
               // console.log(error.response.data);
               // console.log(error.response.status);
               // console.log(error.response.headers);
             } else if (error.request) {
-              this.errorMessages = "Some request error.";
+              this.errorMessages = [{ details: "Some request error." }];
               // The request was made but no response was received
               // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
               // http.ClientRequest in node.js
               // console.log(error.request);
             } else {
-              this.errorMessages = "Some error.";
+              this.errorMessages = [{ details: "Some error." }];
               // console.log(error);
               // Something happened in setting up the request that triggered an Error
               // console.log("Error", error.message);
@@ -435,41 +479,44 @@ export default {
       }
     },
     responseHandler: function(response) {
+      this.summary = response;
       if ("errors" in response) {
         this.errorsHandler(response.errors);
-      } else {
-        this.summary = response;
-        if (this.summary.conversion) {
-          this.conversion = this.summary.conversion;
-          if (this.conversion.overlapping) {
-            this.otherSelectors = this.conversion.overlapping;
-          }
+      }
+      if (this.summary.conversion) {
+        this.conversion = this.summary.conversion;
+        if (this.conversion.overlapping) {
+          this.otherSelectors = this.conversion.overlapping;
         }
+      }
+      if (this.summary.infos) {
+        this.infos = this.summary.infos;
       }
     },
     errorsHandler: function(errors) {
       for (const entry of errors) {
+        this.errorMessages.push(entry);
         if (entry.code === "ERETR") {
-          this.errorMessages =
-            "Unable to retrieve reference " + this.referenceId;
-          this.referenceErrors = [
-            "Unable to retrieve reference " + this.referenceId
-          ];
+          // this.errorMessages =
+          //   "Unable to retrieve reference " + this.referenceId;
+          // this.referenceErrors = [
+          //   "Unable to retrieve reference " + this.referenceId
+          // ];
           this.errorReferenceId = this.referenceId;
           this.handleEretr();
         } else if (entry.code === "ENOSELECTOR") {
-          this.errorMessages =
-            "Selector " +
-            this.selectorId +
-            " not found in reference " +
-            this.referenceId;
+          // this.errorMessages =
+          //   "Selector " +
+          //   this.selectorId +
+          //   " not found in reference " +
+          //   this.referenceId;
           this.errorSelectorId = this.selectorId;
           this.errorReferenceId = this.referenceId;
           this.handleEnoselector();
         } else if (entry.code === "ESYNTAX") {
           this.errorMessages = "Position syntax error.";
         } else if (entry.code === "ERANGELOCATION") {
-          this.errorMessages = "";
+          // this.errorMessages = "";
           this.errorPosition = this.position;
           this.updatePositionErrorMessage("Range locations not supported.");
         } else if (entry.code === "EOUTOFBOUNDARY") {
@@ -477,11 +524,12 @@ export default {
           this.updatePositionErrorMessage(
             "Position out of sequence boundaries."
           );
-        } else {
-          if (entry.code) {
-            this.errorMessages = entry.code + " occurred.";
-          }
         }
+        // else {
+        //   if (entry.code) {
+        //     this.errorMessages = entry.code + " occurred.";
+        //   }
+        // }
       }
     },
     handleEretr() {
@@ -543,6 +591,28 @@ export default {
       }
       output += ":" + position.coordinate_system + ".";
       output += position.position;
+      return output;
+    },
+    getInfo: function(info) {
+      let output = info.code;
+      if (info.details) {
+        output += ": " + info.details;
+      }
+      return output;
+    },
+    getError: function(error) {
+      let output = "";
+      if (error.code) {
+        output += error.code;
+        if (error.details) {
+          output += ": " + error.details;
+        }
+      } else {
+        if (error.details) {
+          output += error.details;
+        }
+      }
+
       return output;
     }
   }
