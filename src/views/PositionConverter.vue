@@ -44,6 +44,7 @@
                   :items="['Reference', 'Selector', 'g', 'c', 'n']"
                   v-model="fromCoordinateSystem"
                   label="Coordinate system"
+                  :clearable="true"
                 ></v-select>
               </v-col>
 
@@ -79,6 +80,7 @@
                 <v-select
                   v-model="toCoordinateSystem"
                   :items="['Reference', 'Selector', 'g', 'c', 'n']"
+                  :clearable="true"
                   label="Coordinate system"
                 ></v-select>
               </v-col>

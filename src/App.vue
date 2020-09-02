@@ -4,7 +4,7 @@
       <v-app-bar color="primary" dark>
         <v-app-bar-nav-icon @click="drawer = true"></v-app-bar-nav-icon>
 
-        <v-toolbar-title>LUMC Mutalyzer 3</v-toolbar-title>
+        <v-toolbar-title>LUMC Mutalyzer 3 <code> Alpha</code></v-toolbar-title>
       </v-app-bar>
 
       <v-navigation-drawer v-model="drawer" absolute temporary>
