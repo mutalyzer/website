@@ -224,6 +224,16 @@
           </v-alert>
         </div>
 
+        <v-sheet elevation="2" class="pa-10 mt-10" v-if="inputModel">
+          <div class="overline mb-4">Input</div>
+          <ModelView :model="inputModel" />
+        </v-sheet>
+
+        <v-sheet elevation="2" class="pa-10 mt-10" v-if="convertedModel">
+          <div class="overline mb-4">Converted To</div>
+          <ModelView :model="convertedModel" />
+        </v-sheet>
+
         <v-sheet elevation="2" class="pa-10 mt-10" v-if="summary">
           <JsonPretty :summary="summary" />
         </v-sheet>
@@ -236,10 +246,12 @@
 import axios from "axios";
 
 import JsonPretty from "../components/JsonPretty.vue";
+import ModelView from "../components/ModelView.vue";
 
 export default {
   components: {
-    JsonPretty
+    JsonPretty,
+    ModelView
   },
   data: () => ({
     valid: true,
@@ -257,6 +269,8 @@ export default {
     loadingOverlay: false,
 
     summary: null,
+    inputModel: null,
+    convertedModel: null,
     conversion: null,
     infos: null,
     responseApi: null,
@@ -431,6 +445,8 @@ export default {
       if (this.referenceId !== null && this.position !== null) {
         this.loadingOverlay = true;
         this.summary = null;
+        this.inputModel = null;
+        this.convertedModel = null;
         this.conversion = null;
         this.infos = null;
         this.otherSelectors = null;
@@ -445,7 +461,7 @@ export default {
           include_overlapping: this.includeOverlapping
         };
         axios
-          // .get('http://145.88.35.44/api/position_convert/', { params }, {})
+          // .get("http://145.88.35.44/api/position_convert/", { params }, {})
           .get("http://127.0.0.1:5000/api/position_convert/", { params }, {})
           .then(response => {
             if (response.data) {
@@ -493,6 +509,12 @@ export default {
       }
       if (this.summary.infos) {
         this.infos = this.summary.infos;
+      }
+      if (this.summary.input_model) {
+        this.inputModel = this.summary.input_model;
+      }
+      if (this.summary.converted_model) {
+        this.convertedModel = this.summary.converted_model;
       }
     },
     errorsHandler: function(errors) {
@@ -571,9 +593,8 @@ export default {
           this.availableSelectors &&
           this.availableSelectors.reference !== this.referenceId
         ) {
-          console.log("getAvailableSelectorsCalled");
           axios
-            // .get('http://145.88.35.44/api/get_selectors/" + this.referenceId, {})
+            // .get("http://145.88.35.44/api/get_selectors/" + this.referenceId, {})
             .get(
               "http://127.0.0.1:5000/api/get_selectors/" + this.referenceId,
               {}
