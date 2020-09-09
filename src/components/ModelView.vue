@@ -76,7 +76,9 @@ export default {
         if (model.reference) {
           output.push(this.getReference(model.reference));
           if (model.reference.selector) {
+            output.push({ view: "(" });
             output.push(this.getSelector(model.reference.selector));
+            output.push({ view: ")" });
           }
         }
         output.push({ view: ":" });
@@ -85,21 +87,25 @@ export default {
           output.push({ view: "." });
         }
         if (model.location) {
-          this.getLocation(model.location).forEach(function(element) {
-            output.push(element);
-          });
+          output.push(...this.getLocation(model.location));
+        }
+        if (model.variants) {
+          output.push(...this.getVariants(model.variants));
         }
       }
       return output;
     },
+    addMessages: function(output, node) {
+      if (node.errors) {
+        output.errors = node.errors;
+      }
+      if (node.info) {
+        output.info = node.info;
+      }
+    },
     getReference: function(reference) {
       const output = {};
-      if (reference.errors) {
-        output.errors = reference.errors;
-      }
-      if (reference.info) {
-        output.info = reference.info;
-      }
+      this.addMessages(output, reference);
       if (reference.id) {
         output.view = reference.id;
       }
@@ -108,30 +114,116 @@ export default {
     },
     getSelector: function(selector) {
       const output = {};
-      if (selector.errors) {
-        output.errors = selector.errors;
-      }
-      if (selector.info) {
-        output.info = selector.info;
-      }
+      this.addMessages(output, selector);
       if (selector.id) {
-        output.view = "(" + selector.id + ")";
+        output.view = selector.id;
       }
       output.hover = false;
       return output;
     },
     getCoordinateSystem: function(model) {
       const output = {};
-      if (model.errors) {
-        output.errors = model.errors;
-      }
-      if (model.info) {
-        output.info = model.info;
-      }
+      this.addMessages(output, model);
       if (model.coordinate_system) {
         output.view = model.coordinate_system;
       }
       output.hover = false;
+      return output;
+    },
+    getVariants: function(variants) {
+      const output = [];
+      for (var i in variants) {
+        output.push(...this.getVariant(variants[i]));
+      }
+      return output;
+    },
+    getVariant: function(variant) {
+      const output = [];
+      if (variant.location) {
+        output.push(...this.getLocation(variant.location));
+      }
+      if (variant.type) {
+        if (variant.type == "substitution") {
+          output.push(...this.getDeleted(variant.deleted));
+          output.push({ view: ">" });
+        }
+        if (variant.type == "deletion") {
+          output.push({ view: "del" });
+        }
+        if (variant.type == "insertion") {
+          output.push({ view: "ins" });
+        }
+        if (variant.inserted) {
+          var inserted = this.getInserted(variant.inserted);
+          if (inserted.length > 1) {
+            output.push({ view: "[" });
+            for (var i in inserted) {
+              if (Array.isArray(inserted[i])) {
+                output.push(...inserted[i]);
+              } else {
+                output.push(inserted[i]);
+              }
+              if (i < inserted.length - 1) {
+                output.push({ view: ";" });
+              }
+            }
+            output.push({ view: "]" });
+          } else {
+            output.push(...inserted);
+          }
+        }
+      }
+      return output;
+    },
+    getDeleted: function(deleted) {
+      const output = [];
+      if (Array.isArray(deleted)) {
+        for (var i in deleted) {
+          output.push(...this.getDeleted(deleted[i]));
+        }
+      } else {
+        if (deleted.sequence) {
+          return [{ view: deleted.sequence }];
+        }
+      }
+      return output;
+    },
+    getInserted: function(inserted) {
+      const output = [];
+      if (Array.isArray(inserted)) {
+        for (var i in inserted) {
+          output.push(this.getInserted(inserted[i]));
+        }
+      } else {
+        if (inserted.source == "description") {
+          if (inserted.sequence) {
+            return { view: inserted.sequence };
+          }
+        } else if (inserted.source == "reference") {
+          if (inserted.location) {
+            output.push(...this.getLocation(inserted.location));
+          }
+          if (inserted.inverted) {
+            output.push({ view: "inv" });
+          }
+        } else {
+          output.push(this.getReference(inserted.source));
+          if (inserted.source.id) {
+            output.push(this.getSelector(inserted.source.id));
+          }
+          if (inserted.location) {
+            output.push({ view: ":" });
+            if (inserted.coordinate_system) {
+              output.push(this.getCoordinateSystem);
+              output.push({ view: "." });
+            }
+            output.push(...this.getLocation(inserted.location));
+          }
+          if (inserted.inverted) {
+            output.push({ view: "inv" });
+          }
+        }
+      }
       return output;
     },
     getLocation: function(location) {
@@ -161,17 +253,13 @@ export default {
       if (location.start.type === "point") {
         output.push(this.getPoint(location.start));
       } else if (location.start.type === "range") {
-        this.getRange(location.start).forEach(function(element) {
-          output.push(element);
-        });
+        output.push(...this.getRange(location.start));
       }
       output.push({ view: "_" });
       if (location.end.type === "point") {
         output.push(this.getPoint(location.end));
       } else if (location.end.type === "range") {
-        this.getRange(location.end).forEach(function(element) {
-          output.push(element);
-        });
+        output.push(...this.getRange(location.end));
       }
       if (location.uncertain) {
         output.push({ view: ")" });
@@ -254,28 +342,28 @@ export default {
 
 <style scoped>
 .info-message {
-  margin: 5px 0;
+  margin: 10px 0;
   padding: 5px;
   font-family: monospace;
   background-color: #e1f5fe;
 }
 
 .info-message-hover {
-  margin: 5px 0;
+  margin: 10px 0;
   padding: 5px;
   font-family: monospace;
   background-color: #81d4fa;
 }
 
 .error-message {
-  margin: 5px 0;
+  margin: 10px 0;
   padding: 5px;
   font-family: monospace;
   background-color: #ffebee;
 }
 
 .error-message-hover {
-  margin: 5px 0;
+  margin: 10px 0;
   padding: 5px;
   font-family: monospace;
   background-color: #ffcdd2;
@@ -317,7 +405,7 @@ export default {
 
 .description {
   margin: 0;
-  padding: 0 1px;
+  padding: 0 2px;
   font-family: monospace;
   display: inline-block;
 }

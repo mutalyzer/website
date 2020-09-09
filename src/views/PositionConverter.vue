@@ -224,6 +224,32 @@
           </v-alert>
         </div>
 
+        <v-alert
+          class="mt-10  pt-6"
+          border="top"
+          color="red lighten-2"
+          elevation="2"
+          tile
+          dark
+          v-if="summary && !convertedModel"
+          type="error"
+        >
+          Conversion not performed. Please check the errors below.
+        </v-alert>
+
+        <v-alert
+          class="mt-10 pt-6"
+          border="top"
+          color="green lighten-2"
+          elevation="2"
+          tile
+          dark
+          v-if="summary && convertedModel"
+          type="success"
+        >
+          Conversion performed.
+        </v-alert>
+
         <v-sheet elevation="2" class="pa-10 mt-10" v-if="inputModel">
           <div class="overline mb-4">Input</div>
           <ModelView :model="inputModel" />
@@ -234,9 +260,14 @@
           <ModelView :model="convertedModel" />
         </v-sheet>
 
-        <v-sheet elevation="2" class="pa-10 mt-10" v-if="summary">
-          <JsonPretty :summary="summary" />
-        </v-sheet>
+        <v-expansion-panels focusable hover class="mt-10 mb-10" v-if="summary">
+          <v-expansion-panel>
+            <v-expansion-panel-header>Raw Response</v-expansion-panel-header>
+            <v-expansion-panel-content>
+              <JsonPretty :summary="summary" />
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+        </v-expansion-panels>
       </v-flex>
     </v-layout>
   </v-container>
@@ -269,6 +300,7 @@ export default {
     loadingOverlay: false,
 
     summary: null,
+    showSummary: false,
     inputModel: null,
     convertedModel: null,
     conversion: null,
@@ -330,14 +362,10 @@ export default {
     ]
   }),
   created: function() {
-    // console.log("Created");
-    // console.log(this.$route);
     this.run();
   },
   watch: {
     $route() {
-      // console.log("Watch");
-      // console.log(this.$route.params);
       this.run();
     },
     referenceId() {
@@ -622,6 +650,9 @@ export default {
         output += ": " + info.details;
       }
       return output;
+    },
+    getInfos: function() {
+      console.log("to be implemented");
     },
     getError: function(error) {
       let output = "";

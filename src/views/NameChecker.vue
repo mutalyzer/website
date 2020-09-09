@@ -59,7 +59,11 @@
           </v-overlay>
         </v-sheet>
 
-        <v-sheet elevation="2" class="pa-10 mt-10" v-if="summary">
+        <v-sheet
+          elevation="2"
+          class="pa-10 mt-10"
+          v-if="summary && normalizedDescription"
+        >
           <div v-if="normalizedDescription">
             <h4>Normalized Description</h4>
             <code>
@@ -75,17 +79,33 @@
             >
           </div>
         </v-sheet>
+
+        <v-sheet elevation="2" class="pa-10 mt-10" v-if="augmentedModel">
+          <div class="overline mb-4">Augmented Model</div>
+          <ModelView :model="augmentedModel" />
+        </v-sheet>
+
+        <v-sheet elevation="2" class="pa-10 mt-10" v-if="summary">
+          <div class="overline mb-4">Raw Response</div>
+          <JsonPretty :summary="summary" />
+        </v-sheet>
       </v-flex>
     </v-layout>
   </v-container>
 </template>
 
 <script>
+import JsonPretty from "../components/JsonPretty.vue";
+import ModelView from "../components/ModelView.vue";
 import axios from "axios";
 const CancelToken = axios.CancelToken;
 let cancel;
 
 export default {
+  components: {
+    JsonPretty,
+    ModelView
+  },
   props: ["descriptionRouter"],
   created: function() {
     if (this.descriptionRouter && 0 !== this.descriptionRouter.length) {
@@ -104,6 +124,7 @@ export default {
   data: () => ({
     description: null,
     descriptionModel: null,
+    augmentedModel: null,
     referenceModel: null,
     normalizedDescription: null,
     equivalentDescriptions: null,
@@ -121,7 +142,7 @@ export default {
     rules: [value => !!value || "Required."],
     examples: [
       "NG_012337.1:g.7125G>T",
-      // 'NG_012337.1:g.10_11ins[T;10_20inv;NG_008835.1:159_170]',
+      "NG_012337.1:g.10_11ins[T;10_20inv;NG_008835:159_170]",
       // 'NG_008835.1(NR_120672.1):n.159dup',
       // 'NG_012337.1(NM_003002.2):c.274G>T',
       // 'LRG_23:c.159dup',
@@ -146,6 +167,7 @@ export default {
       if (this.description !== null) {
         this.loadingOverlay = true;
         this.summary = null;
+        this.augmentedModel = null;
         this.errors = null;
         this.equivalentDescriptions = null;
         this.proteinDescriptions = null;
@@ -179,6 +201,9 @@ export default {
               }
               if (response.data["visualize"]) {
                 this.visualize = response.data["visualize"];
+              }
+              if (response.data["augmented_model"]) {
+                this.augmentedModel = response.data["augmented_model"];
               }
             }
           });
