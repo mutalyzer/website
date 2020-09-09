@@ -225,6 +225,7 @@
         </div>
 
         <v-alert
+          ref="errorAlert"
           class="mt-10  pt-6"
           border="top"
           color="red lighten-2"
@@ -238,6 +239,7 @@
         </v-alert>
 
         <v-alert
+          ref="successAlert"
           class="mt-10 pt-6"
           border="top"
           color="green lighten-2"
@@ -543,6 +545,10 @@ export default {
       }
       if (this.summary.converted_model) {
         this.convertedModel = this.summary.converted_model;
+        this.$nextTick(() => {
+          console.log(this.$refs.successAlert);
+          this.$vuetify.goTo(this.$refs.successAlert, this.options);
+        });
       }
     },
     errorsHandler: function(errors) {

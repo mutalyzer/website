@@ -43,21 +43,34 @@
           >
             Normalize
           </v-btn>
-
-          <v-overlay :absolute="true" :value="loadingOverlay">
-            <div class="text-center">
-              <v-progress-circular
-                :size="50"
-                indeterminate
-              ></v-progress-circular>
-            </div>
-            <div class="text-center">
-              <v-btn @click="loadingOverlay = false" class="mt-5">
-                Cancel
-              </v-btn>
-            </div>
-          </v-overlay>
         </v-sheet>
+
+        <v-overlay :absolute="true" :value="loadingOverlay">
+          <div class="text-center">
+            <v-progress-circular :size="50" indeterminate></v-progress-circular>
+          </div>
+          <div class="text-center">
+            <v-btn @click="loadingOverlay = false" class="mt-5">
+              Cancel
+            </v-btn>
+          </div>
+        </v-overlay>
+
+        <div v-if="errorMessages">
+          <v-alert
+            border="right"
+            dark
+            colored-border
+            type="error"
+            elevation="2"
+            tile
+            class="mt-5"
+            v-for="(error, i) in errorMessages"
+            :key="i"
+          >
+            {{ getError(error) }}
+          </v-alert>
+        </div>
 
         <v-sheet
           elevation="2"
@@ -85,6 +98,20 @@
           <ModelView :model="augmentedModel" />
         </v-sheet>
 
+        <v-sheet
+          elevation="2"
+          class="pa-10 mt-10"
+          v-if="internalCoordinatesModel"
+        >
+          <div class="overline mb-4">Internal Coordinates Model</div>
+          <ModelView :model="internalCoordinatesModel" />
+        </v-sheet>
+
+        <v-sheet elevation="2" class="pa-10 mt-10" v-if="internalIndexingModel">
+          <div class="overline mb-4">Internal Indexing Model</div>
+          <ModelView :model="internalIndexingModel" />
+        </v-sheet>
+
         <v-sheet elevation="2" class="pa-10 mt-10" v-if="summary">
           <div class="overline mb-4">Raw Response</div>
           <JsonPretty :summary="summary" />
@@ -98,8 +125,6 @@
 import JsonPretty from "../components/JsonPretty.vue";
 import ModelView from "../components/ModelView.vue";
 import axios from "axios";
-const CancelToken = axios.CancelToken;
-let cancel;
 
 export default {
   components: {
@@ -124,7 +149,12 @@ export default {
   data: () => ({
     description: null,
     descriptionModel: null,
+
     augmentedModel: null,
+    internalCoordinatesModel: null,
+    internalIndexingModel: null,
+    delinsModel: null,
+
     referenceModel: null,
     normalizedDescription: null,
     equivalentDescriptions: null,
@@ -134,6 +164,7 @@ export default {
     summary: null,
     errors: null,
     loadingOverlay: false,
+    errorMessages: [],
     valid: true,
     model: "",
     label: "HGVS Description",
@@ -143,6 +174,7 @@ export default {
     examples: [
       "NG_012337.1:g.7125G>T",
       "NG_012337.1:g.10_11ins[T;10_20inv;NG_008835:159_170]",
+      "NG_012337.1:g.10_11ins[T;10_20inv;NG_008835(NM_022153.2):159_170]",
       // 'NG_008835.1(NR_120672.1):n.159dup',
       // 'NG_012337.1(NM_003002.2):c.274G>T',
       // 'LRG_23:c.159dup',
@@ -164,10 +196,15 @@ export default {
       this.$refs.descriptionInput.focus();
     },
     nameCheck: function() {
+      this.errorMessages = [];
       if (this.description !== null) {
         this.loadingOverlay = true;
         this.summary = null;
+
         this.augmentedModel = null;
+        this.internalCoordinatesModel = null;
+        this.internalIndexingModel = null;
+
         this.errors = null;
         this.equivalentDescriptions = null;
         this.proteinDescriptions = null;
@@ -176,16 +213,11 @@ export default {
         this.referenceModel = null;
         axios
           // .get('http://145.88.35.44/api/name_check/' + this.description, {
-          .get("http://127.0.0.1:5000/api/name_check/" + this.description, {
-            cancelToken: new CancelToken(function executor(c) {
-              // An executor function receives a cancel function as a parameter
-              cancel = c;
-            })
-          })
+          .get("http://127.0.0.1:5000/api/name_check/" + this.description, {})
           .then(response => {
             if (response.data) {
-              this.summary = response.data;
               this.loadingOverlay = false;
+              this.summary = response.data;
               this.normalizedDescription =
                 response.data["normalized description"];
               if (response.data["errors"]) {
@@ -205,18 +237,55 @@ export default {
               if (response.data["augmented_model"]) {
                 this.augmentedModel = response.data["augmented_model"];
               }
+              if (response.data["internal_coordinates_model"]) {
+                this.internalCoordinatesModel =
+                  response.data["internal_coordinates_model"];
+              }
+              if (response.data["internal_indexing_model"]) {
+                this.internalIndexingModel =
+                  response.data["internal_indexing_model"];
+              }
             }
+          })
+          .catch(error => {
+            this.loadingOverlay = false;
+            if (error.response) {
+              // The request was made and the server responded with a status code
+              // that falls out of the range of 2xx
+              this.errorMessages = [{ details: "Some response error." }];
+              // console.log(error.response.data);
+              // console.log(error.response.status);
+              // console.log(error.response.headers);
+            } else if (error.request) {
+              this.errorMessages = [{ details: "Some request error." }];
+              // The request was made but no response was received
+              // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
+              // http.ClientRequest in node.js
+              // console.log(error.request);
+            } else {
+              this.errorMessages = [{ details: "Some error." }];
+              // console.log(error);
+              // Something happened in setting up the request that triggered an Error
+              // console.log("Error", error.message);
+            }
+            // console.log(error.config);
           });
       }
     },
-    onShown() {
-      // Focus the cancel button when the overlay is showing
-      this.$refs.cancel.focus();
-    },
-    onHidden() {},
-    cancel() {
-      cancel();
-      this.loadingOverlay = false;
+    getError: function(error) {
+      let output = "";
+      if (error.code) {
+        output += error.code;
+        if (error.details) {
+          output += ": " + error.details;
+        }
+      } else {
+        if (error.details) {
+          output += error.details;
+        }
+      }
+
+      return output;
     }
   }
 };

@@ -214,7 +214,7 @@ export default {
           if (inserted.location) {
             output.push({ view: ":" });
             if (inserted.coordinate_system) {
-              output.push(this.getCoordinateSystem);
+              output.push(this.getCoordinateSystem(inserted));
               output.push({ view: "." });
             }
             output.push(...this.getLocation(inserted.location));
@@ -405,7 +405,7 @@ export default {
 
 .description {
   margin: 0;
-  padding: 0 2px;
+  padding: 0 1px;
   font-family: monospace;
   display: inline-block;
 }
