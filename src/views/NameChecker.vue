@@ -78,18 +78,44 @@
           v-if="summary && normalizedDescription"
         >
           <div v-if="normalizedDescription">
-            <h4>Normalized Description</h4>
-            <code>
-              <span class="example-item">
+            <div class="overline">Normalized Description</div>
+            <router-link
+              class="links"
+              :to="{
+                name: 'NameChecker',
+                params: { descriptionRouter: normalizedDescription }
+              }"
+              >{{ normalizedDescription }}</router-link
+            >
+
+            <div v-if="equivalentDescriptions">
+              <div class="overline mt-4">Equivalent Descriptions</div>
+              <div
+                v-for="(equivalentDescription, index) in equivalentDescriptions"
+                :key="index"
+              >
                 <router-link
+                  class="links"
                   :to="{
                     name: 'NameChecker',
-                    params: { descriptionRouter: normalizedDescription }
+                    params: { descriptionRouter: equivalentDescription }
                   }"
-                  >{{ normalizedDescription }}</router-link
+                  >{{ equivalentDescription }}</router-link
                 >
-              </span></code
-            >
+              </div>
+            </div>
+
+            <div v-if="proteinDescriptions">
+              <div class="overline mt-4">Protein Descriptions</div>
+              <div
+                v-for="(proteinDescription, index) in proteinDescriptions"
+                :key="index"
+              >
+                <span class="protein-description">
+                  {{ proteinDescription }}
+                </span>
+              </div>
+            </div>
           </div>
         </v-sheet>
 
@@ -218,18 +244,20 @@ export default {
             if (response.data) {
               this.loadingOverlay = false;
               this.summary = response.data;
-              this.normalizedDescription =
-                response.data["normalized description"];
+              if (response.data["normalized_description"]) {
+                this.normalizedDescription =
+                  response.data["normalized_description"];
+              }
               if (response.data["errors"]) {
                 this.errors = response.data["errors"];
               }
-              if (response.data["equivalent descriptions"]) {
+              if (response.data["equivalent_descriptions"]) {
                 this.equivalentDescriptions =
-                  response.data["equivalent descriptions"];
+                  response.data["equivalent_descriptions"];
               }
-              if (response.data["protein descriptions"]) {
+              if (response.data["protein_descriptions"]) {
                 this.proteinDescriptions =
-                  response.data["protein descriptions"];
+                  response.data["protein_descriptions"];
               }
               if (response.data["visualize"]) {
                 this.visualize = response.data["visualize"];
@@ -342,6 +370,49 @@ a {
 
 .normalized-description {
   color: #0b9b33;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+.description {
+  margin: 0;
+  padding: 0 1px;
+  font-family: monospace;
+  display: inline-block;
+}
+
+.links {
+  text-decoration: none;
+  margin: 0;
+  padding: 0 1px;
+  font-family: monospace;
+  display: inline-block;
+
+  color: #00c853;
+  background-color: #ffffff;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+.links:hover {
+  color: #f2f9f3;
+  background-color: #00c853;
+  cursor: pointer;
+}
+
+.protein-description {
+  text-decoration: none;
+  margin: 0;
+  padding: 0 1px;
+  font-family: monospace;
+  display: inline-block;
+
+  color: #004d40;
+  background-color: #ffffff;
   padding-left: 10px;
   padding-right: 10px;
   padding-top: 5px;
