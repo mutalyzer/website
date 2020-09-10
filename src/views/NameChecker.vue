@@ -72,6 +72,26 @@
           </v-alert>
         </div>
 
+        <div v-if="errorMessages">
+          <v-alert
+            border="right"
+            dark
+            colored-border
+            type="error"
+            elevation="2"
+            tile
+            class="mt-10"
+            v-if="syntaxError"
+          >
+            Syntax Error
+          </v-alert>
+        </div>
+
+        <v-sheet elevation="2" class="pa-10 mt-10" v-if="syntaxError">
+          <div class="overline mb-4">Unexpected Character</div>
+          <SyntaxError :errorModel="syntaxError" />
+        </v-sheet>
+
         <v-sheet
           elevation="2"
           class="pa-10 mt-10"
@@ -138,10 +158,19 @@
           <ModelView :model="internalIndexingModel" />
         </v-sheet>
 
-        <v-sheet elevation="2" class="pa-10 mt-10" v-if="summary">
+        <v-expansion-panels focusable hover class="mt-10 mb-10" v-if="summary">
+          <v-expansion-panel>
+            <v-expansion-panel-header>Raw Response</v-expansion-panel-header>
+            <v-expansion-panel-content>
+              <JsonPretty :summary="summary" />
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+        </v-expansion-panels>
+
+        <!-- <v-sheet elevation="2" class="pa-10 mt-10" v-if="summary">
           <div class="overline mb-4">Raw Response</div>
           <JsonPretty :summary="summary" />
-        </v-sheet>
+        </v-sheet> -->
       </v-flex>
     </v-layout>
   </v-container>
@@ -150,12 +179,14 @@
 <script>
 import JsonPretty from "../components/JsonPretty.vue";
 import ModelView from "../components/ModelView.vue";
+import SyntaxError from "../components/SyntaxError.vue";
 import axios from "axios";
 
 export default {
   components: {
     JsonPretty,
-    ModelView
+    ModelView,
+    SyntaxError
   },
   props: ["descriptionRouter"],
   created: function() {
@@ -176,10 +207,12 @@ export default {
     description: null,
     descriptionModel: null,
 
+    inputModel: null,
     augmentedModel: null,
     internalCoordinatesModel: null,
     internalIndexingModel: null,
     delinsModel: null,
+    syntaxError: null,
 
     referenceModel: null,
     normalizedDescription: null,
@@ -227,9 +260,13 @@ export default {
         this.loadingOverlay = true;
         this.summary = null;
 
+        this.inputModel = null;
         this.augmentedModel = null;
         this.internalCoordinatesModel = null;
         this.internalIndexingModel = null;
+        this.normalizedDescription = null;
+
+        this.syntaxError = null;
 
         this.errors = null;
         this.equivalentDescriptions = null;
@@ -262,6 +299,9 @@ export default {
               if (response.data["visualize"]) {
                 this.visualize = response.data["visualize"];
               }
+              if (response.data["input_model"]) {
+                this.processInputModel(response.data["input_model"]);
+              }
               if (response.data["augmented_model"]) {
                 this.augmentedModel = response.data["augmented_model"];
               }
@@ -280,18 +320,22 @@ export default {
             if (error.response) {
               // The request was made and the server responded with a status code
               // that falls out of the range of 2xx
-              this.errorMessages = [{ details: "Some response error." }];
+              this.errorMessages = [
+                { details: "Some response error occured." }
+              ];
               // console.log(error.response.data);
               // console.log(error.response.status);
               // console.log(error.response.headers);
             } else if (error.request) {
-              this.errorMessages = [{ details: "Some request error." }];
+              this.errorMessages = [
+                { details: "Some error occured on the server side." }
+              ];
               // The request was made but no response was received
               // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
               // http.ClientRequest in node.js
               // console.log(error.request);
             } else {
-              this.errorMessages = [{ details: "Some error." }];
+              this.errorMessages = [{ details: "Some error occured." }];
               // console.log(error);
               // Something happened in setting up the request that triggered an Error
               // console.log("Error", error.message);
@@ -314,6 +358,17 @@ export default {
       }
 
       return output;
+    },
+    processInputModel: function(model) {
+      if (model.errors && model.errors.length === 1) {
+        if (model.errors[0].code === "ESYNTAXUEOF") {
+          this.syntaxError = model.errors[0];
+        } else if (model.errors[0].code === "ESYNTAXUC") {
+          this.syntaxError = model.errors[0];
+        } else {
+          this.inputModel = model;
+        }
+      }
     }
   }
 };
