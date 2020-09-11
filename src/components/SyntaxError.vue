@@ -47,15 +47,16 @@ export default {
   methods: {
     unpackModel: function(model) {
       var values = {};
+      var pos_in_stream = model.pos_in_stream;
+      if (model.details == "Unexpected end of input.") {
+        pos_in_stream -= 1;
+      }
       values.correct = {
-        view: model.description.slice(0, model.pos_in_stream),
+        view: model.description.slice(0, pos_in_stream),
         hover: false
       };
       values.erroneus = {
-        view: model.description.slice(
-          model.pos_in_stream,
-          model.pos_in_stream + 1
-        ),
+        view: model.description.slice(pos_in_stream, pos_in_stream + 1),
         hover: false
       };
       if (model.expecting) {
@@ -63,7 +64,7 @@ export default {
       }
       values.unknown = {
         view: model.description.slice(
-          model.pos_in_stream + 1,
+          pos_in_stream + 1,
           model.description.length
         ),
         hover: false
@@ -79,25 +80,31 @@ export default {
 .correct {
   font-family: monospace;
   display: inline-block;
+  padding-right: 5px;
+  color: #004d40;
 }
 
 .unknown {
   font-family: monospace;
   display: inline-block;
   color: #bdbdbd;
+  padding-left: 5px;
 }
 
 .erroneus {
   font-family: monospace;
   display: inline-block;
+  padding-left: 5px;
+  padding-right: 5px;
   color: #b71c1c;
+  background-color: #e1f5fe;
 }
 
 .error-message {
-  margin: 10px 0;
+  margin: 5px 0;
   padding: 5px;
   font-family: monospace;
-  background-color: #ffebee;
+  background-color: #e1f5fe;
 }
 
 .error-message-hover {
