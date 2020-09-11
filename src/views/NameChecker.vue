@@ -109,7 +109,7 @@
             >
 
             <div v-if="equivalentDescriptions">
-              <div class="overline mt-4">Equivalent Descriptions</div>
+              <div class="overline mt-4">Equivalent Descriptions (MAX 20)</div>
               <div
                 v-for="(equivalentDescription, index) in equivalentDescriptions"
                 :key="index"
@@ -126,7 +126,7 @@
             </div>
 
             <div v-if="proteinDescriptions">
-              <div class="overline mt-4">Protein Descriptions</div>
+              <div class="overline mt-4">Protein Descriptions (MAX 20)</div>
               <div
                 v-for="(proteinDescription, index) in proteinDescriptions"
                 :key="index"
@@ -140,7 +140,7 @@
         </v-sheet>
 
         <v-sheet elevation="2" class="pa-10 mt-10" v-if="augmentedModel">
-          <div class="overline mb-4">Augmented Model</div>
+          <div class="overline mb-4">Information</div>
           <ModelView :model="augmentedModel" />
         </v-sheet>
 
@@ -232,8 +232,8 @@ export default {
     rules: [value => !!value || "Required."],
     examples: [
       "NG_012337.1:g.7125G>T",
-      "NG_012337.1:g.10_11ins[T;10_20inv;NG_008835:159_170]",
-      "NG_012337.1:g.10_11ins[T;10_20inv;NG_008835(NM_022153.2):159_170]",
+      // "NG_012337.1:g.10_11ins[T;10_20inv;NG_008835:159_170]",
+      // "NG_012337.1:g.10_11ins[T;10_20inv;NG_008835(NM_022153.2):159_170]",
       // 'NG_008835.1(NR_120672.1):n.159dup',
       // 'NG_012337.1(NM_003002.2):c.274G>T',
       // 'LRG_23:c.159dup',

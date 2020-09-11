@@ -208,8 +208,10 @@ export default {
           }
         } else {
           output.push(this.getReference(inserted.source));
-          if (inserted.source.id) {
-            output.push(this.getSelector(inserted.source.id));
+          if (inserted.source.selector) {
+            output.push({ view: "(" });
+            output.push(this.getSelector(inserted.source.selector));
+            output.push({ view: ")" });
           }
           if (inserted.location) {
             output.push({ view: ":" });
