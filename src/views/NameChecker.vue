@@ -97,18 +97,6 @@
           <SyntaxError :errorModel="syntaxError" />
         </v-sheet>
 
-
-        <v-sheet elevation="2" class="pa-10 mt-10" v-if="correctedModel">
-          <div class="overline mb-4">New rendering</div>
-          <RenderModel 
-            :model="correctedModel"
-            :description="correctedDescription"
-            :errors="errors"
-            :infos="infos"
-          />
-        </v-sheet>
-
-
         <v-sheet
           elevation="2"
           class="pa-10 mt-10"
@@ -207,16 +195,14 @@
 import JsonPretty from "../components/JsonPretty.vue";
 import ModelView from "../components/ModelView.vue";
 import NewModelView from "../components/NewModelView.vue";
-import RenderModel from "../components/RenderModel.vue";
 import SyntaxError from "../components/SyntaxError.vue";
-import axios from "axios";
+import MutalyzerService from "../services/MutalyzerService.js";
 
 export default {
   components: {
     JsonPretty,
     ModelView,
     NewModelView,
-    RenderModel,
     SyntaxError
   },
   props: ["descriptionRouter"],
@@ -319,13 +305,7 @@ export default {
         this.visualize = null;
         this.descriptionModel = null;
         this.referenceModel = null;
-        axios
-          // .get('http://145.88.35.44/api/name_check/' + encodeURIComponent(this.description), {})
-          .get(
-            "http://127.0.0.1:5000/api/name_check/" +
-              encodeURIComponent(this.description),
-            {}
-          )
+        MutalyzerService.nameCheck(this.description)
           .then(response => {
             if (response.data) {
               this.loadingOverlay = false;
