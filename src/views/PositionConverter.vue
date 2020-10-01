@@ -632,9 +632,10 @@ export default {
           this.availableSelectors.reference !== this.referenceId
         ) {
           axios
-            // .get("http://145.88.35.44/api/get_selectors/" + this.referenceId, {})
+            // .get("http://145.88.35.44/api/get_selectors/" + encodeURIComponent(this.referenceId), {})
             .get(
-              "http://127.0.0.1:5000/api/get_selectors/" + this.referenceId,
+              "http://127.0.0.1:5000/api/get_selectors/" +
+                encodeURIComponent(this.referenceId),
               {}
             )
             .then(response => {

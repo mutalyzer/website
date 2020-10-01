@@ -11,7 +11,12 @@
           <v-text-field
             :rules="rules"
             ref="descriptionInput"
-            v-on:keydown.enter="nameCheck"
+            v-on:keydown.enter="
+              $router.push({
+                name: 'NameChecker',
+                params: { descriptionRouter: description }
+              })
+            "
             v-model="description"
             :label="label"
             :hint="hint"
@@ -92,6 +97,18 @@
           <SyntaxError :errorModel="syntaxError" />
         </v-sheet>
 
+
+        <v-sheet elevation="2" class="pa-10 mt-10" v-if="correctedModel">
+          <div class="overline mb-4">New rendering</div>
+          <RenderModel 
+            :model="correctedModel"
+            :description="correctedDescription"
+            :errors="errors"
+            :infos="infos"
+          />
+        </v-sheet>
+
+
         <v-sheet
           elevation="2"
           class="pa-10 mt-10"
@@ -139,9 +156,19 @@
           </div>
         </v-sheet>
 
-        <v-sheet elevation="2" class="pa-10 mt-10" v-if="augmentedModel">
+        <!-- <v-sheet elevation="2" class="pa-10 mt-10" v-if="correctedModel">
           <div class="overline mb-4">Information</div>
-          <ModelView :model="augmentedModel" />
+          <ModelView :model="correctedModel" />
+        </v-sheet> -->
+
+        <v-sheet elevation="2" class="pa-10 mt-10" v-if="correctedModel">
+          <div class="overline mb-4">information</div>
+          <NewModelView 
+            :model="correctedModel"
+            :description="correctedDescription"
+            :errors="errors"
+            :infos="infos"
+          />
         </v-sheet>
 
         <v-sheet
@@ -179,6 +206,8 @@
 <script>
 import JsonPretty from "../components/JsonPretty.vue";
 import ModelView from "../components/ModelView.vue";
+import NewModelView from "../components/NewModelView.vue";
+import RenderModel from "../components/RenderModel.vue";
 import SyntaxError from "../components/SyntaxError.vue";
 import axios from "axios";
 
@@ -186,6 +215,8 @@ export default {
   components: {
     JsonPretty,
     ModelView,
+    NewModelView,
+    RenderModel,
     SyntaxError
   },
   props: ["descriptionRouter"],
@@ -208,13 +239,14 @@ export default {
     descriptionModel: null,
 
     inputModel: null,
-    augmentedModel: null,
+    correctedModel: null,
     internalCoordinatesModel: null,
     internalIndexingModel: null,
     delinsModel: null,
     syntaxError: null,
 
     referenceModel: null,
+    correctedDescription: null,
     normalizedDescription: null,
     equivalentDescriptions: null,
     proteinDescriptions: null,
@@ -222,6 +254,7 @@ export default {
     sequence: null,
     summary: null,
     errors: null,
+    infos: null,
     loadingOverlay: false,
     errorMessages: [],
     valid: true,
@@ -231,22 +264,32 @@ export default {
     placeholder: "",
     rules: [value => !!value || "Required."],
     examples: [
+      "LRG_303:g.[11del;6883_6884insTTTCGCCCC;7000del]",
+      "LRG_303:g.[11del;6883_6884insTTTCGCCCC]",
+      "LRG_303:g.6883_6884insTTTCGCCCC",
+      "NG_012337(TIMM8B):c.10_11ins[T;10_20inv;NG_008835(NM_022153.2):159_170]",
+      "NG_012337(11818):c.10_11ins[T;10_20inv;NG_008835(NM_022153.2):159_170]",
+      "NG_012337.1:g.[5del;10_20del;20_21insT;21del]",
+      "NG_012337.1:g.[15del;10_20del;20_21insT;21del]",
+      "NG_012337.1:g.[5del;10_20del;20_21insT;21del]",
+      "NG_012337.1:g.[5del;10_20del;20_21insT;30_(40_?)del]",
       "NG_012337.1:g.7125G>T",
       // "NG_012337.1:g.10_11ins[T;10_20inv;NG_008835:159_170]",
-      // "NG_012337.1:g.10_11ins[T;10_20inv;NG_008835(NM_022153.2):159_170]",
+      "NG_012337.1:g.10_11ins[T;10_20inv;NG_008835(NM_022153.2):159_170]",
       // 'NG_008835.1(NR_120672.1):n.159dup',
       // 'NG_012337.1(NM_003002.2):c.274G>T',
       // 'LRG_23:c.159dup',
-      "LRG_24:g.5525_5532del"
-      // 'LRG_24:c.159dup',
-      // 'LRG_24(t3):c.159dup',
+      "LRG_24:g.5525_5532del",
+      "LRG_1:c.5525_5532del",
+      "LRG_24:c.159dup",
+      "LRG_24(t3):c.159dup",
       // 'LRG_24(t1):c.159dup',
       // 'LRG_24:g.[5A>T;10_12del]',
       // 'LRG_24:g.[5A>T;13_15del]',
       // 'NC_000024.10:g.100del',
       // 'NG_008835.1:n.100del',
       // 'NM_003002.4:c.1del',
-      // 'NR_120672.1:n.159dup'
+      "NR_120672.1:n.159dup"
     ]
   }),
   methods: {
@@ -261,22 +304,28 @@ export default {
         this.summary = null;
 
         this.inputModel = null;
-        this.augmentedModel = null;
+        this.correctedModel = null;
         this.internalCoordinatesModel = null;
         this.internalIndexingModel = null;
+        this.correctedDescription = null;
         this.normalizedDescription = null;
 
         this.syntaxError = null;
 
         this.errors = null;
+        this.infos = null;
         this.equivalentDescriptions = null;
         this.proteinDescriptions = null;
         this.visualize = null;
         this.descriptionModel = null;
         this.referenceModel = null;
         axios
-          // .get('http://145.88.35.44/api/name_check/' + this.description, {
-          .get("http://127.0.0.1:5000/api/name_check/" + this.description, {})
+          // .get('http://145.88.35.44/api/name_check/' + encodeURIComponent(this.description), {})
+          .get(
+            "http://127.0.0.1:5000/api/name_check/" +
+              encodeURIComponent(this.description),
+            {}
+          )
           .then(response => {
             if (response.data) {
               this.loadingOverlay = false;
@@ -285,8 +334,15 @@ export default {
                 this.normalizedDescription =
                   response.data["normalized_description"];
               }
+              if (response.data["corrected_description"]) {
+                this.correctedDescription =
+                  response.data["corrected_description"];
+              }
               if (response.data["errors"]) {
-                this.errors = response.data["errors"];
+                this.processErrors(response.data["errors"]);
+              }
+              if (response.data["infos"]) {
+                this.infos = response.data["infos"];
               }
               if (response.data["equivalent_descriptions"]) {
                 this.equivalentDescriptions =
@@ -302,8 +358,8 @@ export default {
               if (response.data["input_model"]) {
                 this.processInputModel(response.data["input_model"]);
               }
-              if (response.data["augmented_model"]) {
-                this.augmentedModel = response.data["augmented_model"];
+              if (response.data["corrected_model"]) {
+                this.correctedModel = response.data["corrected_model"];
               }
               if (response.data["internal_coordinates_model"]) {
                 this.internalCoordinatesModel =
@@ -342,6 +398,17 @@ export default {
             }
             // console.log(error.config);
           });
+      }
+    },
+    processErrors: function(errors) {
+      if (
+        (errors.length === 1 && errors[0].code === "ESYNTAXUEOF") ||
+        errors[0].code === "ESYNTAXUC"
+      ) {
+        this.syntaxError = errors[0];
+      }
+      else {
+        this.errors = errors;
       }
     },
     getError: function(error) {
