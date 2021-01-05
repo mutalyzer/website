@@ -92,9 +92,75 @@
           </v-alert>
         </div>
 
+        <!-- <div v-if="errors">
+          <v-alert
+            border="right"
+            dark
+            colored-border
+            type="error"
+            elevation="2"
+            tile
+            class="mt-5"
+            v-for="(error, i) in errors"
+            :key="i"
+          >
+            {{ getError(error) }}
+          </v-alert>
+        </div> -->
+
         <v-sheet elevation="2" class="pa-10 mt-10" v-if="syntaxError">
           <div class="overline mb-4">Unexpected Character</div>
           <SyntaxError :errorModel="syntaxError" />
+        </v-sheet>
+
+        <v-sheet
+          elevation="2"
+          class="pa-10 mt-10"
+          v-if="
+            (correctedDescription && correctedDescription != inputDescription) || errors
+          "
+        >
+          <div
+            class="overline"
+            v-if="
+              correctedDescription && correctedDescription != inputDescription
+            "
+          >
+            Input description was changed to:
+          </div>
+          <router-link
+            v-if="
+              correctedDescription && correctedDescription != inputDescription
+            "
+            class="links"
+            :to="{
+              name: 'NameChecker',
+              params: { descriptionRouter: normalizedDescription }
+            }"
+            >{{ correctedDescription }}</router-link
+          >
+
+          <div v-if="infos" class="overline">Info messages</div>
+          <div v-if="infos" class="'info-message'">
+            <div
+              v-for="(info, index) in infos"
+              :key="index"
+              :class="'info-message'"
+            >
+              {{ getMessage(info) }}
+            </div>
+          </div>
+
+          <div v-if="errors" class="overline">Errors encountered</div>
+          <div v-if="errors" :class="'error-message'">
+            <div
+              v-for="(info, index) in errors"
+              :key="index"
+              :class="'error-message'"
+            >
+              {{ getMessage(info) }}
+            </div>
+          </div>
         </v-sheet>
 
         <v-sheet
@@ -112,46 +178,75 @@
               }"
               >{{ normalizedDescription }}</router-link
             >
+          </div>
+        </v-sheet>
 
-            <div v-if="equivalentDescriptions">
-              <div class="overline mt-4">Equivalent Descriptions (MAX 20)</div>
+        <v-sheet
+          elevation="2"
+          class="pa-10 mt-10"
+          v-if="summary && normalizedDescription"
+        >
+          <div v-if="equivalentDescriptions">
+            <div class="overline mt-4">Equivalent Descriptions (MAX 20)</div>
+            <div
+              class="ml-4"
+              v-for="(values, c_s) in equivalentDescriptions"
+              :key="c_s"
+            >
+              <span v-if="c_s == 'c'">Coding</span>
+              <span v-else-if="c_s == 'n'">Noncoding</span>
+              <span v-else-if="c_s == 'g'">Genomic</span>
+              <span v-else> {{ c_s }} </span>
               <div
-                v-for="(equivalentDescription, index) in equivalentDescriptions"
+                v-for="(equivalentDescription, index) in values"
                 :key="index"
               >
-                <router-link
-                  class="links"
-                  :to="{
-                    name: 'NameChecker',
-                    params: { descriptionRouter: equivalentDescription }
-                  }"
-                  >{{ equivalentDescription }}</router-link
-                >
-              </div>
-            </div>
-
-            <div v-if="proteinDescriptions">
-              <div class="overline mt-4">Protein Descriptions (MAX 20)</div>
-              <div
-                v-for="(proteinDescription, index) in proteinDescriptions"
-                :key="index"
-              >
-                <span class="protein-description">
-                  {{ proteinDescription }}
-                </span>
+                <template v-if="c_s === 'c'">
+                  <div>
+                    <router-link
+                      class="links"
+                      :to="{
+                        name: 'NameChecker',
+                        params: { descriptionRouter: equivalentDescription[0] }
+                      }"
+                      >{{ equivalentDescription[0] }}</router-link
+                    >
+                  </div>
+                  <div class="protein-description">
+                    {{ equivalentDescription[1] }}
+                  </div>
+                </template>
+                <template v-else>
+                  <router-link
+                    class="links"
+                    :to="{
+                      name: 'NameChecker',
+                      params: { descriptionRouter: equivalentDescription }
+                    }"
+                    >{{ equivalentDescription }}</router-link
+                  >
+                </template>
               </div>
             </div>
           </div>
         </v-sheet>
 
-        <!-- <v-sheet elevation="2" class="pa-10 mt-10" v-if="correctedModel">
+        <v-sheet
+          elevation="2"
+          class="pa-10 mt-10"
+          v-if="correctedModel && false"
+        >
           <div class="overline mb-4">Information</div>
           <ModelView :model="correctedModel" />
-        </v-sheet> -->
+        </v-sheet>
 
-        <v-sheet elevation="2" class="pa-10 mt-10" v-if="correctedModel">
-          <div class="overline mb-4">information</div>
-          <NewModelView 
+        <v-sheet
+          elevation="2"
+          class="pa-10 mt-10"
+          v-if="correctedModel && false"
+        >
+          <div class="overline mb-4">Information</div>
+          <NewModelView
             :model="correctedModel"
             :description="correctedDescription"
             :errors="errors"
@@ -197,6 +292,7 @@ import ModelView from "../components/ModelView.vue";
 import NewModelView from "../components/NewModelView.vue";
 import SyntaxError from "../components/SyntaxError.vue";
 import MutalyzerService from "../services/MutalyzerService.js";
+import "vue-json-pretty/lib/styles.css";
 
 export default {
   components: {
@@ -232,6 +328,7 @@ export default {
     syntaxError: null,
 
     referenceModel: null,
+    inputDescription: null,
     correctedDescription: null,
     normalizedDescription: null,
     equivalentDescriptions: null,
@@ -250,32 +347,32 @@ export default {
     placeholder: "",
     rules: [value => !!value || "Required."],
     examples: [
-      "LRG_303:g.[11del;6883_6884insTTTCGCCCC;7000del]",
-      "LRG_303:g.[11del;6883_6884insTTTCGCCCC]",
-      "LRG_303:g.6883_6884insTTTCGCCCC",
-      "NG_012337(TIMM8B):c.10_11ins[T;10_20inv;NG_008835(NM_022153.2):159_170]",
-      "NG_012337(11818):c.10_11ins[T;10_20inv;NG_008835(NM_022153.2):159_170]",
-      "NG_012337.1:g.[5del;10_20del;20_21insT;21del]",
-      "NG_012337.1:g.[15del;10_20del;20_21insT;21del]",
-      "NG_012337.1:g.[5del;10_20del;20_21insT;21del]",
-      "NG_012337.1:g.[5del;10_20del;20_21insT;30_(40_?)del]",
-      "NG_012337.1:g.7125G>T",
+      // "LRG_303:g.[11del;6883_6884insTTTCGCCCC;7000del]",
+      // "LRG_303:g.[11del;6883_6884insTTTCGCCCC]",
+      // "LRG_303:g.6883_6884insTTTCGCCCC",
+      // "NG_012337(TIMM8B):c.10_11ins[T;10_20inv;NG_008835(NM_022153.2):159_170]",
+      // "NG_012337(11818):c.10_11ins[T;10_20inv;NG_008835(NM_022153.2):159_170]",
+      // "NG_012337.1:g.[5del;10_20del;20_21insT;21del]",
+      // "NG_012337.1:g.[15del;10_20del;20_21insT;21del]",
+      // "NG_012337.1:g.[5del;10_20del;20_21insT;21del]",
+      // "NG_012337.1:g.[5del;10_20del;20_21insT;30_(40_?)del]",
+      // "NG_012337.1:g.7125G>T",
       // "NG_012337.1:g.10_11ins[T;10_20inv;NG_008835:159_170]",
-      "NG_012337.1:g.10_11ins[T;10_20inv;NG_008835(NM_022153.2):159_170]",
-      // 'NG_008835.1(NR_120672.1):n.159dup',
-      // 'NG_012337.1(NM_003002.2):c.274G>T',
-      // 'LRG_23:c.159dup',
+      // "NG_012337.1:g.10_11ins[T;10_20inv;NG_008835(NM_022153.2):159_170]",
+      // "NG_008835.1(NR_120672.1):n.159dup",
+      "NG_012337.1(NM_003002.2):c.274G>T",
+      // "LRG_23:c.159dup",
       "LRG_24:g.5525_5532del",
-      "LRG_1:c.5525_5532del",
-      "LRG_24:c.159dup",
-      "LRG_24(t3):c.159dup",
-      // 'LRG_24(t1):c.159dup',
-      // 'LRG_24:g.[5A>T;10_12del]',
-      // 'LRG_24:g.[5A>T;13_15del]',
-      // 'NC_000024.10:g.100del',
-      // 'NG_008835.1:n.100del',
-      // 'NM_003002.4:c.1del',
-      "NR_120672.1:n.159dup"
+      // "LRG_1:c.5525_5532del",
+      // "LRG_24:c.159dup",
+      // "LRG_24(t3):c.159dup",
+      // "LRG_24(t1):c.159dup",
+      // "LRG_24:g.[5A>T;10_12del]",
+      // "LRG_24:g.[5A>T;13_15del]",
+      // "NC_000024.10:g.100del",
+      // "NG_008835.1:g.100del",
+      // "NM_003002.4:c.1del",
+      // "NR_120672.1:n.159dup"
     ]
   }),
   methods: {
@@ -293,6 +390,7 @@ export default {
         this.correctedModel = null;
         this.internalCoordinatesModel = null;
         this.internalIndexingModel = null;
+        this.inputDescription = null;
         this.correctedDescription = null;
         this.normalizedDescription = null;
 
@@ -310,6 +408,9 @@ export default {
             if (response.data) {
               this.loadingOverlay = false;
               this.summary = response.data;
+              if (response.data["input_description"]) {
+                this.inputDescription = response.data["input_description"];
+              }
               if (response.data["normalized_description"]) {
                 this.normalizedDescription =
                   response.data["normalized_description"];
@@ -386,8 +487,7 @@ export default {
         errors[0].code === "ESYNTAXUC"
       ) {
         this.syntaxError = errors[0];
-      }
-      else {
+      } else {
         this.errors = errors;
       }
     },
@@ -416,7 +516,13 @@ export default {
           this.inputModel = model;
         }
       }
-    }
+    },
+    getMessage: function(message) {
+      if (message.details) {
+        return message.details + " (" + message.code + ")";
+      }
+      return message;
+    },
   }
 };
 </script>
@@ -519,5 +625,67 @@ a {
   padding-right: 10px;
   padding-top: 5px;
   padding-bottom: 5px;
+}
+
+.info-message {
+  margin: 10px 0;
+  padding: 5px;
+  font-family: monospace;
+  background-color: #e1f5fe;
+}
+
+.info-message-hover {
+  margin: 10px 0;
+  padding: 5px;
+  font-family: monospace;
+  background-color: #81d4fa;
+}
+
+.error-message {
+  margin: 10px 0;
+  padding: 5px;
+  font-family: monospace;
+  background-color: #ffebee;
+}
+
+.error-message-hover {
+  margin: 10px 0;
+  padding: 5px;
+  font-family: monospace;
+  background-color: #ffcdd2;
+}
+
+.description-info {
+  margin: 0;
+  padding: 0 1px;
+  color: #01579b;
+  font-family: monospace;
+  display: inline-block;
+}
+
+.description-info-hover {
+  margin: 0;
+  padding: 0 1px;
+  color: #01579b;
+  font-family: monospace;
+  background-color: #81d4fa;
+  display: inline-block;
+}
+
+.description-error {
+  margin: 0;
+  padding: 0 1px;
+  color: #b71c1c;
+  font-family: monospace;
+  display: inline-block;
+}
+
+.description-error-hover {
+  margin: 0;
+  padding: 0 1px;
+  color: #b71c1c;
+  font-family: monospace;
+  background-color: #ffcdd2;
+  display: inline-block;
 }
 </style>

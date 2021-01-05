@@ -278,38 +278,6 @@ export default {
       }
       return output;
     },
-    getPoint: function(point) {
-      const output = {};
-      if (point.errors) {
-        output.errors = point.errors;
-      }
-      if (point.info) {
-        output.info = point.info;
-      }
-      if (point.uncertain) {
-        output.view = "?";
-      } else {
-        let view = "";
-        if (point.outside_cds && point.outside_cds === "downstream") {
-          view += "*";
-        }
-        if (point.position) {
-          view += point.position;
-        }
-        if (point.offset && point.offset.value) {
-          if (point.offset.value > 0) {
-            view += "+" + point.offset.value;
-          } else {
-            view += point.offset.value;
-          }
-        }
-        if (view) {
-          output.view = view;
-        }
-      }
-      output.hover = false;
-      return output;
-    },
 
     getView: function(modelNode) {
       if (modelNode.view) {
