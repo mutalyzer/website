@@ -117,7 +117,9 @@
           elevation="2"
           class="pa-10 mt-10"
           v-if="
-            (correctedDescription && correctedDescription != inputDescription) || errors
+            (correctedDescription &&
+              correctedDescription != inputDescription) ||
+              errors
           "
         >
           <div
@@ -187,7 +189,7 @@
           v-if="summary && normalizedDescription"
         >
           <div v-if="equivalentDescriptions">
-            <div class="overline mt-4">Equivalent Descriptions (MAX 20)</div>
+            <div class="overline mt-4">Equivalent Descriptions</div>
             <div
               class="ml-4"
               v-for="(values, c_s) in equivalentDescriptions"

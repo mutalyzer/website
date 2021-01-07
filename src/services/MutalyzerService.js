@@ -21,5 +21,8 @@ export default {
   },
   descriptionExtract(params) {
     return apiClient.get("/description_extract/", { params });
+  },
+  getSelectors(reference_id) {
+    return apiClient.get("/get_selectors/", { reference_id });
   }
 };

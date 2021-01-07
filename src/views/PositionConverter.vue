@@ -276,10 +276,9 @@
 </template>
 
 <script>
-import axios from "axios";
-
 import JsonPretty from "../components/JsonPretty.vue";
 import ModelView from "../components/ModelView.vue";
+import MutalyzerService from "../services/MutalyzerService.js";
 
 export default {
   components: {
@@ -490,9 +489,7 @@ export default {
           to_coordinate_system: this.toCoordinateSystem,
           include_overlapping: this.includeOverlapping
         };
-        axios
-          // .get("http://145.88.35.44/api/position_convert/", { params }, {})
-          .get("http://127.0.0.1:5000/api/position_convert/", { params }, {})
+        MutalyzerService.positionConvert(params)
           .then(response => {
             if (response.data) {
               this.loadingOverlay = false;
@@ -631,18 +628,11 @@ export default {
           this.availableSelectors &&
           this.availableSelectors.reference !== this.referenceId
         ) {
-          axios
-            // .get("http://145.88.35.44/api/get_selectors/" + encodeURIComponent(this.referenceId), {})
-            .get(
-              "http://127.0.0.1:5000/api/get_selectors/" +
-                encodeURIComponent(this.referenceId),
-              {}
-            )
-            .then(response => {
-              if (response.data) {
-                this.availableSelectors = response.data;
-              }
-            });
+          MutalyzerService.positionConvert(this.referenceId).then(response => {
+            if (response.data) {
+              this.availableSelectors = response.data;
+            }
+          });
         }
       }
     },
