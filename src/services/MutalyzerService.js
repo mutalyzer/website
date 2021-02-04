@@ -22,7 +22,10 @@ export default {
   descriptionExtract(params) {
     return apiClient.get("/description_extract/", { params });
   },
-  getSelectors(reference_id) {
-    return apiClient.get("/get_selectors/", { reference_id });
+  referenceModel(params) {
+    return apiClient.get("/reference_model/", { params });
+  },
+  getSelectors(referenceId) {
+    return apiClient.get("/get_selectors/" + encodeURIComponent(referenceId));
   }
 };
