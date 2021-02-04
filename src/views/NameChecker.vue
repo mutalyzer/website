@@ -116,9 +116,49 @@
         <v-sheet
           elevation="2"
           class="pa-10 mt-10"
+          v-if="summary && normalizedDescription"
+        >
+          <div v-if="normalizedDescription">
+            <div class="overline">Normalized Description</div>
+            <router-link
+              class="links"
+              :to="{
+                name: 'NameChecker',
+                params: { descriptionRouter: normalizedDescription }
+              }"
+              >{{ normalizedDescription }}</router-link
+            >
+          </div>
+          <div>
+            <v-row>
+              <v-col>
+                <v-btn
+                  class="mr-5"
+                  v-if="infos"
+                  color="primary"
+                  elevation="2"
+                  @click="viewInfos = !viewInfos"
+                  >View info messages</v-btn
+                >
+                <v-btn
+                  v-if="renderSelector()"
+                  color="primary"
+                  elevation="2"
+                  @click="viewReferenceInfo = !viewReferenceInfo"
+                  >View reference info</v-btn
+                >
+              </v-col>
+            </v-row>
+          </div>
+        </v-sheet>
+
+        <v-sheet
+          elevation="2"
+          class="pa-10 mt-10"
           v-if="
             (correctedDescription &&
-              correctedDescription != inputDescription) ||
+              correctedDescription != inputDescription &&
+              viewInfos) ||
               errors
           "
         >
@@ -165,22 +205,11 @@
           </div>
         </v-sheet>
 
-        <v-sheet
-          elevation="2"
-          class="pa-10 mt-10"
-          v-if="summary && normalizedDescription"
-        >
-          <div v-if="normalizedDescription">
-            <div class="overline">Normalized Description</div>
-            <router-link
-              class="links"
-              :to="{
-                name: 'NameChecker',
-                params: { descriptionRouter: normalizedDescription }
-              }"
-              >{{ normalizedDescription }}</router-link
-            >
-          </div>
+        <v-sheet elevation="2" class="pa-10 mt-10" v-if="viewReferenceInfo">
+          <RenderSelectorDetails
+            :referenceId="this.correctedModel.reference.id"
+            :selectorId="this.correctedModel.reference.selector.id"
+          />
         </v-sheet>
 
         <v-sheet
@@ -293,6 +322,7 @@ import JsonPretty from "../components/JsonPretty.vue";
 import ModelView from "../components/ModelView.vue";
 import NewModelView from "../components/NewModelView.vue";
 import SyntaxError from "../components/SyntaxError.vue";
+import RenderSelectorDetails from "../components/RenderSelectorDetails.vue";
 import MutalyzerService from "../services/MutalyzerService.js";
 import "vue-json-pretty/lib/styles.css";
 
@@ -301,7 +331,8 @@ export default {
     JsonPretty,
     ModelView,
     NewModelView,
-    SyntaxError
+    SyntaxError,
+    RenderSelectorDetails
   },
   props: ["descriptionRouter"],
   created: function() {
@@ -348,6 +379,8 @@ export default {
     hint: "",
     placeholder: "",
     rules: [value => !!value || "Required."],
+    viewInfos: false,
+    viewReferenceInfo: false,
     examples: [
       // "LRG_303:g.[11del;6883_6884insTTTCGCCCC;7000del]",
       // "LRG_303:g.[11del;6883_6884insTTTCGCCCC]",
@@ -364,7 +397,7 @@ export default {
       // "NG_008835.1(NR_120672.1):n.159dup",
       "NG_012337.1(NM_003002.2):c.274G>T",
       // "LRG_23:c.159dup",
-      "LRG_24:g.5525_5532del",
+      "LRG_24:g.5525_5532del"
       // "LRG_1:c.5525_5532del",
       // "LRG_24:c.159dup",
       // "LRG_24(t3):c.159dup",
@@ -405,6 +438,8 @@ export default {
         this.visualize = null;
         this.descriptionModel = null;
         this.referenceModel = null;
+        this.viewInfos = false;
+        this.viewReferenceInfo = false;
         MutalyzerService.nameCheck(this.description)
           .then(response => {
             if (response.data) {
@@ -525,6 +560,27 @@ export default {
       }
       return message;
     },
+    renderSelector: function() {
+      if (this.correctedModel) {
+        if (this.errors) {
+          for (const entry of this.errors) {
+            if (entry.code === "ERETR") {
+              return false;
+            } else if (entry.code === "ENOSELECTORFOUND") {
+              return false;
+            }
+          }
+        }
+        if (
+          this.correctedModel.reference &&
+          this.correctedModel.reference.selector &&
+          this.correctedModel.reference.selector.id
+        ) {
+          return true;
+        }
+      }
+      return false;
+    }
   }
 };
 </script>

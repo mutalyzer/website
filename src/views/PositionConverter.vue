@@ -73,6 +73,7 @@
                   :items="availableSelectors.selectors"
                   :clearable="true"
                   v-on:click="getAvailableSelectors()"
+                  :error-messages="errorToSelectorIdMessage"
                 ></v-combobox>
               </v-col>
 
@@ -252,14 +253,15 @@
           Conversion performed.
         </v-alert>
 
-        <v-sheet elevation="2" class="pa-10 mt-10" v-if="inputModel">
-          <div class="overline mb-4">Input</div>
-          <ModelView :model="inputModel" />
-        </v-sheet>
-
-        <v-sheet elevation="2" class="pa-10 mt-10" v-if="convertedModel">
-          <div class="overline mb-4">Converted To</div>
-          <ModelView :model="convertedModel" />
+        <v-sheet
+          elevation="2"
+          class="pa-10 mt-10"
+          v-if="summary && convertedModel"
+        >
+          <div class="overline">Input</div>
+          <NewModelView :model="inputModel" />
+          <div class="overline mt-5">Converted To</div>
+          <NewModelView :model="convertedModel" />
         </v-sheet>
 
         <v-expansion-panels focusable hover class="mt-10 mb-10" v-if="summary">
@@ -277,13 +279,13 @@
 
 <script>
 import JsonPretty from "../components/JsonPretty.vue";
-import ModelView from "../components/ModelView.vue";
 import MutalyzerService from "../services/MutalyzerService.js";
+import NewModelView from "../components/NewModelView.vue";
 
 export default {
   components: {
     JsonPretty,
-    ModelView
+    NewModelView
   },
   data: () => ({
     valid: true,
@@ -310,6 +312,8 @@ export default {
     errorMessages: [],
     errorReferenceId: null,
     errorReferenceIdMessage: null,
+    errorToSelectorId: null,
+    errorToSelectorIdMessage: null,
     errorSelectorId: null,
     errorSelectorIdMessage: null,
     errorPosition: null,
@@ -378,6 +382,9 @@ export default {
     },
     selectorId() {
       this.handleEnoselector();
+    },
+    toSelectorId() {
+      this.handleENoToSelector();
     },
     position() {
       this.updatePositionErrorMessage();
@@ -556,26 +563,17 @@ export default {
       for (const entry of errors) {
         this.errorMessages.push(entry);
         if (entry.code === "ERETR") {
-          // this.errorMessages =
-          //   "Unable to retrieve reference " + this.referenceId;
-          // this.referenceErrors = [
-          //   "Unable to retrieve reference " + this.referenceId
-          // ];
           this.errorReferenceId = this.referenceId;
           this.handleEretr();
-        } else if (entry.code === "ENOSELECTOR") {
-          // this.errorMessages =
-          //   "Selector " +
-          //   this.selectorId +
-          //   " not found in reference " +
-          //   this.referenceId;
+        } else if (entry.code === "ENOSELECTORFOUND") {
           this.errorSelectorId = this.selectorId;
-          this.errorReferenceId = this.referenceId;
           this.handleEnoselector();
+        } else if (entry.code === "ENOTOSELECTOR") {
+          this.errorToSelectorId = this.toSelectorId;
+          this.handleENoToSelector();
         } else if (entry.code === "ESYNTAX") {
           this.errorMessages = "Position syntax error.";
         } else if (entry.code === "ERANGELOCATION") {
-          // this.errorMessages = "";
           this.errorPosition = this.position;
           this.updatePositionErrorMessage("Range locations not supported.");
         } else if (entry.code === "EOUTOFBOUNDARY") {
@@ -615,6 +613,21 @@ export default {
         this.errorSelectorIdMessage = null;
       }
     },
+    handleENoToSelector() {
+      console.log("this.toSelectorId");
+      console.log(this.toSelectorId);
+      console.log("this.errorToSelectorIdMessage");
+      console.log(this.errorToSelectorIdMessage);
+      if (
+        this.errorToSelectorId &&
+        this.errorToSelectorId === this.toSelectorId
+      ) {
+        this.errorToSelectorIdMessage =
+          this.toSelectorId + " not in reference " + this.referenceId;
+      } else {
+        this.errorToSelectorIdMessage = null;
+      }
+    },
     updatePositionErrorMessage(message) {
       if (this.errorPosition && this.errorPosition === this.position) {
         this.errorPositionMessage = message;
@@ -628,7 +641,7 @@ export default {
           this.availableSelectors &&
           this.availableSelectors.reference !== this.referenceId
         ) {
-          MutalyzerService.positionConvert(this.referenceId).then(response => {
+          MutalyzerService.getSelectors(this.referenceId).then(response => {
             if (response.data) {
               this.availableSelectors = response.data;
             }
@@ -646,10 +659,14 @@ export default {
       return output;
     },
     getInfo: function(info) {
-      let output = info.code;
+      let output = "";
       if (info.details) {
-        output += ": " + info.details;
+        output += info.details;
       }
+      if (info.code) {
+        output += "(" + info.code + ")";
+      }
+
       return output;
     },
     getInfos: function() {
