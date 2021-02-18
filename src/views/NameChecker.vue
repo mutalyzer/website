@@ -183,7 +183,7 @@
           >
 
           <div v-if="infos" class="overline">Info messages</div>
-          <div v-if="infos" class="'info-message'">
+          <div class="'info-message'">
             <div
               v-for="(info, index) in infos"
               :key="index"
@@ -212,52 +212,51 @@
           />
         </v-sheet>
 
+        <v-sheet elevation="2" class="pa-10 mt-10" v-if="protein">
+          <AffectedProtein :protein="this.protein" />
+        </v-sheet>
+
         <v-sheet
           elevation="2"
           class="pa-10 mt-10"
-          v-if="summary && normalizedDescription"
+          v-if="summary && normalizedDescription && equivalentDescriptions"
         >
-          <div v-if="equivalentDescriptions">
-            <div class="overline mt-4">Equivalent Descriptions</div>
-            <div
-              class="ml-4"
-              v-for="(values, c_s) in equivalentDescriptions"
-              :key="c_s"
-            >
-              <span v-if="c_s == 'c'">Coding</span>
-              <span v-else-if="c_s == 'n'">Noncoding</span>
-              <span v-else-if="c_s == 'g'">Genomic</span>
-              <span v-else> {{ c_s }} </span>
-              <div
-                v-for="(equivalentDescription, index) in values"
-                :key="index"
-              >
-                <template v-if="c_s === 'c'">
-                  <div>
-                    <router-link
-                      class="links"
-                      :to="{
-                        name: 'NameChecker',
-                        params: { descriptionRouter: equivalentDescription[0] }
-                      }"
-                      >{{ equivalentDescription[0] }}</router-link
-                    >
-                  </div>
-                  <div class="protein-description">
-                    {{ equivalentDescription[1] }}
-                  </div>
-                </template>
-                <template v-else>
+          <div class="overline mt-4">Equivalent Descriptions</div>
+          <div
+            class="ml-4"
+            v-for="(values, c_s) in equivalentDescriptions"
+            :key="c_s"
+          >
+            <span v-if="c_s == 'c'">Coding</span>
+            <span v-else-if="c_s == 'n'">Noncoding</span>
+            <span v-else-if="c_s == 'g'">Genomic</span>
+            <span v-else> {{ c_s }} </span>
+            <div v-for="(equivalentDescription, index) in values" :key="index">
+              <template v-if="c_s === 'c'">
+                <div>
                   <router-link
                     class="links"
                     :to="{
                       name: 'NameChecker',
-                      params: { descriptionRouter: equivalentDescription }
+                      params: { descriptionRouter: equivalentDescription[0] }
                     }"
-                    >{{ equivalentDescription }}</router-link
+                    >{{ equivalentDescription[0] }}</router-link
                   >
-                </template>
-              </div>
+                </div>
+                <div class="protein-description">
+                  {{ equivalentDescription[1] }}
+                </div>
+              </template>
+              <template v-else>
+                <router-link
+                  class="links"
+                  :to="{
+                    name: 'NameChecker',
+                    params: { descriptionRouter: equivalentDescription }
+                  }"
+                  >{{ equivalentDescription }}</router-link
+                >
+              </template>
             </div>
           </div>
         </v-sheet>
@@ -323,6 +322,7 @@ import ModelView from "../components/ModelView.vue";
 import NewModelView from "../components/NewModelView.vue";
 import SyntaxError from "../components/SyntaxError.vue";
 import RenderSelectorDetails from "../components/RenderSelectorDetails.vue";
+import AffectedProtein from "../components/AffectedProtein.vue";
 import MutalyzerService from "../services/MutalyzerService.js";
 import "vue-json-pretty/lib/styles.css";
 
@@ -332,7 +332,8 @@ export default {
     ModelView,
     NewModelView,
     SyntaxError,
-    RenderSelectorDetails
+    RenderSelectorDetails,
+    AffectedProtein
   },
   props: ["descriptionRouter"],
   created: function() {
@@ -364,6 +365,7 @@ export default {
     inputDescription: null,
     correctedDescription: null,
     normalizedDescription: null,
+    protein: null,
     equivalentDescriptions: null,
     proteinDescriptions: null,
     visualize: null,
@@ -428,13 +430,13 @@ export default {
         this.inputDescription = null;
         this.correctedDescription = null;
         this.normalizedDescription = null;
+        this.protein = null;
 
         this.syntaxError = null;
 
         this.errors = null;
         this.infos = null;
         this.equivalentDescriptions = null;
-        this.proteinDescriptions = null;
         this.visualize = null;
         this.descriptionModel = null;
         this.referenceModel = null;
@@ -466,9 +468,8 @@ export default {
                 this.equivalentDescriptions =
                   response.data["equivalent_descriptions"];
               }
-              if (response.data["protein_descriptions"]) {
-                this.proteinDescriptions =
-                  response.data["protein_descriptions"];
+              if (response.data["protein"]) {
+                this.protein = response.data["protein"];
               }
               if (response.data["visualize"]) {
                 this.visualize = response.data["visualize"];

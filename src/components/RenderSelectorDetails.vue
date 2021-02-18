@@ -277,10 +277,10 @@ export default {
               cds.id = entry.id;
             }
           }
-          if (exons) {
+          if (exons.length > 0) {
             output.exons = exons;
           }
-          if (cds) {
+          if (!(Object.keys(cds).length === 0 && cds.constructor === Object)) {
             output.cds = cds;
           }
         }

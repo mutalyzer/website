@@ -188,7 +188,7 @@ export default {
       return "description";
     },
     setHovers: function(path) {
-      console.log('setHovers');
+      console.log("setHovers");
       // this.hovers[path] = true;
       Vue.set(this.hovers, path, true);
       // this.descriptionClasses[path] = this.getDescriptionClass(path);
