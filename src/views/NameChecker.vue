@@ -212,6 +212,10 @@
           />
         </v-sheet>
 
+        <v-sheet elevation="2" class="pa-10 mt-10" v-if="selectorShort">
+          <SelectorShort :selector="this.selectorShort" />
+        </v-sheet>
+
         <v-sheet elevation="2" class="pa-10 mt-10" v-if="protein">
           <AffectedProtein :protein="this.protein" />
         </v-sheet>
@@ -323,6 +327,7 @@ import NewModelView from "../components/NewModelView.vue";
 import SyntaxError from "../components/SyntaxError.vue";
 import RenderSelectorDetails from "../components/RenderSelectorDetails.vue";
 import AffectedProtein from "../components/AffectedProtein.vue";
+import SelectorShort from "../components/SelectorShort.vue";
 import MutalyzerService from "../services/MutalyzerService.js";
 import "vue-json-pretty/lib/styles.css";
 
@@ -333,7 +338,8 @@ export default {
     NewModelView,
     SyntaxError,
     RenderSelectorDetails,
-    AffectedProtein
+    AffectedProtein,
+    SelectorShort
   },
   props: ["descriptionRouter"],
   created: function() {
@@ -366,6 +372,7 @@ export default {
     correctedDescription: null,
     normalizedDescription: null,
     protein: null,
+    selectorShort: null,
     equivalentDescriptions: null,
     proteinDescriptions: null,
     visualize: null,
@@ -431,6 +438,7 @@ export default {
         this.correctedDescription = null;
         this.normalizedDescription = null;
         this.protein = null;
+        this.selectorShort = null;
 
         this.syntaxError = null;
 
@@ -470,6 +478,9 @@ export default {
               }
               if (response.data["protein"]) {
                 this.protein = response.data["protein"];
+              }
+              if (response.data["selector_short"]) {
+                this.selectorShort = response.data["selector_short"];
               }
               if (response.data["visualize"]) {
                 this.visualize = response.data["visualize"];

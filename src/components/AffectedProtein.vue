@@ -6,27 +6,15 @@
     </div>
     <div class="overline">Affected Protein Reference Sequence</div>
     <div class="protein-seq">
-      <span class="protein-equal">
-        {{ reference[0].seq }}
-      </span>
-      <span class="protein-diff">
-        {{ reference[1].seq }}
-      </span>
-      <span class="protein-equal">
-        {{ reference[2].seq }}
-      </span>
+      <span class="protein-equal">{{ reference[0].seq }}</span>
+      <span class="protein-diff">{{ reference[1].seq }}</span>
+      <span class="protein-equal">{{ reference[2].seq }}</span>
     </div>
     <div class="overline">Affected Protein Predicted Sequence</div>
     <div class="protein-seq">
-      <span class="protein-equal">
-        {{ predicted[0].seq }}
-      </span>
-      <span class="protein-diff">
-        {{ predicted[1].seq }}
-      </span>
-      <span class="protein-equal">
-        {{ predicted[2].seq }}
-      </span>
+      <span class="protein-equal">{{ predicted[0].seq }}</span>
+      <span class="protein-diff">{{ predicted[1].seq }}</span>
+      <span class="protein-equal">{{ predicted[2].seq }}</span>
     </div>
   </div>
 </template>
@@ -92,18 +80,9 @@ export default {
       }
 
       var prefix = this.getPrefix(r, p);
-      console.log("prefix");
-      console.log(prefix);
-
       var suffix = this.getSuffix(r, p);
-      console.log("suffix");
-      console.log(suffix);
-
       var r_middle = r.split(prefix)[1].split(suffix)[0];
-      console.log(r_middle);
-
       var p_middle = p.split(prefix)[1].split(suffix)[0];
-      console.log(p_middle);
 
       this.reference.push({ seq: prefix, type: "equal" });
       this.reference.push({ seq: r_middle, type: "diff" });
@@ -120,7 +99,7 @@ export default {
 .protein-description {
   text-decoration: none;
   margin: 0;
-  padding: 0 1px;
+  padding: 2px;
   font-family: monospace;
   display: inline;
 
@@ -133,12 +112,13 @@ export default {
 }
 
 .protein-seq {
-  padding-left: 10px;
+  margin-left: 5px;
+  padding: 10px;
   text-decoration: none;
   font-family: monospace;
   display: block;
   color: #004d40;
-  background-color: #ffffff;
+  background-color: #efefef;
   overflow-wrap: break-word;
 }
 
@@ -149,7 +129,6 @@ export default {
   font-family: monospace;
   display: inline;
   color: #000000;
-  background-color: #ffffff;
   overflow-wrap: break-word;
 }
 
@@ -161,7 +140,6 @@ export default {
   display: inline;
   font-weight: bold;
   color: #990000;
-  background-color: #ffffff;
   overflow-wrap: break-word;
 }
 </style>
