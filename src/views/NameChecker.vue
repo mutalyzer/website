@@ -10,58 +10,69 @@
         <v-sheet elevation="2" class="pa-10 mt-10">
           <v-text-field
             :rules="rules"
-            ref="descriptionInput"
+            ref="refInputDescriptionTextBox"
             v-on:keydown.enter="
               $router.push({
                 name: 'NameChecker',
-                params: { descriptionRouter: description }
+                params: { descriptionRouter: inputDescriptionTextBox },
               })
             "
-            v-model="description"
-            :label="label"
-            :hint="hint"
-            :placeholder="placeholder"
+            v-model="inputDescriptionTextBox"
+            :label="inputDescriptionTextBoxLabel"
             :clearable="true"
             autofocus
           ></v-text-field>
 
           <div class="examples-list">
             Examples:
-            <code
-              v-for="(example, index) in examples"
+            <span
+              class="example-item"
+              v-for="(example, index) in descriptionExamples"
               :key="index"
-              @click.prevent="selectExample(index)"
+              @click.prevent="selectDescriptionExample(index)"
+              >{{ example }}</span
             >
-              <span class="example-item">{{ example }}</span>
-            </code>
           </div>
 
           <v-btn
             ref="nameCheck"
-            :disabled="!valid"
             class="mt-5"
             color="primary"
             :to="{
               name: 'NameChecker',
-              params: { descriptionRouter: description }
+              params: { descriptionRouter: inputDescriptionTextBox },
             }"
           >
             Normalize
           </v-btn>
         </v-sheet>
 
-        <v-overlay :absolute="true" :value="loadingOverlay">
-          <div class="text-center">
-            <v-progress-circular :size="50" indeterminate></v-progress-circular>
+        <v-sheet
+          elevation="2"
+          class="pa-10 mt-10"
+          v-if="response && response.normalized_description"
+        >
+          <div v-if="response && response.normalized_description">
+            <div class="normalized-description">
+              {{ response.normalized_description }}
+            </div>
           </div>
-          <div class="text-center">
-            <v-btn @click="loadingOverlay = false" class="mt-5">
-              Cancel
-            </v-btn>
-          </div>
-        </v-overlay>
+        </v-sheet>
 
-        <div v-if="errorMessages">
+        <v-alert
+          prominent
+          type="error"
+          tile
+          elevation="2"
+          class="mt-10"
+          v-if="response && response.errors"
+        >
+          <v-row align="center">
+            <v-col class="grow"> Errors were encountered. </v-col>
+          </v-row>
+        </v-alert>
+
+        <v-sheet elevation="2" class="pa-10 mt-10" v-if="isSyntaxError()">
           <v-alert
             border="right"
             dark
@@ -69,693 +80,348 @@
             type="error"
             elevation="2"
             tile
-            class="mt-5"
-            v-for="(error, i) in errorMessages"
-            :key="i"
-          >
-            {{ getError(error) }}
-          </v-alert>
-        </div>
-
-        <div v-if="errorMessages">
-          <v-alert
-            border="right"
-            dark
-            colored-border
-            type="error"
-            elevation="2"
-            tile
-            class="mt-10"
-            v-if="syntaxError"
           >
             Syntax Error
           </v-alert>
-        </div>
 
-        <!-- <div v-if="errors">
-          <v-alert
-            border="right"
-            dark
-            colored-border
-            type="error"
-            elevation="2"
-            tile
-            class="mt-5"
-            v-for="(error, i) in errors"
-            :key="i"
-          >
-            {{ getError(error) }}
-          </v-alert>
-        </div> -->
-
-        <v-sheet elevation="2" class="pa-10 mt-10" v-if="syntaxError">
           <div class="overline mb-4">Unexpected Character</div>
-          <SyntaxError :errorModel="syntaxError" />
+          <SyntaxError :errorModel="getSyntaxError()" />
         </v-sheet>
 
-        <v-sheet
+        <v-alert
+          dense
+          type="info"
+          class="mt-5 mb-0"
+          v-if="wereCorrections()"
           elevation="2"
-          class="pa-10 mt-10"
-          v-if="summary && normalizedDescription"
+          tile
         >
-          <div v-if="normalizedDescription">
-            <div class="overline">Normalized Description</div>
-            <router-link
-              class="links"
-              :to="{
-                name: 'NameChecker',
-                params: { descriptionRouter: normalizedDescription }
-              }"
-              >{{ normalizedDescription }}</router-link
-            >
-          </div>
-          <div>
-            <v-row>
-              <v-col>
-                <v-btn
-                  class="mr-5"
-                  v-if="infos"
-                  color="primary"
-                  elevation="2"
-                  @click="viewInfos = !viewInfos"
-                  >View info messages</v-btn
-                >
-                <v-btn
-                  v-if="renderSelector()"
-                  color="primary"
-                  elevation="2"
-                  @click="viewReferenceInfo = !viewReferenceInfo"
-                  >View reference info</v-btn
-                >
-              </v-col>
-            </v-row>
-          </div>
-        </v-sheet>
+          <v-row align="center">
+            <v-col class="grow">
+              Corrections were performed on the input description.
+            </v-col>
+            <v-col class="shrink">
+              <v-btn
+                small
+                color="secondary"
+                @click="showCorrections = !showCorrections"
+                >{{
+                  showCorrections ? "Hide Corrections" : "See Corrections"
+                }}</v-btn
+              >
+            </v-col>
+          </v-row>
+        </v-alert>
 
         <v-sheet
           elevation="2"
-          class="pa-10 mt-10"
+          class="pa-10 mt-0"
           v-if="
-            (correctedDescription &&
-              correctedDescription != inputDescription &&
-              viewInfos) ||
-              errors
+            (wereCorrections() && showCorrections) ||
+            (response && response.errors)
           "
         >
-          <div
-            class="overline"
-            v-if="
-              correctedDescription && correctedDescription != inputDescription
-            "
-          >
-            Input description was changed to:
-          </div>
-          <router-link
-            v-if="
-              correctedDescription && correctedDescription != inputDescription
-            "
-            class="links"
-            :to="{
-              name: 'NameChecker',
-              params: { descriptionRouter: normalizedDescription }
-            }"
-            >{{ correctedDescription }}</router-link
-          >
-
-          <div v-if="infos" class="overline">Info messages</div>
-          <div class="'info-message'">
+          <div v-if="wereCorrections() && showCorrections">
+            <div class="overline">Input Description</div>
+            <div :class="getInputDescriptionClass()">
+              {{ inputDescription }}
+            </div>
+            <div class="overline">Corrections</div>
+            <div class="'info-message'">
+              <div
+                v-for="(info, index) in response.infos"
+                :key="index"
+                :class="'info-message'"
+              >
+                {{ getMessage(info) }}
+              </div>
+            </div>
             <div
-              v-for="(info, index) in infos"
-              :key="index"
-              :class="'info-message'"
+              v-if="
+                response &&
+                response.corrected_description &&
+                response.corrected_description != inputDescription &&
+                showCorrections
+              "
             >
-              {{ getMessage(info) }}
+              <div class="overline">Corrected Description</div>
+              <div :class="getCorrectedDescriptionClass()">
+                {{ response.corrected_description }}
+              </div>
             </div>
           </div>
-
-          <div v-if="errors" class="overline">Errors encountered</div>
-          <div v-if="errors" :class="'error-message'">
-            <div
-              v-for="(info, index) in errors"
-              :key="index"
-              :class="'error-message'"
-            >
-              {{ getMessage(info) }}
-            </div>
-          </div>
-        </v-sheet>
-
-        <v-sheet elevation="2" class="pa-10 mt-10" v-if="viewReferenceInfo">
-          <RenderSelectorDetails
-            :referenceId="this.correctedModel.reference.id"
-            :selectorId="this.correctedModel.reference.selector.id"
-          />
-        </v-sheet>
-
-        <v-sheet elevation="2" class="pa-10 mt-10" v-if="selectorShort">
-          <SelectorShort :selector="this.selectorShort" />
-        </v-sheet>
-
-        <v-sheet elevation="2" class="pa-10 mt-10" v-if="protein">
-          <AffectedProtein :protein="this.protein" />
-        </v-sheet>
-
-        <v-sheet
-          elevation="2"
-          class="pa-10 mt-10"
-          v-if="summary && normalizedDescription && equivalentDescriptions"
-        >
-          <div class="overline mt-4">Equivalent Descriptions</div>
-          <div
-            class="ml-4"
-            v-for="(values, c_s) in equivalentDescriptions"
-            :key="c_s"
-          >
-            <span v-if="c_s == 'c'">Coding</span>
-            <span v-else-if="c_s == 'n'">Noncoding</span>
-            <span v-else-if="c_s == 'g'">Genomic</span>
-            <span v-else> {{ c_s }} </span>
-            <div v-for="(equivalentDescription, index) in values" :key="index">
-              <template v-if="c_s === 'c'">
-                <div>
-                  <router-link
-                    class="links"
-                    :to="{
-                      name: 'NameChecker',
-                      params: { descriptionRouter: equivalentDescription[0] }
-                    }"
-                    >{{ equivalentDescription[0] }}</router-link
-                  >
-                </div>
-                <div class="protein-description">
-                  {{ equivalentDescription[1] }}
-                </div>
-              </template>
-              <template v-else>
-                <router-link
-                  class="links"
-                  :to="{
-                    name: 'NameChecker',
-                    params: { descriptionRouter: equivalentDescription }
-                  }"
-                  >{{ equivalentDescription }}</router-link
-                >
-              </template>
+          <div v-if="response && response.errors">
+            <div class="overline">Errors</div>
+            <div class="'error-message'">
+              <div
+                v-for="(error, index) in response.errors"
+                :key="index"
+                :class="'error-message'"
+              >
+                {{ getMessage(error) }}
+              </div>
             </div>
           </div>
         </v-sheet>
 
-        <v-sheet
-          elevation="2"
-          class="pa-10 mt-10"
-          v-if="correctedModel && false"
+        <v-expansion-panels
+          focusable
+          hover
+          class="mt-5 mb-5"
+          v-if="response && response.equivalent_descriptions"
         >
-          <div class="overline mb-4">Information</div>
-          <ModelView :model="correctedModel" />
-        </v-sheet>
-
-        <v-sheet
-          elevation="2"
-          class="pa-10 mt-10"
-          v-if="correctedModel && false"
-        >
-          <div class="overline mb-4">Information</div>
-          <NewModelView
-            :model="correctedModel"
-            :description="correctedDescription"
-            :errors="errors"
-            :infos="infos"
-          />
-        </v-sheet>
-
-        <v-sheet
-          elevation="2"
-          class="pa-10 mt-10"
-          v-if="internalCoordinatesModel"
-        >
-          <div class="overline mb-4">Internal Coordinates Model</div>
-          <ModelView :model="internalCoordinatesModel" />
-        </v-sheet>
-
-        <v-sheet elevation="2" class="pa-10 mt-10" v-if="internalIndexingModel">
-          <div class="overline mb-4">Internal Indexing Model</div>
-          <ModelView :model="internalIndexingModel" />
-        </v-sheet>
-
-        <v-expansion-panels focusable hover class="mt-10 mb-10" v-if="summary">
           <v-expansion-panel>
-            <v-expansion-panel-header>Raw Response</v-expansion-panel-header>
-            <v-expansion-panel-content>
-              <JsonPretty :summary="summary" />
+            <v-expansion-panel-header
+              >Equivalent Descriptions</v-expansion-panel-header
+            >
+            <v-expansion-panel-content class="pt-5">
+              <div
+                class="ml-4"
+                v-for="(values, c_s) in response.equivalent_descriptions"
+                :key="c_s"
+              >
+                <span v-if="c_s == 'c'">Coding</span>
+                <span v-else-if="c_s == 'n'">Noncoding</span>
+                <span v-else-if="c_s == 'g'">Genomic</span>
+                <span v-else> {{ c_s }} </span>
+                <div
+                  v-for="(equivalentDescription, index) in values"
+                  :key="index"
+                >
+                  <template v-if="c_s === 'c'">
+                    <div>
+                      <router-link
+                        class="ok-description-link"
+                        :to="{
+                          name: 'NameChecker',
+                          params: {
+                            descriptionRouter: equivalentDescription[0],
+                          },
+                        }"
+                        >{{ equivalentDescription[0] }}</router-link
+                      >
+                    </div>
+                  </template>
+                  <template v-else>
+                    <router-link
+                      class="ok-description-link"
+                      :to="{
+                        name: 'NameChecker',
+                        params: { descriptionRouter: equivalentDescription },
+                      }"
+                      >{{ equivalentDescription }}</router-link
+                    >
+                  </template>
+                </div>
+              </div>
             </v-expansion-panel-content>
           </v-expansion-panel>
         </v-expansion-panels>
 
-        <!-- <v-sheet elevation="2" class="pa-10 mt-10" v-if="summary">
-          <div class="overline mb-4">Raw Response</div>
-          <JsonPretty :summary="summary" />
-        </v-sheet> -->
+        <v-expansion-panels
+          focusable
+          hover
+          class="mt-5 mb-5"
+          v-if="response && response.selector_short"
+        >
+          <v-expansion-panel>
+            <v-expansion-panel-header
+              >Selector Details</v-expansion-panel-header
+            >
+            <v-expansion-panel-content>
+              <SelectorShort :selector="response.selector_short" />
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+        </v-expansion-panels>
+
+        <v-expansion-panels
+          focusable
+          hover
+          class="mt-5 mb-5"
+          v-if="response && response.protein"
+        >
+          <v-expansion-panel>
+            <v-expansion-panel-header>Protein Details</v-expansion-panel-header>
+            <v-expansion-panel-content>
+              <AffectedProtein :protein="this.response.protein" />
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+        </v-expansion-panels>
+
+        <v-expansion-panels focusable hover class="mt-10 mb-10" v-if="response">
+          <v-expansion-panel>
+            <v-expansion-panel-header>Raw Response</v-expansion-panel-header>
+            <v-expansion-panel-content>
+              <JsonPretty :summary="response" />
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+        </v-expansion-panels>
       </v-flex>
     </v-layout>
   </v-container>
 </template>
 
 <script>
-import JsonPretty from "../components/JsonPretty.vue";
-import ModelView from "../components/ModelView.vue";
-import NewModelView from "../components/NewModelView.vue";
-import SyntaxError from "../components/SyntaxError.vue";
-import RenderSelectorDetails from "../components/RenderSelectorDetails.vue";
-import AffectedProtein from "../components/AffectedProtein.vue";
-import SelectorShort from "../components/SelectorShort.vue";
 import MutalyzerService from "../services/MutalyzerService.js";
-import "vue-json-pretty/lib/styles.css";
+import JsonPretty from "../components/JsonPretty.vue";
+import SelectorShort from "../components/SelectorShort.vue";
+import AffectedProtein from "../components/AffectedProtein.vue";
+import SyntaxError from "../components/SyntaxError.vue";
 
 export default {
   components: {
     JsonPretty,
-    ModelView,
-    NewModelView,
-    SyntaxError,
-    RenderSelectorDetails,
+    SelectorShort,
     AffectedProtein,
-    SelectorShort
+    SyntaxError,
   },
   props: ["descriptionRouter"],
-  created: function() {
+  created: function () {
     if (this.descriptionRouter && 0 !== this.descriptionRouter.length) {
-      this.description = this.descriptionRouter;
+      this.inputDescriptionTextBox = this.descriptionRouter;
       this.nameCheck();
     }
   },
   watch: {
     $route() {
       if (this.descriptionRouter && 0 !== this.descriptionRouter.length) {
-        this.description = this.descriptionRouter;
+        this.inputDescriptionTextBox = this.descriptionRouter;
         this.nameCheck();
       }
-    }
+    },
   },
   data: () => ({
-    description: null,
-    descriptionModel: null,
-
-    inputModel: null,
-    correctedModel: null,
-    internalCoordinatesModel: null,
-    internalIndexingModel: null,
-    delinsModel: null,
-    syntaxError: null,
-
-    referenceModel: null,
-    inputDescription: null,
-    correctedDescription: null,
-    normalizedDescription: null,
-    protein: null,
-    selectorShort: null,
-    equivalentDescriptions: null,
-    proteinDescriptions: null,
-    visualize: null,
-    sequence: null,
-    summary: null,
-    errors: null,
-    infos: null,
-    loadingOverlay: false,
-    errorMessages: [],
-    valid: true,
-    model: "",
-    label: "HGVS Description",
-    hint: "",
-    placeholder: "",
-    rules: [value => !!value || "Required."],
-    viewInfos: false,
-    viewReferenceInfo: false,
-    examples: [
-      // "LRG_303:g.[11del;6883_6884insTTTCGCCCC;7000del]",
-      // "LRG_303:g.[11del;6883_6884insTTTCGCCCC]",
-      // "LRG_303:g.6883_6884insTTTCGCCCC",
-      // "NG_012337(TIMM8B):c.10_11ins[T;10_20inv;NG_008835(NM_022153.2):159_170]",
-      // "NG_012337(11818):c.10_11ins[T;10_20inv;NG_008835(NM_022153.2):159_170]",
-      // "NG_012337.1:g.[5del;10_20del;20_21insT;21del]",
-      // "NG_012337.1:g.[15del;10_20del;20_21insT;21del]",
-      // "NG_012337.1:g.[5del;10_20del;20_21insT;21del]",
-      // "NG_012337.1:g.[5del;10_20del;20_21insT;30_(40_?)del]",
-      // "NG_012337.1:g.7125G>T",
-      // "NG_012337.1:g.10_11ins[T;10_20inv;NG_008835:159_170]",
-      // "NG_012337.1:g.10_11ins[T;10_20inv;NG_008835(NM_022153.2):159_170]",
-      // "NG_008835.1(NR_120672.1):n.159dup",
+    inputDescriptionTextBox: null,
+    rules: [(value) => !!value || "Required."],
+    inputDescriptionTextBoxLabel: "HGVS Description",
+    descriptionExamples: [
       "NG_012337.1(NM_003002.2):c.274G>T",
-      // "LRG_23:c.159dup",
-      "LRG_24:g.5525_5532del"
-      // "LRG_1:c.5525_5532del",
-      // "LRG_24:c.159dup",
-      // "LRG_24(t3):c.159dup",
-      // "LRG_24(t1):c.159dup",
-      // "LRG_24:g.[5A>T;10_12del]",
-      // "LRG_24:g.[5A>T;13_15del]",
-      // "NC_000024.10:g.100del",
-      // "NG_008835.1:g.100del",
-      // "NM_003002.4:c.1del",
-      // "NR_120672.1:n.159dup"
-    ]
+      "LRG_24:g.5525_5532del",
+    ],
+
+    loadingOverlay: false,
+
+    inputDescription: null, // The description for which the most recent call was sent.
+
+    response: null,
+
+    errors: null,
+
+    showCorrections: false,
   }),
   methods: {
-    selectExample: function(index) {
-      this.description = this.examples[index];
-      this.$refs.descriptionInput.focus();
+    selectDescriptionExample: function (i) {
+      this.inputDescriptionTextBox = this.descriptionExamples[i];
+      this.$refs.refInputDescriptionTextBox.focus();
     },
-    nameCheck: function() {
-      this.errorMessages = [];
-      if (this.description !== null) {
+    nameCheck: function () {
+      this.errorMessages = null;
+      if (this.inputDescriptionTextBox !== null) {
         this.loadingOverlay = true;
-        this.summary = null;
-
-        this.inputModel = null;
-        this.correctedModel = null;
-        this.internalCoordinatesModel = null;
-        this.internalIndexingModel = null;
         this.inputDescription = null;
-        this.correctedDescription = null;
-        this.normalizedDescription = null;
-        this.protein = null;
-        this.selectorShort = null;
+        this.showCorrections = false;
 
-        this.syntaxError = null;
-
-        this.errors = null;
-        this.infos = null;
-        this.equivalentDescriptions = null;
-        this.visualize = null;
-        this.descriptionModel = null;
-        this.referenceModel = null;
-        this.viewInfos = false;
-        this.viewReferenceInfo = false;
-        MutalyzerService.nameCheck(this.description)
-          .then(response => {
+        MutalyzerService.nameCheck(this.inputDescriptionTextBox)
+          .then((response) => {
             if (response.data) {
               this.loadingOverlay = false;
-              this.summary = response.data;
-              if (response.data["input_description"]) {
-                this.inputDescription = response.data["input_description"];
-              }
-              if (response.data["normalized_description"]) {
-                this.normalizedDescription =
-                  response.data["normalized_description"];
-              }
-              if (response.data["corrected_description"]) {
-                this.correctedDescription =
-                  response.data["corrected_description"];
-              }
-              if (response.data["errors"]) {
-                this.processErrors(response.data["errors"]);
-              }
-              if (response.data["infos"]) {
-                this.infos = response.data["infos"];
-              }
-              if (response.data["equivalent_descriptions"]) {
-                this.equivalentDescriptions =
-                  response.data["equivalent_descriptions"];
-              }
-              if (response.data["protein"]) {
-                this.protein = response.data["protein"];
-              }
-              if (response.data["selector_short"]) {
-                this.selectorShort = response.data["selector_short"];
-              }
-              if (response.data["visualize"]) {
-                this.visualize = response.data["visualize"];
-              }
-              if (response.data["input_model"]) {
-                this.processInputModel(response.data["input_model"]);
-              }
-              if (response.data["corrected_model"]) {
-                this.correctedModel = response.data["corrected_model"];
-              }
-              if (response.data["internal_coordinates_model"]) {
-                this.internalCoordinatesModel =
-                  response.data["internal_coordinates_model"];
-              }
-              if (response.data["internal_indexing_model"]) {
-                this.internalIndexingModel =
-                  response.data["internal_indexing_model"];
-              }
+              this.response = response.data;
+              this.inputDescription = this.inputDescriptionTextBox;
             }
           })
-          .catch(error => {
+          .catch((error) => {
             this.loadingOverlay = false;
             if (error.response) {
-              // The request was made and the server responded with a status code
-              // that falls out of the range of 2xx
-              this.errorMessages = [
-                { details: "Some response error occured." }
-              ];
-              // console.log(error.response.data);
-              // console.log(error.response.status);
-              // console.log(error.response.headers);
+              this.errors = [{ details: "Some response error occured." }];
             } else if (error.request) {
-              this.errorMessages = [
-                { details: "Some error occured on the server side." }
+              this.errors = [
+                { details: "Some error occured on the server side." },
               ];
-              // The request was made but no response was received
-              // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-              // http.ClientRequest in node.js
-              // console.log(error.request);
             } else {
-              this.errorMessages = [{ details: "Some error occured." }];
-              // console.log(error);
-              // Something happened in setting up the request that triggered an Error
-              // console.log("Error", error.message);
+              this.errors = [{ details: "Some error occured." }];
             }
-            // console.log(error.config);
           });
       }
     },
-    processErrors: function(errors) {
-      if (
-        (errors.length === 1 && errors[0].code === "ESYNTAXUEOF") ||
-        errors[0].code === "ESYNTAXUC"
-      ) {
-        this.syntaxError = errors[0];
-      } else {
-        this.errors = errors;
-      }
-    },
-    getError: function(error) {
-      let output = "";
-      if (error.code) {
-        output += error.code;
-        if (error.details) {
-          output += ": " + error.details;
-        }
-      } else {
-        if (error.details) {
-          output += error.details;
-        }
-      }
-
-      return output;
-    },
-    processInputModel: function(model) {
-      if (model.errors && model.errors.length === 1) {
-        if (model.errors[0].code === "ESYNTAXUEOF") {
-          this.syntaxError = model.errors[0];
-        } else if (model.errors[0].code === "ESYNTAXUC") {
-          this.syntaxError = model.errors[0];
+    getInputDescriptionClass: function () {
+      if (this.response) {
+        if (
+          this.response.normalized_description &&
+          this.response.normalized_description == this.inputDescription
+        ) {
+          return "ok-description";
+        } else if (
+          this.response.corrected_description &&
+          this.response.corrected_description == this.inputDescription
+        ) {
+          return "normalized-description";
+        } else if (
+          this.response.corrected_description &&
+          !this.response.errors
+        ) {
+          return "corrected-description";
         } else {
-          this.inputModel = model;
+          return "error-description";
         }
       }
     },
-    getMessage: function(message) {
+    getCorrectedDescriptionClass: function () {
+      if (this.response) {
+        if (
+          this.response.normalized_description &&
+          this.response.corrected_description &&
+          this.response.normalized_description ==
+            this.response.corrected_description
+        ) {
+          return "ok-description";
+        } else if (
+          this.response.normalized_description &&
+          this.response.corrected_description &&
+          this.response.normalized_description != this.inputDescription
+        ) {
+          return "corrected-description";
+        } else if (
+          this.response.corrected_description &&
+          this.response.errors
+        ) {
+          return "error-description";
+        } else {
+          return "description";
+        }
+      }
+    },
+    wereCorrections: function () {
+      console.log(this.showCorrections);
+      return (
+        this.response &&
+        this.response.corrected_description &&
+        this.response.corrected_description != this.inputDescription
+      );
+    },
+    getMessage: function (message) {
       if (message.details) {
         return message.details + " (" + message.code + ")";
       }
       return message;
     },
-    renderSelector: function() {
-      if (this.correctedModel) {
-        if (this.errors) {
-          for (const entry of this.errors) {
-            if (entry.code === "ERETR") {
-              return false;
-            } else if (entry.code === "ENOSELECTORFOUND") {
-              return false;
-            }
-          }
-        }
+    getSyntaxError: function () {
+      if (this.response && this.response.errors) {
+        let errors = this.response.errors;
         if (
-          this.correctedModel.reference &&
-          this.correctedModel.reference.selector &&
-          this.correctedModel.reference.selector.id
+          (errors.length === 1 && errors[0].code === "ESYNTAXUEOF") ||
+          errors[0].code === "ESYNTAXUC"
         ) {
-          return true;
+          return errors[0];
         }
       }
-      return false;
-    }
-  }
+    },
+    isSyntaxError: function () {
+      if (this.getSyntaxError()) {
+        return true;
+      } else {
+        return false;
+      }
+    },
+  },
 };
 </script>
-
-<!-- Add "scoped" attribute to limit CSS to this component only -->
-<style scoped>
-h3 {
-  margin: 40px 0 0;
-}
-ul {
-  list-style-type: none;
-  padding: 0;
-}
-li {
-  display: inline-block;
-  margin: 0 10px;
-}
-a {
-  color: #42b983;
-}
-
-.btn {
-  margin-top: 5px;
-}
-
-.examples-list {
-  margin-top: 5px;
-}
-
-.example-item {
-  display: inline-block;
-  color: #1e90ff;
-  background-color: #ffffff;
-  padding-left: 10px;
-  padding-right: 10px;
-  padding-top: 5px;
-  padding-bottom: 5px;
-}
-
-.example-item:hover {
-  color: #f2f9f3;
-  background-color: #1e90ff;
-  cursor: pointer;
-}
-
-.v-application code {
-  background-color: #ffffff;
-}
-
-.v-text-field {
-  font-family: monospace;
-}
-
-.normalized-description {
-  color: #0b9b33;
-  padding-left: 10px;
-  padding-right: 10px;
-  padding-top: 5px;
-  padding-bottom: 5px;
-}
-
-.description {
-  margin: 0;
-  padding: 0 1px;
-  font-family: monospace;
-  display: inline-block;
-}
-
-.links {
-  text-decoration: none;
-  margin: 0;
-  padding: 0 1px;
-  font-family: monospace;
-  display: inline-block;
-
-  color: #00c853;
-  background-color: #ffffff;
-  padding-left: 10px;
-  padding-right: 10px;
-  padding-top: 5px;
-  padding-bottom: 5px;
-}
-
-.links:hover {
-  color: #f2f9f3;
-  background-color: #00c853;
-  cursor: pointer;
-}
-
-.protein-description {
-  text-decoration: none;
-  margin: 0;
-  padding: 0 1px;
-  font-family: monospace;
-  display: inline-block;
-
-  color: #004d40;
-  background-color: #ffffff;
-  padding-left: 10px;
-  padding-right: 10px;
-  padding-top: 5px;
-  padding-bottom: 5px;
-}
-
-.info-message {
-  margin: 10px 0;
-  padding: 5px;
-  font-family: monospace;
-  background-color: #e1f5fe;
-}
-
-.info-message-hover {
-  margin: 10px 0;
-  padding: 5px;
-  font-family: monospace;
-  background-color: #81d4fa;
-}
-
-.error-message {
-  margin: 10px 0;
-  padding: 5px;
-  font-family: monospace;
-  background-color: #ffebee;
-}
-
-.error-message-hover {
-  margin: 10px 0;
-  padding: 5px;
-  font-family: monospace;
-  background-color: #ffcdd2;
-}
-
-.description-info {
-  margin: 0;
-  padding: 0 1px;
-  color: #01579b;
-  font-family: monospace;
-  display: inline-block;
-}
-
-.description-info-hover {
-  margin: 0;
-  padding: 0 1px;
-  color: #01579b;
-  font-family: monospace;
-  background-color: #81d4fa;
-  display: inline-block;
-}
-
-.description-error {
-  margin: 0;
-  padding: 0 1px;
-  color: #b71c1c;
-  font-family: monospace;
-  display: inline-block;
-}
-
-.description-error-hover {
-  margin: 0;
-  padding: 0 1px;
-  color: #b71c1c;
-  font-family: monospace;
-  background-color: #ffcdd2;
-  display: inline-block;
-}
-</style>

@@ -32,6 +32,7 @@ export default {
     };
   },
   created: function() {
+    console.log(this.protein);
     this.getReference();
   },
   methods: {
@@ -66,7 +67,8 @@ export default {
       var r = this.protein.reference;
       var p = this.protein.predicted;
 
-      if (r == p) {
+
+      if (r == p || p == "?") {
         this.reference.push({ seq: r, type: "equal" });
         this.predicted.push({ seq: p, type: "equal" });
 
@@ -81,6 +83,7 @@ export default {
 
       var prefix = this.getPrefix(r, p);
       var suffix = this.getSuffix(r, p);
+
       var r_middle = r.split(prefix)[1].split(suffix)[0];
       var p_middle = p.split(prefix)[1].split(suffix)[0];
 

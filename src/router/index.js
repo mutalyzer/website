@@ -37,6 +37,10 @@ const routes = [
     component: DescriptionExtractor
   },
   {
+    path: "/api",
+    name: "api",
+  },
+  {
     path: "*",
     name: "catchAll",
     component: Home

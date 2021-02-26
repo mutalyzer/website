@@ -17,14 +17,15 @@
 
 <script>
 import VueJsonPretty from "vue-json-pretty";
+import "vue-json-pretty/lib/styles.css";
 
 export default {
   name: "JsonPretty",
   components: {
-    VueJsonPretty
+    VueJsonPretty,
   },
   props: {
-    summary: null
+    summary: null,
   },
   data() {
     return {
@@ -38,7 +39,7 @@ export default {
       selectOnClickNode: true,
       collapsedOnClickBrackets: true,
       useCustomLinkFormatter: false,
-      deep: 7
+      deep: 7,
     };
   },
   methods: {
@@ -46,7 +47,7 @@ export default {
       console.log("click: ", path, data, treeName);
       this.itemPath = path;
       this.itemData = !data ? data + "" : data;
-    }
-  }
+    },
+  },
 };
 </script>

@@ -1,6 +1,12 @@
 <template>
   <div>
-    <v-data-table :headers="headers" :items="values"></v-data-table>
+    <div class="overline">Selector Positions Details</div>
+    <v-data-table
+      dense
+      :items-per-page="5"
+      :headers="headers"
+      :items="values"
+    ></v-data-table>
   </div>
 </template>
 
@@ -8,15 +14,15 @@
 export default {
   name: "SelectorShort",
   props: {
-    selector: null
+    selector: null,
   },
   data() {
     return {
       headers: [],
-      values: []
+      values: [],
     };
   },
-  created: function() {
+  created: function () {
     this.getValues();
     this.getHeaders();
   },
@@ -30,7 +36,7 @@ export default {
             g_s: this.selector.exon.g[i][0],
             g_e: this.selector.exon.g[i][1],
             c_s: this.selector.exon.c[i][0],
-            c_e: this.selector.exon.c[i][1]
+            c_e: this.selector.exon.c[i][1],
           });
         } else if (this.selector.exon.n) {
           output.push({
@@ -38,13 +44,13 @@ export default {
             g_s: this.selector.exon.g[i][0],
             g_e: this.selector.exon.g[i][1],
             n_s: this.selector.exon.n[i][0],
-            n_e: this.selector.exon.n[i][1]
+            n_e: this.selector.exon.n[i][1],
           });
         } else {
           output.push({
             name: i,
             g_s: this.selector.exon.g[i][0],
-            g_e: this.selector.exon.g[i][1]
+            g_e: this.selector.exon.g[i][1],
           });
         }
       }
@@ -54,7 +60,7 @@ export default {
           g_s: this.selector.cds.g[0][0],
           g_e: this.selector.cds.g[0][1],
           c_s: this.selector.cds.c[0][0],
-          c_e: this.selector.cds.c[0][1]
+          c_e: this.selector.cds.c[0][1],
         });
       }
 
@@ -67,12 +73,12 @@ export default {
           ...[
             {
               text: "Exon number / CDS",
-              value: "name"
+              value: "name",
             },
             { text: "Start (g.)", value: "g_s" },
             { text: "End (g.)", value: "g_e" },
             { text: "Start (c.)", value: "c_s" },
-            { text: "End (c.)", value: "c_e" }
+            { text: "End (c.)", value: "c_e" },
           ]
         );
       } else if (this.selector.exon.n) {
@@ -80,15 +86,17 @@ export default {
           ...[
             {
               text: "Exon number",
-              value: "name"
+              value: "name",
             },
+            { text: "Start (g.)", value: "g_s" },
+            { text: "End (g.)", value: "g_e" },
             { text: "Start (n.)", value: "n_s" },
-            { text: "End (n.)", value: "c_e" }
+            { text: "End (n.)", value: "n_e" },
           ]
         );
       }
       this.headers = output;
-    }
-  }
+    },
+  },
 };
 </script>

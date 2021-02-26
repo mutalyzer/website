@@ -25,17 +25,13 @@
         </v-expansion-panel-header>
         <v-expansion-panel-content class="pl-1">
           <v-row no-gutters>
-            <v-col cols="4">
-              Molecule type
-            </v-col>
+            <v-col cols="4"> Molecule type </v-col>
             <v-col cols="8" class="text--secondary">
               {{ record.mol_type }}
             </v-col>
           </v-row>
           <v-row no-gutters>
-            <v-col cols="4">
-              Length
-            </v-col>
+            <v-col cols="4"> Length </v-col>
             <v-col cols="8" class="text--secondary">
               {{ record.length }} bases
             </v-col>
@@ -53,9 +49,7 @@
               <v-fade-transition leave-absolute>
                 <span v-if="open"></span>
                 <v-row v-else no-gutters style="width: 100%">
-                  <v-col align="center">
-                    gene
-                  </v-col>
+                  <v-col align="center"> gene </v-col>
                 </v-row>
               </v-fade-transition>
             </v-col>
@@ -63,25 +57,19 @@
         </v-expansion-panel-header>
         <v-expansion-panel-content class="pl-1">
           <v-row v-if="gene.hgnc" no-gutters>
-            <v-col cols="4">
-              HGNC ID
-            </v-col>
+            <v-col cols="4"> HGNC ID </v-col>
             <v-col cols="8" class="text--secondary">
               {{ gene.hgnc }}
             </v-col>
           </v-row>
           <v-row v-if="gene.synonym" no-gutters>
-            <v-col cols="4">
-              Synonym
-            </v-col>
+            <v-col cols="4"> Synonym </v-col>
             <v-col cols="8" class="text--secondary">
               {{ gene.synonym }}
             </v-col>
           </v-row>
           <v-row v-if="gene.location" no-gutters>
-            <v-col cols="4">
-              Location
-            </v-col>
+            <v-col cols="4"> Location </v-col>
             <v-col cols="8" class="text--secondary">
               [{{ gene.location.start }}; {{ gene.location.end }}]
               {{ gene.location.strand }}
@@ -110,26 +98,20 @@
         </v-expansion-panel-header>
         <v-expansion-panel-content class="pl-1">
           <v-row no-gutters>
-            <v-col cols="4">
-              Type
-            </v-col>
+            <v-col cols="4"> Type </v-col>
             <v-col cols="8" class="text--secondary">
               {{ transcript.type }}
             </v-col>
           </v-row>
           <v-row no-gutters>
-            <v-col cols="4">
-              Location
-            </v-col>
+            <v-col cols="4"> Location </v-col>
             <v-col cols="8" class="text--secondary">
               [{{ transcript.location.start }}; {{ transcript.location.end }}]
               {{ transcript.location.strand }}
             </v-col>
           </v-row>
           <v-row v-if="transcript.exons" no-gutters>
-            <v-col cols="4">
-              Exons
-            </v-col>
+            <v-col cols="4"> Exons </v-col>
             <v-col cols="8" class="text--secondary">
               <v-row
                 v-for="(exon, index) in transcript.exons"
@@ -146,9 +128,7 @@
             </v-col>
           </v-row>
           <v-row v-if="transcript.cds" no-gutters>
-            <v-col cols="4">
-              CDS
-            </v-col>
+            <v-col cols="4"> CDS </v-col>
             <v-col cols="8" class="text--secondary">
               <v-row no-gutters>
                 <v-col cols="4">
@@ -189,11 +169,11 @@ import JsonPretty from "./JsonPretty.vue";
 export default {
   name: "RenderSelectorDetails",
   components: {
-    JsonPretty
+    JsonPretty,
   },
   props: {
     referenceId: null,
-    selectorId: null
+    selectorId: null,
   },
   data() {
     return {
@@ -201,15 +181,15 @@ export default {
       selectorModel: null,
       record: null,
       gene: null,
-      transcript: null
+      transcript: null,
     };
   },
-  created: function() {
+  created: function () {
     const params = {
       reference_id: this.referenceId,
-      feature_id: this.selectorId
+      feature_id: this.selectorId,
     };
-    MutalyzerService.referenceModel(params).then(response => {
+    MutalyzerService.referenceModel(params).then((response) => {
       if (response.data) {
         this.selectorModel = response.data;
         this.record = this.getRecord(this.selectorModel);
@@ -240,7 +220,11 @@ export default {
             output.hgnc = gene.qualifiers.HGNC;
           }
           if (gene.qualifiers.synonym) {
-            output.synonym = gene.qualifiers.synonym.join(", ");
+            if (typeof gene.qualifiers.synonym == "string") {
+              output.synonym = gene.qualifiers.synonym;
+            } else {
+              output.synonym = gene.qualifiers.synonym.join(", ");
+            }
           }
         }
         if (gene.location) {
@@ -258,7 +242,7 @@ export default {
         let transcript = annotations.features[0].features[0];
         let output = {
           id: transcript.id,
-          type: transcript.type
+          type: transcript.type,
         };
         if (transcript.location) {
           output.location = this.extractLocation(transcript.location);
@@ -270,7 +254,7 @@ export default {
             if (entry.type == "exon") {
               exons.push({
                 id: entry.id,
-                location: this.extractLocation(entry.location)
+                location: this.extractLocation(entry.location),
               });
             } else if (entry.type == "CDS") {
               cds.location = this.extractLocation(entry.location);
@@ -290,7 +274,7 @@ export default {
     extractLocation(location) {
       let output = {
         start: location.start.position,
-        end: location.end.position
+        end: location.end.position,
       };
       if (location.strand == 1) {
         output.strand = "+";
@@ -298,7 +282,7 @@ export default {
         output.strand = "-";
       }
       return output;
-    }
-  }
+    },
+  },
 };
 </script>
