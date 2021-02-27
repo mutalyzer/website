@@ -47,6 +47,15 @@
           </v-btn>
         </v-sheet>
 
+        <v-overlay :absolute="true" :value="loadingOverlay">
+          <div class="text-center">
+            <v-progress-circular :size="50" indeterminate></v-progress-circular>
+          </div>
+          <div class="text-center">
+            <v-btn @click="loadingOverlay = false" class="mt-5"> Cancel </v-btn>
+          </div>
+        </v-overlay>
+
         <v-sheet
           elevation="2"
           color="green lighten-5"
