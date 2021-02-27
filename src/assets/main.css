@@ -1,0 +1,200 @@
+h3 {
+  margin: 40px 0 0;
+}
+ul {
+  list-style-type: none;
+  padding: 0;
+}
+li {
+  display: inline-block;
+  margin: 0 10px;
+}
+
+.alpha {
+  padding: 5px;
+  margin-left: 5px;
+  color: #FBE9E7;
+  background-color: #FF5722;
+}
+
+.btn {
+  margin-top: 5px;
+}
+
+.examples-list {
+  margin-top: 5px;
+  background-color: #ffffff;
+}
+
+.example-item {
+  display: inline-block;
+  color: #1e90ff;
+  background-color: #ffffff;
+  padding: 5px 10px;
+  margin-left: 2px;
+  font-family: monospace;
+  font-size: medium;
+}
+
+.example-item:hover {
+  color: #f2f9f3;
+  background-color: #1e90ff;
+  cursor: pointer;
+}
+
+.description {
+  padding: 0 1px;
+  padding: 5px 10px;
+  font-family: monospace;
+}
+
+.error-description {
+  color: #d60000;
+  padding: 5px 10px;
+  font-family: monospace;
+}
+
+.corrected-description {
+  color: #00b6ad;
+  padding: 5px 10px;
+  font-family: monospace;
+}
+
+.normalized-description {
+  color: #000399;
+  padding: 5px 10px;
+  font-family: monospace;
+}
+
+.ok-description {
+  color: #00c853;
+  padding: 5px 10px;
+  font-family: monospace;
+}
+
+.ok-description-link {
+  text-decoration: none;
+  margin: 0;
+  padding: 5px 10px;
+  font-family: monospace;
+  display: inline-block;
+  color: #00c853;
+  background-color: #ffffff;
+}
+
+.ok-description-link:hover {
+  color: #f2f9f3;
+  background-color: #00c853;
+  cursor: pointer;
+}
+
+.code {
+  background-color: #ffffff;
+  color: #b71c1c;
+}
+
+.v-text-field {
+  font-family: monospace;
+}
+
+.normalized-description {
+  color: #0b9b33;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+.links {
+  text-decoration: none;
+  margin: 0;
+  padding: 0 1px;
+  font-family: monospace;
+  display: inline-block;
+  color: #00c853;
+  background-color: #ffffff;
+  padding: 5px 10px;
+}
+
+.links:hover {
+  color: #f2f9f3;
+  background-color: #00c853;
+  cursor: pointer;
+}
+
+.protein-description {
+  text-decoration: none;
+  margin: 0;
+  padding: 0 1px;
+  font-family: monospace;
+  display: inline-block;
+
+  color: #004d40;
+  background-color: #ffffff;
+  padding-left: 10px;
+  padding-right: 10px;
+  padding-top: 5px;
+  padding-bottom: 5px;
+}
+
+.info-message {
+  margin: 10px 10px 10px 10px;
+  padding: 5px;
+  font-family: monospace;
+  background-color: #e1f5fe;
+}
+
+.info-message-hover {
+  margin: 10px 0;
+  padding: 5px;
+  font-family: monospace;
+  background-color: #81d4fa;
+}
+
+.error-message {
+  margin: 10px 10px 10px 10px;
+  padding: 5px;
+  font-family: monospace;
+  background-color: #ffebee;
+}
+
+.error-message-hover {
+  margin: 10px 0;
+  padding: 5px;
+  font-family: monospace;
+  background-color: #ffcdd2;
+}
+
+.description-info {
+  margin: 0;
+  padding: 0 1px;
+  color: #01579b;
+  font-family: monospace;
+  display: inline-block;
+}
+
+.description-info-hover {
+  margin: 0;
+  padding: 0 1px;
+  color: #01579b;
+  font-family: monospace;
+  background-color: #81d4fa;
+  display: inline-block;
+}
+
+.description-error {
+  margin: 0;
+  padding: 0 1px;
+  color: #b71c1c;
+  font-family: monospace;
+  display: inline-block;
+}
+
+.description-error-hover {
+  margin: 0;
+  padding: 0 1px;
+  color: #b71c1c;
+  font-family: monospace;
+  background-color: #ffcdd2;
+  display: inline-block;
+}

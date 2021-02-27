@@ -49,13 +49,12 @@
 
         <v-sheet
           elevation="2"
-          class="pa-10 mt-10"
+          color="green lighten-5"
+          class="pa-10 mt-10 mb-5"
           v-if="response && response.normalized_description"
         >
-          <div v-if="response && response.normalized_description">
-            <div class="normalized-description">
-              {{ response.normalized_description }}
-            </div>
+          <div class="normalized-description">
+            {{ response.normalized_description }}
           </div>
         </v-sheet>
 
@@ -64,41 +63,32 @@
           type="error"
           tile
           elevation="2"
-          class="mt-10"
+          class="mt-10 mb-0"
           v-if="response && response.errors"
         >
           <v-row align="center">
-            <v-col class="grow"> Errors were encountered. </v-col>
+            <v-col class="grow"> Errors encountered. </v-col>
           </v-row>
         </v-alert>
 
-        <v-sheet elevation="2" class="pa-10 mt-10" v-if="isSyntaxError()">
-          <v-alert
-            border="right"
-            dark
-            colored-border
-            type="error"
-            elevation="2"
-            tile
-          >
-            Syntax Error
-          </v-alert>
-
-          <div class="overline mb-4">Unexpected Character</div>
-          <SyntaxError :errorModel="getSyntaxError()" />
-        </v-sheet>
+        <v-expand-transition>
+          <v-sheet elevation="2" class="pa-10" v-if="isSyntaxError()">
+            <div class="overline mb-4">Unexpected Character</div>
+            <SyntaxError :errorModel="getSyntaxError()" />
+          </v-sheet>
+        </v-expand-transition>
 
         <v-alert
           dense
           type="info"
-          class="mt-5 mb-0"
+          class="mt-0 mb-0"
           v-if="wereCorrections()"
           elevation="2"
           tile
         >
           <v-row align="center">
             <v-col class="grow">
-              Corrections were performed on the input description.
+              Note that the input description was corrected.
             </v-col>
             <v-col class="shrink">
               <v-btn
@@ -113,46 +103,49 @@
           </v-row>
         </v-alert>
 
-        <v-sheet
-          elevation="2"
-          class="pa-10 mt-0"
-          v-if="
-            (wereCorrections() && showCorrections) ||
-            (response && response.errors)
-          "
-        >
-          <div v-if="wereCorrections() && showCorrections">
-            <div class="overline">Input Description</div>
-            <div :class="getInputDescriptionClass()">
-              {{ inputDescription }}
-            </div>
-            <div class="overline">Corrections</div>
-            <div class="'info-message'">
-              <div
-                v-for="(info, index) in response.infos"
-                :key="index"
-                :class="'info-message'"
-              >
-                {{ getMessage(info) }}
+        <v-expand-transition>
+          <v-sheet
+            elevation="2"
+            class="pa-10 mt-0"
+            v-if="
+              ((wereCorrections() && showCorrections) ||
+                (response && response.errors)) &&
+              !isSyntaxError()
+            "
+          >
+            <v-expand-transition>
+              <div v-if="wereCorrections() && showCorrections">
+                <div class="overline">Input Description</div>
+                <div :class="getInputDescriptionClass()">
+                  {{ inputDescription }}
+                </div>
+                <div class="overline">Corrections</div>
+                <div class="'info-message'">
+                  <div
+                    v-for="(info, index) in response.infos"
+                    :key="index"
+                    :class="'info-message'"
+                  >
+                    {{ getMessage(info) }}
+                  </div>
+                </div>
+                <div
+                  v-if="
+                    response &&
+                    response.corrected_description &&
+                    response.corrected_description != inputDescription &&
+                    showCorrections
+                  "
+                >
+                  <div class="overline">Corrected Description</div>
+                  <div :class="getCorrectedDescriptionClass()">
+                    {{ response.corrected_description }}
+                  </div>
+                </div>
               </div>
-            </div>
-            <div
-              v-if="
-                response &&
-                response.corrected_description &&
-                response.corrected_description != inputDescription &&
-                showCorrections
-              "
-            >
-              <div class="overline">Corrected Description</div>
-              <div :class="getCorrectedDescriptionClass()">
-                {{ response.corrected_description }}
-              </div>
-            </div>
-          </div>
-          <div v-if="response && response.errors">
-            <div class="overline">Errors</div>
-            <div class="'error-message'">
+            </v-expand-transition>
+            <div v-if="response && response.errors">
+              <div class="overline">Errors</div>
               <div
                 v-for="(error, index) in response.errors"
                 :key="index"
@@ -161,13 +154,14 @@
                 {{ getMessage(error) }}
               </div>
             </div>
-          </div>
-        </v-sheet>
+          </v-sheet>
+        </v-expand-transition>
 
         <v-expansion-panels
           focusable
           hover
           class="mt-5 mb-5"
+          tile
           v-if="response && response.equivalent_descriptions"
         >
           <v-expansion-panel>
@@ -222,6 +216,7 @@
           focusable
           hover
           class="mt-5 mb-5"
+          tile
           v-if="response && response.selector_short"
         >
           <v-expansion-panel>
@@ -238,6 +233,7 @@
           focusable
           hover
           class="mt-5 mb-5"
+          tile
           v-if="response && response.protein"
         >
           <v-expansion-panel>
@@ -315,11 +311,11 @@ export default {
       this.$refs.refInputDescriptionTextBox.focus();
     },
     nameCheck: function () {
-      this.errorMessages = null;
       if (this.inputDescriptionTextBox !== null) {
         this.loadingOverlay = true;
         this.inputDescription = null;
         this.showCorrections = false;
+        this.response = null;
 
         MutalyzerService.nameCheck(this.inputDescriptionTextBox)
           .then((response) => {
@@ -391,7 +387,6 @@ export default {
       }
     },
     wereCorrections: function () {
-      console.log(this.showCorrections);
       return (
         this.response &&
         this.response.corrected_description &&

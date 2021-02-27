@@ -34,18 +34,18 @@
 export default {
   name: "ModelView",
   props: {
-    errorModel: {}
+    errorModel: {},
   },
   data() {
     return {
-      unpackedModel: {}
+      unpackedModel: {},
     };
   },
-  created: function() {
+  created: function () {
     this.unpackedModel = this.unpackModel(this.errorModel);
   },
   methods: {
-    unpackModel: function(model) {
+    unpackModel: function (model) {
       var values = {};
       var pos_in_stream = model.pos_in_stream;
       if (model.details == "Unexpected end of input.") {
@@ -53,26 +53,26 @@ export default {
       }
       values.correct = {
         view: model.description.slice(0, pos_in_stream),
-        hover: false
+        hover: false,
       };
       values.erroneus = {
         view: model.description.slice(pos_in_stream, pos_in_stream + 1),
-        hover: false
+        hover: false,
       };
       if (model.expecting) {
-        values.erroneus.expecting = model.expecting;
+        values.erroneus.expecting = [...new Set(model.expecting)];
       }
       values.unknown = {
         view: model.description.slice(
           pos_in_stream + 1,
           model.description.length
         ),
-        hover: false
+        hover: false,
       };
 
       return values;
-    }
-  }
+    },
+  },
 };
 </script>
 
