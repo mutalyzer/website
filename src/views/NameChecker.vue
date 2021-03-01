@@ -56,16 +56,36 @@
           </div>
         </v-overlay>
 
-        <v-sheet
+        <v-alert
+          ref="successAlert"
+          class="mt-10 mb-10 pt-12 pb-10"
+          border="top"
           elevation="2"
-          color="green lighten-5"
-          class="pa-10 mt-10 mb-5"
-          v-if="response && response.normalized_description"
+          tile
+          v-if="isNormalized()"
+          type="success"
         >
-          <div class="normalized-description">
-            {{ response.normalized_description }}
-          </div>
-        </v-sheet>
+          <span style="font-family: monospace"
+            >{{ response.normalized_description }}
+          </span>
+        </v-alert>
+
+        <v-alert
+          prominent
+          type="error"
+          tile
+          elevation="2"
+          class="mt-10"
+          icon="mdi-network-off-outline"
+          color="grey darken-4"
+          v-if="connectionErrors"
+        >
+          <v-row align="center">
+            <v-col class="grow">
+              {{ connectionErrors.details }}
+            </v-col>
+          </v-row>
+        </v-alert>
 
         <v-alert
           prominent
@@ -81,7 +101,7 @@
         </v-alert>
 
         <v-expand-transition>
-          <v-sheet elevation="2" class="pa-10" v-if="isSyntaxError()">
+          <v-sheet elevation="2" class="pa-10" v-if="syntaxError()">
             <div class="overline mb-4">Unexpected Character</div>
             <SyntaxError :errorModel="getSyntaxError()" />
           </v-sheet>
@@ -91,7 +111,7 @@
           dense
           type="info"
           class="mt-0 mb-0"
-          v-if="wereCorrections()"
+          v-if="correctionsPerformed()"
           elevation="2"
           tile
         >
@@ -117,13 +137,16 @@
             elevation="2"
             class="pa-10 mt-0"
             v-if="
-              ((wereCorrections() && showCorrections) ||
-                (response && response.errors)) &&
-              !isSyntaxError()
+              ((correctionsPerformed() && showCorrections) ||
+                errorsEncountered()) &&
+              !syntaxError()
             "
           >
             <v-expand-transition>
-              <div v-if="wereCorrections() && showCorrections">
+              <div
+                ref="refCorrections"
+                v-if="correctionsPerformed() && showCorrections"
+              >
                 <div class="overline">Input Description</div>
                 <div :class="getInputDescriptionClass()">
                   {{ inputDescription }}
@@ -138,14 +161,7 @@
                     {{ getMessage(info) }}
                   </div>
                 </div>
-                <div
-                  v-if="
-                    response &&
-                    response.corrected_description &&
-                    response.corrected_description != inputDescription &&
-                    showCorrections
-                  "
-                >
+                <div v-if="correctionsPerformed() && showCorrections">
                   <div class="overline">Corrected Description</div>
                   <div :class="getCorrectedDescriptionClass()">
                     {{ response.corrected_description }}
@@ -153,7 +169,7 @@
                 </div>
               </div>
             </v-expand-transition>
-            <div v-if="response && response.errors">
+            <div v-if="errorsEncountered()">
               <div class="overline">Errors</div>
               <div
                 v-for="(error, index) in response.errors"
@@ -310,7 +326,7 @@ export default {
 
     response: null,
 
-    errors: null,
+    connectionErrors: null,
 
     showCorrections: false,
   }),
@@ -325,6 +341,7 @@ export default {
         this.inputDescription = null;
         this.showCorrections = false;
         this.response = null;
+        this.connectionErrors = null;
 
         MutalyzerService.nameCheck(this.inputDescriptionTextBox)
           .then((response) => {
@@ -332,21 +349,73 @@ export default {
               this.loadingOverlay = false;
               this.response = response.data;
               this.inputDescription = this.inputDescriptionTextBox;
+              if (this.isNormalized()) {
+                this.$nextTick(() => {
+                  this.$vuetify.goTo(this.$refs.successAlert, this.options);
+                });
+              }
             }
           })
           .catch((error) => {
             this.loadingOverlay = false;
             if (error.response) {
-              this.errors = [{ details: "Some response error occured." }];
+              this.connectionErrors = {
+                details: "Some response error occured.",
+              };
             } else if (error.request) {
-              this.errors = [
-                { details: "Some error occured on the server side." },
-              ];
+              this.connectionErrors = {
+                details: "Some connection or server error occured.",
+              };
             } else {
-              this.errors = [{ details: "Some error occured." }];
+              this.connectionErrors = { details: "Some error occured." };
             }
           });
       }
+    },
+    isNormalized: function () {
+      if (this.response && this.response.normalized_description) {
+        return true;
+      } else {
+        return false;
+      }
+    },
+    correctionsPerformed: function () {
+      return (
+        this.response &&
+        this.response.corrected_description &&
+        this.response.corrected_description != this.inputDescription
+      );
+    },
+    syntaxError: function () {
+      if (this.getSyntaxError()) {
+        return true;
+      } else {
+        return false;
+      }
+    },
+    getSyntaxError: function () {
+      if (this.response && this.response.errors) {
+        let errors = this.response.errors;
+        if (
+          (errors.length === 1 && errors[0].code === "ESYNTAXUEOF") ||
+          errors[0].code === "ESYNTAXUC"
+        ) {
+          return errors[0];
+        }
+      }
+    },
+    errorsEncountered: function () {
+      if (this.response && this.response.errors) {
+        return true;
+      } else {
+        return false;
+      }
+    },
+    getMessage: function (message) {
+      if (message.details) {
+        return message.details + " (" + message.code + ")";
+      }
+      return message;
     },
     getInputDescriptionClass: function () {
       if (this.response) {
@@ -393,37 +462,6 @@ export default {
         } else {
           return "description";
         }
-      }
-    },
-    wereCorrections: function () {
-      return (
-        this.response &&
-        this.response.corrected_description &&
-        this.response.corrected_description != this.inputDescription
-      );
-    },
-    getMessage: function (message) {
-      if (message.details) {
-        return message.details + " (" + message.code + ")";
-      }
-      return message;
-    },
-    getSyntaxError: function () {
-      if (this.response && this.response.errors) {
-        let errors = this.response.errors;
-        if (
-          (errors.length === 1 && errors[0].code === "ESYNTAXUEOF") ||
-          errors[0].code === "ESYNTAXUC"
-        ) {
-          return errors[0];
-        }
-      }
-    },
-    isSyntaxError: function () {
-      if (this.getSyntaxError()) {
-        return true;
-      } else {
-        return false;
       }
     },
   },
