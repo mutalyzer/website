@@ -4,8 +4,9 @@
       <v-app-bar color="primary" dark>
         <v-app-bar-nav-icon @click="drawer = true"></v-app-bar-nav-icon>
 
-        <v-toolbar-title
-          >LUMC Mutalyzer 3 <span class="alpha"> Alpha</span></v-toolbar-title
+        <v-toolbar-title>
+          <router-link to="/" class="title-link">LUMC Mutalyzer 3</router-link>
+          <span class="alpha">Alpha</span></v-toolbar-title
         >
       </v-app-bar>
 
@@ -74,6 +75,4 @@ export default {
 };
 </script>
 
-<style>
-@import "assets/main.css";
-</style>
+<style scoped src="./assets/main.css"></style>

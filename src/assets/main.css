@@ -1,6 +1,10 @@
-h3 {
-  margin: 40px 0 0;
+:root {
+  --green: #4CAF50;
+  --light-blue-lighten-5: #E1F5FE;
+  --red-accent-4: #D50000;
+  --red-lighten-5: #FFEBEE;
 }
+
 ul {
   list-style-type: none;
   padding: 0;
@@ -12,9 +16,19 @@ li {
 
 .alpha {
   padding: 5px;
-  margin-left: 5px;
+  margin: 10px;
   color: #FBE9E7;
   background-color: #FF5722;
+}
+
+.title-link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.title-link:hover {
+  text-decoration: none;
+  color: var(--red-lighten-5);
 }
 
 .btn {
@@ -67,7 +81,7 @@ li {
 }
 
 .ok-description {
-  color: #00c853;
+  color: var(--green);
   padding: 5px 10px;
   font-family: monospace;
 }
@@ -78,13 +92,13 @@ li {
   padding: 5px 10px;
   font-family: monospace;
   display: inline-block;
-  color: #00c853;
+  color: var(--green);
   background-color: #ffffff;
 }
 
 .ok-description-link:hover {
-  color: #f2f9f3;
-  background-color: #00c853;
+  color: #ffffff;
+  background-color: var(--green);
   cursor: pointer;
 }
 

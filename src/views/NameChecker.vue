@@ -58,8 +58,7 @@
 
         <v-alert
           ref="successAlert"
-          class="mt-10 mb-0 pt-12 pb-10"
-          border="top"
+          class="mt-10 mb-0"
           elevation="2"
           prominent
           tile
@@ -476,3 +475,5 @@ export default {
   },
 };
 </script>
+
+<style scoped src="../assets/main.css"></style>
