@@ -58,16 +58,29 @@
 
         <v-alert
           ref="successAlert"
-          class="mt-10 mb-10 pt-12 pb-10"
+          class="mt-10 mb-0 pt-12 pb-10"
           border="top"
           elevation="2"
+          prominent
           tile
           v-if="isNormalized()"
           type="success"
         >
-          <span style="font-family: monospace"
-            >{{ response.normalized_description }}
-          </span>
+          <v-row align="center">
+            <v-col class="grow">
+              <span style="font-family: monospace"
+                >{{ response.normalized_description }}
+              </span>
+            </v-col>
+            <v-col class="shrink" v-if="correctionsPerformed()">
+              <v-btn
+                small
+                color="secondary"
+                @click="showCorrections = !showCorrections"
+                >{{ showCorrections ? "Hide" : "See" }} Details</v-btn
+              >
+            </v-col>
+          </v-row>
         </v-alert>
 
         <v-alert
@@ -96,7 +109,15 @@
           v-if="response && response.errors"
         >
           <v-row align="center">
-            <v-col class="grow"> Errors encountered. </v-col>
+            <v-col class="grow"> Errors </v-col>
+            <v-col class="shrink" v-if="correctionsPerformed()">
+              <v-btn
+                small
+                color="secondary"
+                @click="showCorrections = !showCorrections"
+                >{{ showCorrections ? "Hide" : "See" }} Details</v-btn
+              >
+            </v-col>
           </v-row>
         </v-alert>
 
@@ -106,31 +127,6 @@
             <SyntaxError :errorModel="getSyntaxError()" />
           </v-sheet>
         </v-expand-transition>
-
-        <v-alert
-          dense
-          type="info"
-          class="mt-0 mb-0"
-          v-if="correctionsPerformed()"
-          elevation="2"
-          tile
-        >
-          <v-row align="center">
-            <v-col class="grow">
-              Note that the input description was corrected.
-            </v-col>
-            <v-col class="shrink">
-              <v-btn
-                small
-                color="secondary"
-                @click="showCorrections = !showCorrections"
-                >{{
-                  showCorrections ? "Hide Corrections" : "See Corrections"
-                }}</v-btn
-              >
-            </v-col>
-          </v-row>
-        </v-alert>
 
         <v-expand-transition>
           <v-sheet
@@ -166,11 +162,11 @@
                   <div :class="getCorrectedDescriptionClass()">
                     {{ response.corrected_description }}
                   </div>
+                  <div v-if="errorsEncountered()" class="overline">Errors</div>
                 </div>
               </div>
             </v-expand-transition>
             <div v-if="errorsEncountered()">
-              <div class="overline">Errors</div>
               <div
                 v-for="(error, index) in response.errors"
                 :key="index"
@@ -269,6 +265,24 @@
           </v-expansion-panel>
         </v-expansion-panels>
 
+        <!-- <v-sheet
+          elevation="2"
+          class="pa-10 mt-10"
+          v-if="
+            response &&
+            response.corrected_model &&
+            response.corrected_model.reference &&
+            response.corrected_model.reference.id &&
+            response.corrected_model.reference.selector &&
+            response.corrected_model.reference.selector.id
+          "
+        >
+          <RenderSelectorDetails
+            :referenceId="this.response.corrected_model.reference.id"
+            :selectorId="this.response.corrected_model.reference.selector.id"
+          />
+        </v-sheet> -->
+
         <v-expansion-panels focusable hover class="mt-10 mb-10" v-if="response">
           <v-expansion-panel>
             <v-expansion-panel-header>Raw Response</v-expansion-panel-header>
@@ -319,15 +333,10 @@ export default {
       "NG_012337.1(NM_003002.2):c.274G>T",
       "LRG_24:g.5525_5532del",
     ],
-
     loadingOverlay: false,
-
     inputDescription: null, // The description for which the most recent call was sent.
-
     response: null,
-
     connectionErrors: null,
-
     showCorrections: false,
   }),
   methods: {
@@ -339,9 +348,9 @@ export default {
       if (this.inputDescriptionTextBox !== null) {
         this.loadingOverlay = true;
         this.inputDescription = null;
-        this.showCorrections = false;
         this.response = null;
         this.connectionErrors = null;
+        this.showCorrections = false;
 
         MutalyzerService.nameCheck(this.inputDescriptionTextBox)
           .then((response) => {
