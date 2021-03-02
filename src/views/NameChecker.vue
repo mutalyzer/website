@@ -71,13 +71,37 @@
                 >{{ response.normalized_description }}
               </span>
             </v-col>
+            <v-col class="shrink">
+              <v-tooltip bottom>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-btn
+                    v-bind="attrs"
+                    v-on="on"
+                    icon
+                    v-clipboard="response.normalized_description"
+                  >
+                    <v-icon>mdi-content-copy</v-icon>
+                  </v-btn>
+                </template>
+                <span>Copy</span>
+              </v-tooltip>
+            </v-col>
             <v-col class="shrink" v-if="correctionsPerformed()">
-              <v-btn
-                small
-                color="secondary"
-                @click="showCorrections = !showCorrections"
-                >{{ showCorrections ? "Hide" : "See" }} Details</v-btn
-              >
+              <v-tooltip bottom>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-btn
+                    v-bind="attrs"
+                    v-on="on"
+                    icon
+                    @click="showCorrections = !showCorrections"
+                  >
+                    <v-icon>
+                      mdi-details {{ showCorrections ? "mdi-rotate-180" : "" }}
+                    </v-icon>
+                  </v-btn>
+                </template>
+                <span>{{ showCorrections ? "Hide" : "See" }} Details</span>
+              </v-tooltip>
             </v-col>
           </v-row>
         </v-alert>
@@ -110,36 +134,37 @@
           <v-row align="center">
             <v-col class="grow"> Errors </v-col>
             <v-col class="shrink" v-if="correctionsPerformed()">
-              <v-btn
-                small
-                color="secondary"
-                @click="showCorrections = !showCorrections"
-                >{{ showCorrections ? "Hide" : "See" }} Details</v-btn
-              >
+              <v-tooltip bottom>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-btn
+                    v-bind="attrs"
+                    v-on="on"
+                    icon
+                    @click="showCorrections = !showCorrections"
+                  >
+                    <v-icon>
+                      mdi-details {{ showCorrections ? "mdi-rotate-180" : "" }}
+                    </v-icon>
+                  </v-btn>
+                </template>
+                <span>{{ showCorrections ? "Hide" : "See" }} Details</span>
+              </v-tooltip>
             </v-col>
           </v-row>
         </v-alert>
 
         <v-expand-transition>
-          <v-sheet elevation="2" class="pa-10" v-if="syntaxError()">
-            <div class="overline mb-4">Unexpected Character</div>
-            <SyntaxError :errorModel="getSyntaxError()" />
-          </v-sheet>
-        </v-expand-transition>
-
-        <v-expand-transition>
           <v-sheet
             elevation="2"
-            class="pa-10 mt-0"
             v-if="
-              ((correctionsPerformed() && showCorrections) ||
-                errorsEncountered()) &&
-              !syntaxError()
+              (correctionsPerformed() && showCorrections) || errorsEncountered()
             "
           >
             <v-expand-transition>
-              <div
+              <v-sheet
                 ref="refCorrections"
+                class="pt-5 pr-10 pb-5 pl-10"
+                color="grey lighten-5"
                 v-if="correctionsPerformed() && showCorrections"
               >
                 <div class="overline">Input Description</div>
@@ -147,33 +172,46 @@
                   {{ inputDescription }}
                 </div>
                 <div class="overline">Corrections</div>
-                <div class="'info-message'">
-                  <div
-                    v-for="(info, index) in response.infos"
-                    :key="index"
-                    :class="'info-message'"
-                  >
-                    {{ getMessage(info) }}
-                  </div>
-                </div>
+                <v-alert
+                  color="blue lighten-1"
+                  tile
+                  border="left"
+                  class="ml-2"
+                  dark
+                  v-for="(info, index) in response.infos"
+                  :key="index"
+                >
+                  {{ getMessage(info) }}
+                </v-alert>
                 <div v-if="correctionsPerformed() && showCorrections">
                   <div class="overline">Corrected Description</div>
                   <div :class="getCorrectedDescriptionClass()">
                     {{ response.corrected_description }}
                   </div>
-                  <div v-if="errorsEncountered()" class="overline">Errors</div>
                 </div>
-              </div>
+              </v-sheet>
             </v-expand-transition>
-            <div v-if="errorsEncountered()">
-              <div
+            <v-sheet
+              class="pt-5 pr-10 pb-2 pl-10"
+              color="red lighten-5"
+              v-if="errorsEncountered()"
+            >
+              <v-alert
+                color="red lighten-1"
+                tile
+                border="left"
+                dark
                 v-for="(error, index) in response.errors"
                 :key="index"
-                :class="'error-message'"
               >
-                {{ getMessage(error) }}
-              </div>
-            </div>
+                <div v-if="syntaxError()">
+                  <SyntaxError :errorModel="getSyntaxError()" />
+                </div>
+                <div v-else>
+                  {{ getMessage(error) }}
+                </div>
+              </v-alert>
+            </v-sheet>
           </v-sheet>
         </v-expand-transition>
 
@@ -264,7 +302,7 @@
           </v-expansion-panel>
         </v-expansion-panels>
 
-        <!-- <v-sheet
+        <v-sheet
           elevation="2"
           class="pa-10 mt-10"
           v-if="
@@ -280,7 +318,7 @@
             :referenceId="this.response.corrected_model.reference.id"
             :selectorId="this.response.corrected_model.reference.selector.id"
           />
-        </v-sheet> -->
+        </v-sheet>
 
         <v-expansion-panels focusable hover class="mt-10 mb-10" v-if="response">
           <v-expansion-panel>
@@ -299,6 +337,7 @@
 import MutalyzerService from "../services/MutalyzerService.js";
 import JsonPretty from "../components/JsonPretty.vue";
 import SelectorShort from "../components/SelectorShort.vue";
+import RenderSelectorDetails from "../components/RenderSelectorDetails.vue";
 import AffectedProtein from "../components/AffectedProtein.vue";
 import SyntaxError from "../components/SyntaxError.vue";
 
@@ -306,6 +345,7 @@ export default {
   components: {
     JsonPretty,
     SelectorShort,
+    RenderSelectorDetails,
     AffectedProtein,
     SyntaxError,
   },

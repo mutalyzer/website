@@ -1,28 +1,21 @@
 <template>
   <div>
+    <div class="overline">{{ error.details }}</div>
     <div>
-      <span v-if="unpackedModel.correct.view" class="correct">
-        {{ unpackedModel.correct.view }}
+      <span v-if="error.correct.view" class="correct">
+        {{ error.correct.view }}
       </span>
-      <span
-        v-if="unpackedModel.erroneus.view"
-        @mouseover="unpackedModel.erroneus.hover = true"
-        @mouseleave="unpackedModel.erroneus.hover = false"
-        class="erroneus"
-      >
-        {{ unpackedModel.erroneus.view }}
+      <span v-if="error.erroneus.view" class="erroneus">
+        {{ error.erroneus.view }}
       </span>
-      <span v-if="unpackedModel.unknown.view" class="unknown">
-        {{ unpackedModel.unknown.view }}
+      <span v-if="error.unknown.view" class="unknown">
+        {{ error.unknown.view }}
       </span>
     </div>
     <div>
-      <div class="overline mt-2">Expecting</div>
+      <div class="overline mt-2">Expecting:</div>
     </div>
-    <div
-      v-for="(expecting, index) in unpackedModel.erroneus.expecting"
-      :key="index"
-    >
+    <div v-for="(expecting, index) in error.erroneus.expecting" :key="index">
       <div class="error-message">
         {{ expecting }}
       </div>
@@ -38,15 +31,15 @@ export default {
   },
   data() {
     return {
-      unpackedModel: {},
+      error: {},
     };
   },
   created: function () {
-    this.unpackedModel = this.unpackModel(this.errorModel);
+    this.error = this.unpackModel(this.errorModel);
   },
   methods: {
     unpackModel: function (model) {
-      var values = {};
+      var values = { details: "Syntax error:" };
       var pos_in_stream = model.pos_in_stream;
       if (model.details == "Unexpected end of input.") {
         pos_in_stream -= 1;
@@ -79,16 +72,14 @@ export default {
 <style scoped>
 .correct {
   font-family: monospace;
-  display: inline-block;
-  padding-right: 5px;
-  color: #004d40;
+  display: inline;
+  margin-left: 5px;
 }
 
 .unknown {
   font-family: monospace;
-  display: inline-block;
-  color: #bdbdbd;
-  padding-left: 5px;
+  display: inline;
+  color: #eceff1;
 }
 
 .erroneus {
@@ -97,69 +88,13 @@ export default {
   padding-left: 5px;
   padding-right: 5px;
   color: #b71c1c;
-  background-color: #e1f5fe;
+  background-color: #eceff1;
 }
 
 .error-message {
-  margin: 5px 0;
+  margin: 5px 5px 0px;
   padding: 5px;
+  background-color: #e57373;
   font-family: monospace;
-  background-color: #e1f5fe;
-}
-
-.error-message-hover {
-  margin: 10px 0;
-  padding: 5px;
-  font-family: monospace;
-  background-color: #ffcdd2;
-}
-
-.description-info {
-  margin: 0;
-  padding: 0 1px;
-  color: #01579b;
-  font-family: monospace;
-  display: inline-block;
-}
-
-.description-info-hover {
-  margin: 0;
-  padding: 0 1px;
-  color: #01579b;
-  font-family: monospace;
-  background-color: #81d4fa;
-  display: inline-block;
-}
-
-.description-error {
-  margin: 0;
-  padding: 0 1px;
-  color: #b71c1c;
-  font-family: monospace;
-  display: inline-block;
-}
-
-.description-error-hover {
-  margin: 0;
-  padding: 0 1px;
-  color: #b71c1c;
-  font-family: monospace;
-  background-color: #ffcdd2;
-  display: inline-block;
-}
-
-.description {
-  margin: 0;
-  padding: 0 1px;
-  font-family: monospace;
-  display: inline-block;
-}
-
-.description-hover {
-  margin: 0;
-  padding: 0 1px;
-  font-family: monospace;
-  display: inline-block;
-  background-color: #81d4fa;
 }
 </style>

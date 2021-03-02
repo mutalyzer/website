@@ -31,6 +31,7 @@ li {
   color: var(--red-lighten-5);
 }
 
+
 .btn {
   margin-top: 5px;
 }
@@ -83,6 +84,7 @@ li {
 .ok-description {
   color: var(--green);
   padding: 5px 10px;
+  display: inline;
   font-family: monospace;
 }
 
@@ -91,7 +93,7 @@ li {
   margin: 0;
   padding: 5px 10px;
   font-family: monospace;
-  display: inline-block;
+  display: inline;
   color: var(--green);
   background-color: #ffffff;
 }
@@ -149,34 +151,6 @@ li {
   padding-right: 10px;
   padding-top: 5px;
   padding-bottom: 5px;
-}
-
-.info-message {
-  margin: 10px 10px 10px 10px;
-  padding: 5px;
-  font-family: monospace;
-  background-color: #e1f5fe;
-}
-
-.info-message-hover {
-  margin: 10px 0;
-  padding: 5px;
-  font-family: monospace;
-  background-color: #81d4fa;
-}
-
-.error-message {
-  margin: 10px 10px 10px 10px;
-  padding: 5px;
-  font-family: monospace;
-  background-color: #ffebee;
-}
-
-.error-message-hover {
-  margin: 10px 0;
-  padding: 5px;
-  font-family: monospace;
-  background-color: #ffcdd2;
 }
 
 .description-info {
