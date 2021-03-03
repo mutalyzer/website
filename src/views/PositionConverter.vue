@@ -283,7 +283,12 @@
                 v-for="(error, index) in response.errors"
                 :key="index"
               >
-                {{ getMessage(error) }}
+                <div v-if="error.code == 'EPOSITIONSYNTAX'">
+                  <SyntaxError :errorModel="error" />
+                </div>
+                <div v-else>
+                  {{ getMessage(error) }}
+                </div>
               </v-alert>
             </v-sheet>
           </v-sheet>
@@ -306,10 +311,12 @@
 import JsonPretty from "../components/JsonPretty.vue";
 import MutalyzerService from "../services/MutalyzerService.js";
 import DescriptionModel from "../mixins/DescriptionModel.js";
+import SyntaxError from "../components/SyntaxError.vue";
 
 export default {
   components: {
     JsonPretty,
+    SyntaxError,
   },
   mixins: [DescriptionModel],
   data: () => ({
@@ -505,6 +512,7 @@ export default {
         this.response = null;
         this.response = false;
         this.connectionErrors = null;
+        this.showCorrections = false;
 
         const params = {
           reference_id: this.referenceId,
@@ -582,8 +590,9 @@ export default {
         } else if (entry.code === "ENOTOSELECTOR") {
           this.errorToSelectorId = this.toSelectorId;
           this.handleENoToSelector();
-        } else if (entry.code === "ESYNTAX") {
-          this.errorMessages = "Position syntax error.";
+        } else if (entry.code === "EPOSITIONSYNTAX") {
+          this.errorPosition = this.position;
+          this.updatePositionErrorMessage("Syntax error.");
         } else if (entry.code === "ERANGELOCATION") {
           this.errorPosition = this.position;
           this.updatePositionErrorMessage("Range locations not supported.");

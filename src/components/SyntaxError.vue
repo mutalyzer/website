@@ -5,9 +5,9 @@
       <span v-if="error.correct.view" class="correct">{{
         error.correct.view
       }}</span>
-      <span v-if="error.erroneus.view" class="erroneus">
-        {{ error.erroneus.view }}
-      </span>
+      <span v-if="error.erroneus.view" class="erroneus">{{
+        error.erroneus.view
+      }}</span>
       <span v-if="error.unknown.view" class="unknown">{{
         error.unknown.view
       }}</span>
@@ -44,11 +44,9 @@ export default {
       }
       values.correct = {
         view: model.description.slice(0, pos_in_stream),
-        hover: false,
       };
       values.erroneus = {
         view: model.description.slice(pos_in_stream, pos_in_stream + 1),
-        hover: false,
       };
       if (model.expecting) {
         values.erroneus.expecting = [...new Set(model.expecting)];
@@ -58,9 +56,7 @@ export default {
           pos_in_stream + 1,
           model.description.length
         ),
-        hover: false,
       };
-
       return values;
     },
   },
@@ -77,14 +73,15 @@ export default {
 .unknown {
   font-family: monospace;
   display: inline;
-  color: #eceff1;
+  color: #ef9a9a;
 }
 
 .erroneus {
   font-family: monospace;
+  text-align: center;
   display: inline;
   margin: 3px;
-  padding: 4px 0px;
+  padding: 4px 2px;
   color: #b71c1c;
   background-color: #ffebee;
 }
