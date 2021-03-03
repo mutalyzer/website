@@ -33,9 +33,9 @@
                   :label="'Selector ID'"
                   :hint="'E.g. NM_001232.3'"
                   :items="availableSelectors.selectors"
-                  :error-messages="errorSelectorIdMessage"
+                  :click="getAvailableSelectors()"
                   :clearable="true"
-                  v-on:click="getAvailableSelectors()"
+                  :error-messages="errorFromSelectorIdMessage"
                 ></v-combobox>
               </v-col>
 
@@ -71,8 +71,8 @@
                   :label="'Selector ID'"
                   :hint="'E.g. NM_001232.3'"
                   :items="availableSelectors.selectors"
+                  :click="getAvailableSelectors()"
                   :clearable="true"
-                  v-on:click="getAvailableSelectors()"
                   :error-messages="errorToSelectorIdMessage"
                 ></v-combobox>
               </v-col>
@@ -111,8 +111,8 @@
                   position: position,
                   toSelectorId: toSelectorId,
                   toCoordinateSystem: toCoordinateSystem,
-                  includeOverlapping: includeOverlapping
-                }
+                  includeOverlapping: includeOverlapping,
+                },
               }"
             >
               Convert
@@ -142,133 +142,158 @@
             <v-progress-circular :size="50" indeterminate></v-progress-circular>
           </div>
           <div class="text-center">
-            <v-btn @click="loadingOverlay = false" class="mt-5">
-              Cancel
-            </v-btn>
+            <v-btn @click="loadingOverlay = false" class="mt-5"> Cancel </v-btn>
           </div>
         </v-overlay>
 
-        <div v-if="errorMessages">
-          <v-alert
-            border="right"
-            dark
-            colored-border
-            type="error"
-            elevation="2"
-            tile
-            class="mt-5"
-            v-for="(error, i) in errorMessages"
-            :key="i"
-          >
-            {{ getError(error) }}
-          </v-alert>
-        </div>
-
-        <v-sheet elevation="2" class="pa-10 mt-10" v-if="conversion">
-          <v-row>
-            <v-col>
-              <div class="overline mb-4">Input Position</div>
-              <div class="">
-                <span class="description">
-                  {{
-                    getDescription(
-                      conversion.reference_id,
-                      conversion.input_position
-                    )
-                  }}
-                </span>
-              </div>
-            </v-col>
-          </v-row>
-          <v-row>
-            <v-col>
-              <div class="overline mb-4">Converted Position</div>
-              <div>
-                <span class="description">
-                  {{
-                    getDescription(
-                      conversion.reference_id,
-                      conversion.converted_position
-                    )
-                  }}
-                </span>
-              </div>
-            </v-col>
-          </v-row>
-          <v-row v-if="otherSelectors">
-            <v-col>
-              <div class="overline mb-4">Other Selectors</div>
-              <div v-if="!otherSelectors || !otherSelectors.length">
-                No other selectors overlap with the provided position.
-              </div>
-              <div v-for="(selector, i) in otherSelectors" :key="i">
-                <span class="description">
-                  {{ getDescription(conversion.reference_id, selector) }}
-                </span>
-              </div>
-            </v-col>
-          </v-row>
-        </v-sheet>
-
-        <div v-if="infos">
-          <v-alert
-            border="right"
-            colored-border
-            type="info"
-            elevation="2"
-            tile
-            class="mt-5"
-            v-for="(info, i) in infos"
-            :key="i"
-          >
-            {{ getInfo(info) }}
-          </v-alert>
-        </div>
-
-        <v-alert
-          ref="errorAlert"
-          class="mt-10  pt-6"
-          border="top"
-          color="red lighten-2"
-          elevation="2"
-          tile
-          dark
-          v-if="summary && !convertedModel"
-          type="error"
-        >
-          Conversion not performed. Please check the errors below.
-        </v-alert>
-
         <v-alert
           ref="successAlert"
-          class="mt-10 pt-6"
-          border="top"
-          color="green lighten-2"
+          class="mt-10 mb-0"
           elevation="2"
+          prominent
           tile
-          dark
-          v-if="summary && convertedModel"
+          v-if="isConverted()"
           type="success"
         >
-          Conversion performed.
+          <v-row align="center">
+            <v-col class="grow">
+              <span style="font-family: monospace">{{
+                modelToDescription(response.converted_model)
+              }}</span>
+            </v-col>
+            <v-col class="shrink">
+              <v-tooltip bottom>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-btn
+                    v-bind="attrs"
+                    v-on="on"
+                    icon
+                    v-clipboard="response.normalized_description"
+                  >
+                    <v-icon>mdi-content-copy</v-icon>
+                  </v-btn>
+                </template>
+                <span>Copy</span>
+              </v-tooltip>
+            </v-col>
+            <v-col class="shrink" v-if="correctionsPerformed()">
+              <v-tooltip bottom>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-btn
+                    v-bind="attrs"
+                    v-on="on"
+                    icon
+                    @click="showCorrections = !showCorrections"
+                  >
+                    <v-icon>
+                      mdi-details {{ showCorrections ? "mdi-rotate-180" : "" }}
+                    </v-icon>
+                  </v-btn>
+                </template>
+                <span>{{ showCorrections ? "Hide" : "See" }} Details</span>
+              </v-tooltip>
+            </v-col>
+          </v-row>
         </v-alert>
 
-        <v-sheet
+        <v-alert
+          prominent
+          type="error"
+          tile
           elevation="2"
-          class="pa-10 mt-10"
-          v-if="summary && convertedModel"
+          class="mt-10"
+          icon="mdi-network-off-outline"
+          color="grey darken-4"
+          v-if="connectionErrors"
         >
-          <div class="overline">Input</div>
-          <NewModelView :model="inputModel" />
-          <div class="overline mt-5">Converted To</div>
-          <NewModelView :model="convertedModel" />
-        </v-sheet>
+          <v-row align="center">
+            <v-col class="grow">
+              {{ connectionErrors.details }}
+            </v-col>
+          </v-row>
+        </v-alert>
 
-        <v-expansion-panels focusable hover class="mt-10 mb-10" v-if="summary">
+        <v-alert
+          prominent
+          type="error"
+          tile
+          elevation="2"
+          class="mt-10 mb-0"
+          v-if="response && response.errors"
+        >
+          <v-row align="center">
+            <v-col class="grow overline">Error</v-col>
+            <v-col class="shrink" v-if="correctionsPerformed()">
+              <v-tooltip bottom>
+                <template v-slot:activator="{ on, attrs }">
+                  <v-btn
+                    v-bind="attrs"
+                    v-on="on"
+                    icon
+                    @click="showCorrections = !showCorrections"
+                  >
+                    <v-icon>
+                      mdi-details {{ showCorrections ? "mdi-rotate-180" : "" }}
+                    </v-icon>
+                  </v-btn>
+                </template>
+                <span>{{ showCorrections ? "Hide" : "See" }} Details</span>
+              </v-tooltip>
+            </v-col>
+          </v-row>
+        </v-alert>
+
+        <v-expand-transition>
+          <v-sheet
+            elevation="2"
+            v-if="
+              (correctionsPerformed() && showCorrections) || errorsEncountered()
+            "
+          >
+            <v-expand-transition>
+              <v-sheet
+                ref="refCorrections"
+                class="pt-5 pr-10 pb-5 pl-10"
+                color="grey lighten-5"
+                v-if="correctionsPerformed() && showCorrections"
+              >
+                <div class="overline">Corrections</div>
+                <v-alert
+                  color="light-blue lighten-5"
+                  tile
+                  border="left"
+                  class="ml-2"
+                  v-for="(info, index) in response.infos"
+                  :key="index"
+                >
+                  {{ getMessage(info) }}
+                </v-alert>
+              </v-sheet>
+            </v-expand-transition>
+            <v-sheet
+              class="pt-10 pr-10 pb-8 pl-10"
+              color="red lighten-5"
+              v-if="errorsEncountered()"
+            >
+              <v-alert
+                color="red lighten-1"
+                tile
+                border="left"
+                dark
+                v-for="(error, index) in response.errors"
+                :key="index"
+              >
+                {{ getMessage(error) }}
+              </v-alert>
+            </v-sheet>
+          </v-sheet>
+        </v-expand-transition>
+
+        <v-expansion-panels focusable hover class="mt-10 mb-10" v-if="response">
           <v-expansion-panel>
             <v-expansion-panel-header>Raw Response</v-expansion-panel-header>
             <v-expansion-panel-content>
-              <JsonPretty :summary="summary" />
+              <JsonPretty :summary="response" />
             </v-expansion-panel-content>
           </v-expansion-panel>
         </v-expansion-panels>
@@ -280,13 +305,13 @@
 <script>
 import JsonPretty from "../components/JsonPretty.vue";
 import MutalyzerService from "../services/MutalyzerService.js";
-import NewModelView from "../components/NewModelView.vue";
+import DescriptionModel from "../mixins/DescriptionModel.js";
 
 export default {
   components: {
     JsonPretty,
-    NewModelView
   },
+  mixins: [DescriptionModel],
   data: () => ({
     valid: true,
     lazy: false,
@@ -299,44 +324,42 @@ export default {
     toCoordinateSystem: "",
     includeOverlapping: false,
 
-    rules: [value => !!value || "Required."],
+    rules: [(value) => !!value || "Required."],
     loadingOverlay: false,
 
-    summary: null,
-    showSummary: false,
-    inputModel: null,
-    convertedModel: null,
-    conversion: null,
-    infos: null,
-    responseApi: null,
+    response: null,
     errorMessages: [],
     errorReferenceId: null,
     errorReferenceIdMessage: null,
+    errorFromSelectorId: null,
+    errorFromSelectorIdMessage: null,
     errorToSelectorId: null,
     errorToSelectorIdMessage: null,
-    errorSelectorId: null,
-    errorSelectorIdMessage: null,
     errorPosition: null,
     errorPositionMessage: null,
     referenceErrors: null,
     otherSelectors: null,
     availableSelectors: {},
+
+    showCorrections: false,
+    connectionErrors: null,
+
     examples: [
       {
         item: "LRG_24:g.100 -> t1",
         fields: {
           referenceId: "LRG_24",
           position: "100",
-          toSelectorId: "t1"
-        }
+          toSelectorId: "t1",
+        },
       },
       {
         item: "NG_007485.1(NR_047542.1):n.274 -> g.",
         fields: {
           referenceId: "NG_007485.1",
           fromSelectorId: "NR_047542.1",
-          position: "274"
-        }
+          position: "274",
+        },
       },
       {
         item: "NG_017013.2(NM_000546.5):c.274 -> NM_000546.5",
@@ -344,16 +367,16 @@ export default {
           referenceId: "NG_017013.2",
           fromSelectorId: "NM_000546.5",
           fromCoordinateSystem: "Selector",
-          position: "274"
-        }
+          position: "274",
+        },
       },
       {
         item: "NG_012337.1:g.274 -> NG_012337.1(NM_003002.2)",
         fields: {
           referenceId: "NG_012337.1",
           position: "274",
-          toSelectorId: "NM_003002.2"
-        }
+          toSelectorId: "NM_003002.2",
+        },
       },
       {
         item: "NC_000001.11(NM_001232.4):c.274 -> NC_000001.11",
@@ -361,12 +384,12 @@ export default {
           referenceId: "NC_000001.11",
           fromSelectorId: "NM_001232.4",
           fromCoordinateSystem: "Selector",
-          position: "274"
-        }
-      }
-    ]
+          position: "274",
+        },
+      },
+    ],
   }),
-  created: function() {
+  created: function () {
     this.run();
   },
   watch: {
@@ -378,20 +401,19 @@ export default {
         this.availableSelectors = {};
       }
       this.handleEretr();
-      this.handleEnoselector();
     },
-    selectorId() {
-      this.handleEnoselector();
+    fromSelectorId() {
+      this.handleENoFromSelector();
     },
     toSelectorId() {
       this.handleENoToSelector();
     },
     position() {
       this.updatePositionErrorMessage();
-    }
+    },
   },
   methods: {
-    run: function() {
+    run: function () {
       if (
         this.$route.query.referenceId &&
         0 !== this.$route.query.referenceId.length
@@ -444,7 +466,7 @@ export default {
         this.positionConvert();
       }
     },
-    setExample: function(fields) {
+    setExample: function (fields) {
       if (fields.referenceId) {
         this.referenceId = fields.referenceId;
       } else {
@@ -476,17 +498,14 @@ export default {
         this.toCoordinateSystem = "";
       }
     },
-    positionConvert: function() {
+    positionConvert: function () {
       this.errorMessages = [];
       if (this.referenceId !== null && this.position !== null) {
         this.loadingOverlay = true;
-        this.summary = null;
-        this.inputModel = null;
-        this.convertedModel = null;
-        this.conversion = null;
-        this.infos = null;
-        this.otherSelectors = null;
-        this.responseApi = null;
+        this.response = null;
+        this.response = false;
+        this.connectionErrors = null;
+
         const params = {
           reference_id: this.referenceId,
           from_selector_id: this.fromSelectorId,
@@ -494,80 +513,72 @@ export default {
           position: this.position,
           to_selector_id: this.toSelectorId,
           to_coordinate_system: this.toCoordinateSystem,
-          include_overlapping: this.includeOverlapping
+          include_overlapping: this.includeOverlapping,
         };
         MutalyzerService.positionConvert(params)
-          .then(response => {
+          .then((response) => {
             if (response.data) {
               this.loadingOverlay = false;
-              this.responseApi = response.data;
-              this.responseHandler(response.data);
-              this.loadingOverlay = false;
+              this.response = response.data;
+              if (response.data.errors) {
+                this.errorsHandler(response.data.errors);
+              }
+              this.inputDescription = this.inputDescriptionTextBox;
+              if (this.isConverted()) {
+                this.$nextTick(() => {
+                  this.$vuetify.goTo(this.$refs.successAlert, this.options);
+                });
+              }
             }
           })
-          .catch(error => {
+          .catch((error) => {
             this.loadingOverlay = false;
             if (error.response) {
-              // The request was made and the server responded with a status code
-              // that falls out of the range of 2xx
-              this.errorMessages = [
-                { details: "Some response error occured." }
-              ];
-              // console.log(error.response.data);
-              // console.log(error.response.status);
-              // console.log(error.response.headers);
+              this.connectionErrors = {
+                details: "Some response error occured.",
+              };
             } else if (error.request) {
-              this.errorMessages = [
-                { details: "Some error occured on the server side." }
-              ];
-              // The request was made but no response was received
-              // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-              // http.ClientRequest in node.js
-              // console.log(error.request);
+              this.connectionErrors = {
+                details: "Some connection or server error occured.",
+              };
             } else {
-              this.errorMessages = [{ details: "Some error occured." }];
-              // console.log(error);
-              // Something happened in setting up the request that triggered an Error
-              // console.log("Error", error.message);
+              this.connectionErrors = { details: "Some error occured." };
             }
-            // console.log(error.config);
           });
       }
     },
-    responseHandler: function(response) {
-      this.summary = response;
-      if ("errors" in response) {
-        this.errorsHandler(response.errors);
-      }
-      if (this.summary.conversion) {
-        this.conversion = this.summary.conversion;
-        if (this.conversion.overlapping) {
-          this.otherSelectors = this.conversion.overlapping;
-        }
-      }
-      if (this.summary.infos) {
-        this.infos = this.summary.infos;
-      }
-      if (this.summary.input_model) {
-        this.inputModel = this.summary.input_model;
-      }
-      if (this.summary.converted_model) {
-        this.convertedModel = this.summary.converted_model;
-        this.$nextTick(() => {
-          console.log(this.$refs.successAlert);
-          this.$vuetify.goTo(this.$refs.successAlert, this.options);
-        });
+    isConverted: function () {
+      if (this.response && this.response.converted_model) {
+        return true;
+      } else {
+        return false;
       }
     },
-    errorsHandler: function(errors) {
+    correctionsPerformed: function () {
+      return this.response && this.response.infos;
+    },
+    errorsEncountered: function () {
+      if (this.response && this.response.errors) {
+        return true;
+      } else {
+        return false;
+      }
+    },
+    getMessage: function (message) {
+      if (message.details) {
+        return message.details + " (" + message.code + ")";
+      }
+      return message;
+    },
+    errorsHandler: function (errors) {
       for (const entry of errors) {
         this.errorMessages.push(entry);
         if (entry.code === "ERETR") {
           this.errorReferenceId = this.referenceId;
           this.handleEretr();
         } else if (entry.code === "ENOSELECTORFOUND") {
-          this.errorSelectorId = this.selectorId;
-          this.handleEnoselector();
+          this.errorFromSelectorId = this.fromSelectorId;
+          this.handleENoFromSelector();
         } else if (entry.code === "ENOTOSELECTOR") {
           this.errorToSelectorId = this.toSelectorId;
           this.handleENoToSelector();
@@ -582,11 +593,6 @@ export default {
             "Position out of sequence boundaries."
           );
         }
-        // else {
-        //   if (entry.code) {
-        //     this.errorMessages = entry.code + " occurred.";
-        //   }
-        // }
       }
     },
     handleEretr() {
@@ -596,28 +602,18 @@ export default {
         this.errorReferenceIdMessage = null;
       }
     },
-    handleEnoselector() {
-      if (this.errorReferenceId && this.errorReferenceId === this.referenceId) {
-        this.errorReferenceIdMessage =
-          this.referenceId + " does not contain " + this.selectorId;
+    handleENoFromSelector() {
+      if (
+        this.errorFromSelectorId &&
+        this.errorFromSelectorId === this.fromSelectorId
+      ) {
+        this.errorFromSelectorIdMessage =
+          this.fromSelectorId + " not found in " + this.referenceId;
       } else {
-        this.errorSelectorIdMessage = null;
-        this.errorReferenceIdMessage = null;
-        return;
-      }
-      if (this.errorSelectorId && this.errorSelectorId === this.selectorId) {
-        this.errorSelectorIdMessage =
-          this.selectorId + " not found in " + this.referenceId;
-      } else {
-        this.errorReferenceIdMessage = null;
-        this.errorSelectorIdMessage = null;
+        this.errorFromSelectorIdMessage = null;
       }
     },
     handleENoToSelector() {
-      console.log("this.toSelectorId");
-      console.log(this.toSelectorId);
-      console.log("this.errorToSelectorIdMessage");
-      console.log(this.errorToSelectorIdMessage);
       if (
         this.errorToSelectorId &&
         this.errorToSelectorId === this.toSelectorId
@@ -635,13 +631,13 @@ export default {
         this.errorPositionMessage = null;
       }
     },
-    getAvailableSelectors: function() {
+    getAvailableSelectors: function () {
       if (this.referenceId !== null && 0 !== this.referenceId.length) {
         if (
           this.availableSelectors &&
           this.availableSelectors.reference !== this.referenceId
         ) {
-          MutalyzerService.getSelectors(this.referenceId).then(response => {
+          MutalyzerService.getSelectors(this.referenceId).then((response) => {
             if (response.data) {
               this.availableSelectors = response.data;
             }
@@ -649,7 +645,7 @@ export default {
         }
       }
     },
-    getDescription: function(reference_id, position) {
+    getDescription: function (reference_id, position) {
       let output = reference_id;
       if (position.selector_id) {
         output += "(" + position.selector_id + ")";
@@ -658,52 +654,8 @@ export default {
       output += position.position;
       return output;
     },
-    getInfo: function(info) {
-      let output = "";
-      if (info.details) {
-        output += info.details;
-      }
-      if (info.code) {
-        output += "(" + info.code + ")";
-      }
-
-      return output;
-    },
-    getInfos: function() {
-      console.log("to be implemented");
-    },
-    getError: function(error) {
-      let output = "";
-      if (error.code) {
-        output += error.code;
-        if (error.details) {
-          output += ": " + error.details;
-        }
-      } else {
-        if (error.details) {
-          output += error.details;
-        }
-      }
-
-      return output;
-    }
-  }
+  },
 };
 </script>
 
-<style scoped>
-.description {
-  display: inline-block;
-  /* white-space: nowrap; */
-  color: #1565c0;
-  font-family: monospace;
-}
-
-.description:hover {
-  color: #0d47a1;
-}
-
-.v-text-field {
-  font-family: monospace;
-}
-</style>
+<style scoped src="../assets/main.css"></style>
