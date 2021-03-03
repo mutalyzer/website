@@ -1,7 +1,7 @@
 import axios from "axios";
 
-//const apiBaseUrl = `http://127.0.0.1:5000/api/`;
-const apiBaseUrl = `http://v3.mutalyzer.nl/api/`;
+const apiBaseUrl = `http://127.0.0.1:5000/api/`;
+//const apiBaseUrl = `http://v3.mutalyzer.nl/api/`;
 
 const apiClient = axios.create({
   baseURL: apiBaseUrl,

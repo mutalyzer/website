@@ -1,6 +1,5 @@
 <template>
   <div>
-    <div class="overline">Selector Positions Details</div>
     <v-data-table
       dense
       :items-per-page="5"

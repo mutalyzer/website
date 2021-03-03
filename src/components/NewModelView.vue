@@ -113,33 +113,33 @@ export default {
     model: null,
     description: null,
     errors: null,
-    infos: null
+    infos: null,
   },
   data() {
     return {
       hovers: {},
-      descriptionClasses: {}
+      descriptionClasses: {},
     };
   },
-  created: function() {
+  created: function () {
     this.descriptionClasses["reference.id"] = this.getDescriptionClass(
       "reference.id"
     );
   },
   methods: {
-    getMessage: function(message) {
+    getMessage: function (message) {
       if (message.details) {
         return message.details + " (" + message.code + ")";
       }
       return message;
     },
-    getMessagePath: function(message) {
+    getMessagePath: function (message) {
       if (message.paths) {
         return message.paths;
       }
       return "";
     },
-    getVariantOperation: function(variant) {
+    getVariantOperation: function (variant) {
       if (variant.type == "deletion") {
         return "del";
       }
@@ -147,14 +147,14 @@ export default {
         return "dup";
       }
     },
-    isPoint: function(location) {
+    isPoint: function (location) {
       if (location.type === "point") {
         return true;
       } else {
         return false;
       }
     },
-    getDescriptionClass: function(path) {
+    getDescriptionClass: function (path) {
       if (this.errors) {
         for (var error of this.errors) {
           if (error.paths) {
@@ -187,7 +187,7 @@ export default {
       }
       return "description";
     },
-    setHovers: function(path) {
+    setHovers: function (path) {
       console.log("setHovers");
       // this.hovers[path] = true;
       Vue.set(this.hovers, path, true);
@@ -199,7 +199,7 @@ export default {
       console.log("class:", this.descriptionClasses[path]);
       console.log("descriptionClasses:", this.descriptionClasses);
     },
-    resetHovers: function(path) {
+    resetHovers: function (path) {
       console.log("resetHovers", path);
       Vue.set(this.hovers, path, false);
       // this.hovers[path] = false;
@@ -210,8 +210,8 @@ export default {
       console.log("hovers[path]:", this.hovers[path]);
       console.log("class:", this.descriptionClasses[path]);
       console.log("descriptionClasses:", this.descriptionClasses);
-    }
-  }
+    },
+  },
 };
 </script>
 

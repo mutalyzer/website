@@ -2,23 +2,21 @@
   <div>
     <div class="overline">{{ error.details }}</div>
     <div>
-      <span v-if="error.correct.view" class="correct">
-        {{ error.correct.view }}
-      </span>
+      <span v-if="error.correct.view" class="correct">{{
+        error.correct.view
+      }}</span>
       <span v-if="error.erroneus.view" class="erroneus">
         {{ error.erroneus.view }}
       </span>
-      <span v-if="error.unknown.view" class="unknown">
-        {{ error.unknown.view }}
-      </span>
+      <span v-if="error.unknown.view" class="unknown">{{
+        error.unknown.view
+      }}</span>
     </div>
     <div>
       <div class="overline mt-2">Expecting:</div>
     </div>
     <div v-for="(expecting, index) in error.erroneus.expecting" :key="index">
-      <div class="error-message">
-        {{ expecting }}
-      </div>
+      <div class="expecting">{{ expecting }}</div>
     </div>
   </div>
 </template>
@@ -39,7 +37,7 @@ export default {
   },
   methods: {
     unpackModel: function (model) {
-      var values = { details: "Syntax error:" };
+      var values = { details: "Unexpected character:" };
       var pos_in_stream = model.pos_in_stream;
       if (model.details == "Unexpected end of input.") {
         pos_in_stream -= 1;
@@ -84,17 +82,18 @@ export default {
 
 .erroneus {
   font-family: monospace;
-  display: inline-block;
-  padding-left: 5px;
-  padding-right: 5px;
+  display: inline;
+  margin: 3px;
+  padding: 4px 0px;
   color: #b71c1c;
-  background-color: #eceff1;
+  background-color: #ffebee;
 }
 
-.error-message {
+.expecting {
   margin: 5px 5px 0px;
   padding: 5px;
-  background-color: #e57373;
+  color: #b71c1c;
+  background-color: #ffebee;
   font-family: monospace;
 }
 </style>

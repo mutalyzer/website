@@ -2,7 +2,7 @@
   <v-container>
     <v-layout>
       <v-flex xs12>
-        <h1 class="display-1  mt-10">Description Extractor</h1>
+        <h1 class="display-1 mt-10">Description Extractor</h1>
         <p>
           Generates the HGVS variant description from a reference sequence and
           an observed sequence.
@@ -69,32 +69,32 @@ export default {
     reference: "",
     observed: "",
     position: "",
-    rules: [value => !!value || "Required."],
+    rules: [(value) => !!value || "Required."],
     summary: null,
     responseApi: null,
-    example: { reference: "AAA", observed: "ATA" }
+    example: { reference: "AAA", observed: "ATA" },
   }),
   methods: {
-    setExample: function() {
+    setExample: function () {
       this.reference = this.example.reference;
       this.observed = this.example.observed;
     },
-    descriptionExtract: function() {
+    descriptionExtract: function () {
       if (this.reference !== null && this.observed !== null) {
         this.summary = null;
         this.responseApi = null;
         const params = {
           reference: this.reference,
-          observed: this.observed
+          observed: this.observed,
         };
         MutalyzerService.descriptionExtract(params)
-          .then(response => {
+          .then((response) => {
             if (response.data) {
               this.responseHandler(response.data);
               this.loadingOverlay = false;
             }
           })
-          .catch(error => {
+          .catch((error) => {
             if (error.response) {
               // The request was made and the server responded with a status code
               // that falls out of the range of 2xx
@@ -118,7 +118,7 @@ export default {
           });
       }
     },
-    responseHandler: function(response) {
+    responseHandler: function (response) {
       this.summary = response;
       if ("errors" in response) {
         console.log("some error");
@@ -128,10 +128,10 @@ export default {
         this.summary = response;
       }
     },
-    errorsHandler: function(errors) {
+    errorsHandler: function (errors) {
       console.log("Some Error", errors);
-    }
-  }
+    },
+  },
 };
 </script>
 

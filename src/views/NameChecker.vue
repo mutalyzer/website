@@ -132,7 +132,7 @@
           v-if="response && response.errors"
         >
           <v-row align="center">
-            <v-col class="grow"> Errors </v-col>
+            <v-col class="grow overline">Error</v-col>
             <v-col class="shrink" v-if="correctionsPerformed()">
               <v-tooltip bottom>
                 <template v-slot:activator="{ on, attrs }">
@@ -173,11 +173,10 @@
                 </div>
                 <div class="overline">Corrections</div>
                 <v-alert
-                  color="blue lighten-1"
+                  color="light-blue lighten-5"
                   tile
                   border="left"
                   class="ml-2"
-                  dark
                   v-for="(info, index) in response.infos"
                   :key="index"
                 >
@@ -192,7 +191,7 @@
               </v-sheet>
             </v-expand-transition>
             <v-sheet
-              class="pt-5 pr-10 pb-2 pl-10"
+              class="pt-10 pr-10 pb-8 pl-10"
               color="red lighten-5"
               v-if="errorsEncountered()"
             >
@@ -223,7 +222,7 @@
           v-if="response && response.equivalent_descriptions"
         >
           <v-expansion-panel>
-            <v-expansion-panel-header
+            <v-expansion-panel-header class="overline"
               >Equivalent Descriptions</v-expansion-panel-header
             >
             <v-expansion-panel-content class="pt-5">
@@ -275,14 +274,14 @@
           hover
           class="mt-5 mb-5"
           tile
-          v-if="response && response.selector_short"
+          v-if="response && response.protein"
         >
           <v-expansion-panel>
-            <v-expansion-panel-header
-              >Selector Details</v-expansion-panel-header
+            <v-expansion-panel-header class="overline"
+              >Protein Details</v-expansion-panel-header
             >
             <v-expansion-panel-content>
-              <SelectorShort :selector="response.selector_short" />
+              <AffectedProtein :protein="this.response.protein" />
             </v-expansion-panel-content>
           </v-expansion-panel>
         </v-expansion-panels>
@@ -292,33 +291,34 @@
           hover
           class="mt-5 mb-5"
           tile
-          v-if="response && response.protein"
+          v-if="response && response.corrected_model"
         >
           <v-expansion-panel>
-            <v-expansion-panel-header>Protein Details</v-expansion-panel-header>
+            <v-expansion-panel-header class="overline"
+              >Reference Information</v-expansion-panel-header
+            >
             <v-expansion-panel-content>
-              <AffectedProtein :protein="this.response.protein" />
+              <ReferenceInformation :model="this.response.corrected_model" />
             </v-expansion-panel-content>
           </v-expansion-panel>
         </v-expansion-panels>
 
-        <v-sheet
-          elevation="2"
-          class="pa-10 mt-10"
-          v-if="
-            response &&
-            response.corrected_model &&
-            response.corrected_model.reference &&
-            response.corrected_model.reference.id &&
-            response.corrected_model.reference.selector &&
-            response.corrected_model.reference.selector.id
-          "
+        <v-expansion-panels
+          focusable
+          hover
+          class="mt-5 mb-5"
+          tile
+          v-if="response && response.selector_short"
         >
-          <RenderSelectorDetails
-            :referenceId="this.response.corrected_model.reference.id"
-            :selectorId="this.response.corrected_model.reference.selector.id"
-          />
-        </v-sheet>
+          <v-expansion-panel>
+            <v-expansion-panel-header class="overline"
+              >Selector Positions Details</v-expansion-panel-header
+            >
+            <v-expansion-panel-content class="pt-5">
+              <SelectorShort :selector="response.selector_short" />
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+        </v-expansion-panels>
 
         <v-expansion-panels focusable hover class="mt-10 mb-10" v-if="response">
           <v-expansion-panel>
@@ -337,17 +337,17 @@
 import MutalyzerService from "../services/MutalyzerService.js";
 import JsonPretty from "../components/JsonPretty.vue";
 import SelectorShort from "../components/SelectorShort.vue";
-import RenderSelectorDetails from "../components/RenderSelectorDetails.vue";
 import AffectedProtein from "../components/AffectedProtein.vue";
 import SyntaxError from "../components/SyntaxError.vue";
+import ReferenceInformation from "../components/ReferenceInformation.vue";
 
 export default {
   components: {
     JsonPretty,
     SelectorShort,
-    RenderSelectorDetails,
     AffectedProtein,
     SyntaxError,
+    ReferenceInformation,
   },
   props: ["descriptionRouter"],
   created: function () {

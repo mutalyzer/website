@@ -25,7 +25,7 @@
           @mouseover="v.hover = true"
           @mouseleave="v.hover = false"
           :class="[
-            v.hover && v.errors ? 'error-message-hover' : 'error-message'
+            v.hover && v.errors ? 'error-message-hover' : 'error-message',
           ]"
         >
           {{ getMessage(error) }}
@@ -59,18 +59,18 @@
 export default {
   name: "ModelView",
   props: {
-    model: {}
+    model: {},
   },
   data() {
     return {
-      unpackedModel: []
+      unpackedModel: [],
     };
   },
-  created: function() {
+  created: function () {
     this.unpackedModel = this.unpackModel(this.model);
   },
   methods: {
-    unpackModel: function(model) {
+    unpackModel: function (model) {
       var output = [];
       if (model) {
         if (model.reference) {
@@ -95,7 +95,7 @@ export default {
       }
       return output;
     },
-    addMessages: function(output, node) {
+    addMessages: function (output, node) {
       if (node.errors) {
         output.errors = node.errors;
       }
@@ -103,7 +103,7 @@ export default {
         output.info = node.info;
       }
     },
-    getReference: function(reference) {
+    getReference: function (reference) {
       const output = {};
       this.addMessages(output, reference);
       if (reference.id) {
@@ -112,7 +112,7 @@ export default {
       output.hover = false;
       return output;
     },
-    getSelector: function(selector) {
+    getSelector: function (selector) {
       const output = {};
       this.addMessages(output, selector);
       if (selector.id) {
@@ -121,7 +121,7 @@ export default {
       output.hover = false;
       return output;
     },
-    getCoordinateSystem: function(model) {
+    getCoordinateSystem: function (model) {
       const output = {};
       this.addMessages(output, model);
       if (model.coordinate_system) {
@@ -130,14 +130,14 @@ export default {
       output.hover = false;
       return output;
     },
-    getVariants: function(variants) {
+    getVariants: function (variants) {
       const output = [];
       for (var i in variants) {
         output.push(...this.getVariant(variants[i]));
       }
       return output;
     },
-    getVariant: function(variant) {
+    getVariant: function (variant) {
       const output = [];
       if (variant.location) {
         output.push(...this.getLocation(variant.location));
@@ -175,7 +175,7 @@ export default {
       }
       return output;
     },
-    getDeleted: function(deleted) {
+    getDeleted: function (deleted) {
       const output = [];
       if (Array.isArray(deleted)) {
         for (var i in deleted) {
@@ -188,7 +188,7 @@ export default {
       }
       return output;
     },
-    getInserted: function(inserted) {
+    getInserted: function (inserted) {
       const output = [];
       if (Array.isArray(inserted)) {
         for (var i in inserted) {
@@ -228,7 +228,7 @@ export default {
       }
       return output;
     },
-    getLocation: function(location) {
+    getLocation: function (location) {
       const output = [];
       if (location.type === "point") {
         output.push(this.getPoint(location));
@@ -247,7 +247,7 @@ export default {
       }
       return output;
     },
-    getRange: function(location) {
+    getRange: function (location) {
       const output = [];
       if (location.uncertain) {
         output.push({ view: "(" });
@@ -279,20 +279,20 @@ export default {
       return output;
     },
 
-    getView: function(modelNode) {
+    getView: function (modelNode) {
       if (modelNode.view) {
         return modelNode.view;
       } else {
         return "";
       }
     },
-    getMessage: function(message) {
+    getMessage: function (message) {
       if (message.details) {
         return message.details + " (" + message.code + ")";
       }
       return message;
     },
-    getDescriptionClass: function(v) {
+    getDescriptionClass: function (v) {
       if (v.errors) {
         return v.hover && v.errors
           ? "description-error-hover"
@@ -305,8 +305,8 @@ export default {
       } else {
         return "description";
       }
-    }
-  }
+    },
+  },
 };
 </script>
 

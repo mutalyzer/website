@@ -27,7 +27,7 @@
             <div
               v-if="!selected"
               class="title grey--text text--lighten-1 font-weight-light"
-              style="align-self: center;"
+              style="align-self: center"
             >
               Select a User
             </div>
@@ -89,14 +89,14 @@ export default {
   name: "RenderSelectorDetails",
   props: {
     referenceId: null,
-    selectorId: null
+    selectorId: null,
   },
   data() {
     return {
       active: [],
       selectorModel: null,
       items: [],
-      open: [this.selectorId]
+      open: [this.selectorId],
     };
   },
   computed: {
@@ -108,14 +108,14 @@ export default {
 
       // return this.selectorModel.find(user => user.id === id);
       return 0;
-    }
+    },
   },
-  created: function() {
+  created: function () {
     const params = {
       reference_id: this.referenceId,
-      feature_id: this.selectorId
+      feature_id: this.selectorId,
     };
-    MutalyzerService.referenceModel(params).then(response => {
+    MutalyzerService.referenceModel(params).then((response) => {
       if (response.data) {
         this.selectorModel = response.data;
         this.items = [this.getItems(this.selectorModel)];
@@ -132,7 +132,7 @@ export default {
         }
       }
       return items;
-    }
-  }
+    },
+  },
 };
 </script>

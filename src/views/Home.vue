@@ -16,7 +16,7 @@
                 :elevation="hover ? 4 : 2"
                 :to="{ name: 'NameChecker' }"
               >
-                <v-card-text class="pt-6" style="position: relative;">
+                <v-card-text class="pt-6" style="position: relative">
                   <h3 class="display-1 font-weight-light blue--text mb-2">
                     Name Checker
                   </h3>
@@ -36,7 +36,7 @@
                 :elevation="hover ? 4 : 2"
                 :to="{ name: 'PositionConverter' }"
               >
-                <v-card-text class="pt-6" style="position: relative;">
+                <v-card-text class="pt-6" style="position: relative">
                   <h3 class="display-1 font-weight-light blue--text mb-2">
                     Position Converter
                   </h3>
@@ -56,7 +56,7 @@
                 :elevation="hover ? 4 : 2"
                 :to="{ name: 'DescriptionExtractor' }"
               >
-                <v-card-text class="pt-6" style="position: relative;">
+                <v-card-text class="pt-6" style="position: relative">
                   <h3 class="display-1 font-weight-light blue--text mb-2">
                     Description Extractor
                   </h3>
@@ -76,7 +76,7 @@
 
 <script>
 export default {
-  name: "Home"
+  name: "Home",
 };
 </script>
 
