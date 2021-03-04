@@ -346,9 +346,9 @@
 </template>
 
 <script>
-import JsonPretty from "../components/JsonPretty.vue";
-import MutalyzerService from "../services/MutalyzerService.js";
 import DescriptionModel from "../mixins/DescriptionModel.js";
+import MutalyzerService from "../services/MutalyzerService.js";
+import JsonPretty from "../components/JsonPretty.vue";
 import SyntaxError from "../components/SyntaxError.vue";
 
 export default {

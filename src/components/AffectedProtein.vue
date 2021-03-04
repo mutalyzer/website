@@ -23,16 +23,15 @@
 export default {
   name: "AffectedProtein",
   props: {
-    protein: null
+    protein: null,
   },
   data() {
     return {
       reference: [],
-      predicted: []
+      predicted: [],
     };
   },
-  created: function() {
-    console.log(this.protein);
+  created: function () {
     this.getReference();
   },
   methods: {
@@ -67,7 +66,6 @@ export default {
       var r = this.protein.reference;
       var p = this.protein.predicted;
 
-
       if (r == p || p == "?") {
         this.reference.push({ seq: r, type: "equal" });
         this.predicted.push({ seq: p, type: "equal" });
@@ -94,8 +92,8 @@ export default {
       this.predicted.push({ seq: prefix, type: "equal" });
       this.predicted.push({ seq: p_middle, type: "diff" });
       this.predicted.push({ seq: suffix, type: "equal" });
-    }
-  }
+    },
+  },
 };
 </script>
 <style lang="scss" scoped>
