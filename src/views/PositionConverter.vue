@@ -158,7 +158,7 @@
           <v-row align="center">
             <v-col class="grow">
               <span style="font-family: monospace">{{
-                modelToDescription(response.converted_model)
+                converted_description
               }}</span>
             </v-col>
             <v-col class="shrink">
@@ -168,7 +168,7 @@
                     v-bind="attrs"
                     v-on="on"
                     icon
-                    v-clipboard="response.normalized_description"
+                    v-clipboard="converted_description"
                   >
                     <v-icon>mdi-content-copy</v-icon>
                   </v-btn>
@@ -294,6 +294,44 @@
           </v-sheet>
         </v-expand-transition>
 
+        <v-expansion-panels
+          focusable
+          hover
+          class="mt-5 mb-5"
+          tile
+          v-if="response && response.overlap"
+        >
+          <v-expansion-panel>
+            <v-expansion-panel-header class="overline"
+              >Overlapping selectors</v-expansion-panel-header
+            >
+            <v-expansion-panel-content class="pt-5">
+              <div
+                class="ml-4"
+                v-for="(values, c_s) in response.overlap"
+                :key="c_s"
+              >
+                <span v-if="c_s == 'c'">Coding</span>
+                <span v-else-if="c_s == 'n'">Noncoding</span>
+                <span v-else-if="c_s == 'g'">Genomic</span>
+                <span v-else> {{ c_s }} </span>
+                <div v-for="(overlap_model, index) in values" :key="index">
+                  <template v-if="c_s === 'c'">
+                    <span class="ok-description">
+                      {{ modelToDescription(overlap_model) }}
+                    </span>
+                  </template>
+                  <template v-else>
+                    <span class="ok-description">
+                      {{ modelToDescription(overlap_model) }}
+                    </span>
+                  </template>
+                </div>
+              </div>
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+        </v-expansion-panels>
+
         <v-expansion-panels focusable hover class="mt-10 mb-10" v-if="response">
           <v-expansion-panel>
             <v-expansion-panel-header>Raw Response</v-expansion-panel-header>
@@ -335,6 +373,7 @@ export default {
     loadingOverlay: false,
 
     response: null,
+    converted_description: null,
     errorMessages: [],
     errorReferenceId: null,
     errorReferenceIdMessage: null,
@@ -510,9 +549,9 @@ export default {
       if (this.referenceId !== null && this.position !== null) {
         this.loadingOverlay = true;
         this.response = null;
-        this.response = false;
-        this.connectionErrors = null;
+        this.converted_description = null;
         this.showCorrections = false;
+        this.connectionErrors = null;
 
         const params = {
           reference_id: this.referenceId,
@@ -531,8 +570,10 @@ export default {
               if (response.data.errors) {
                 this.errorsHandler(response.data.errors);
               }
-              this.inputDescription = this.inputDescriptionTextBox;
               if (this.isConverted()) {
+                this.converted_description = this.modelToDescription(
+                  this.response.converted_model
+                );
                 this.$nextTick(() => {
                   this.$vuetify.goTo(this.$refs.successAlert, this.options);
                 });
