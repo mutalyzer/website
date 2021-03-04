@@ -1,15 +1,14 @@
 import axios from "axios";
 
-const apiBaseUrl = `http://127.0.0.1:5000/api/`;
-//const apiBaseUrl = `http://v3.mutalyzer.nl/api/`;
+const apiBaseUrl = process.env.VUE_APP_API_URL;
 
 const apiClient = axios.create({
   baseURL: apiBaseUrl,
   withCredentials: false, // This is the default
   headers: {
     Accept: "application/json",
-    "Content-Type": "application/json"
-  }
+    "Content-Type": "application/json",
+  },
 });
 
 export default {
@@ -27,5 +26,5 @@ export default {
   },
   getSelectors(referenceId) {
     return apiClient.get("/get_selectors/" + encodeURIComponent(referenceId));
-  }
+  },
 };
