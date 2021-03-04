@@ -5,11 +5,11 @@ export default {
     model: null,
     description: null,
     errors: null,
-    infos: null
+    infos: null,
   },
   data() {
     return {
-      someText: "AAAA"
+      someText: "AAAA",
     };
   },
   render(createElement) {
@@ -214,7 +214,7 @@ export default {
     console.log(this.model);
     const counter = createElement("span", [
       "one",
-      createElement("span", ["two"])
+      createElement("span", ["two"]),
     ]);
     console.log("--- counter", counter);
 
@@ -229,13 +229,13 @@ export default {
     var text = createElement("div", this.someText);
 
     var inputText = createElement("input", {
-      domProps: { value: this.someText }
+      domProps: { value: this.someText },
     });
 
     var inputText2 = createElement(
       "input",
       {
-        domProps: { value: this.model.reference.id }
+        domProps: { value: this.model.reference.id },
       },
       this.model.reference.id
     );
@@ -247,7 +247,7 @@ export default {
 
     return createElement("div", {}, [inputText, inputText2, text, elements]);
     // return createElement('div', {}, ['gfgdfg', counter, model])
-  }
+  },
 };
 </script>
 
