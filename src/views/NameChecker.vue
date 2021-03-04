@@ -390,6 +390,7 @@ export default {
         this.response = null;
         this.connectionErrors = null;
         this.showCorrections = false;
+        this.inputDescriptionTextBox = this.inputDescriptionTextBox.trim();
 
         MutalyzerService.nameCheck(this.inputDescriptionTextBox)
           .then((response) => {
