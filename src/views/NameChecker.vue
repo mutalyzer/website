@@ -336,8 +336,8 @@
 <script>
 import MutalyzerService from "../services/MutalyzerService.js";
 import JsonPretty from "../components/JsonPretty.vue";
-import SelectorShort from "../components/SelectorShort.vue";
 import AffectedProtein from "../components/AffectedProtein.vue";
+import SelectorShort from "../components/SelectorShort.vue";
 import SyntaxError from "../components/SyntaxError.vue";
 import ReferenceInformation from "../components/ReferenceInformation.vue";
 

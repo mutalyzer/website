@@ -1,4 +1,4 @@
-# vuetify-router-demo
+# Mutalyzer Website
 
 ## Project setup
 ```
