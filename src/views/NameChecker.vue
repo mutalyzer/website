@@ -132,7 +132,9 @@
           v-if="response && response.errors"
         >
           <v-row align="center">
-            <v-col class="grow overline">Error</v-col>
+            <v-col class="grow overline"
+              >Description could not be interpreted</v-col
+            >
             <v-col class="shrink" v-if="correctionsPerformed()">
               <v-tooltip bottom>
                 <template v-slot:activator="{ on, attrs }">
