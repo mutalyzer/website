@@ -299,23 +299,10 @@
             >
             <v-expansion-panel-content>
               <ReferenceInformation :model="this.response.corrected_model" />
-            </v-expansion-panel-content>
-          </v-expansion-panel>
-        </v-expansion-panels>
-
-        <v-expansion-panels
-          focusable
-          hover
-          class="mt-5 mb-5"
-          tile
-          v-if="response && response.selector_short"
-        >
-          <v-expansion-panel>
-            <v-expansion-panel-header class="overline"
-              >Selector Positions Details</v-expansion-panel-header
-            >
-            <v-expansion-panel-content class="pt-5">
-              <SelectorShort :selector="response.selector_short" />
+              <SelectorShort
+                v-if="response && response.selector_short"
+                :selector="response.selector_short"
+              />
             </v-expansion-panel-content>
           </v-expansion-panel>
         </v-expansion-panels>

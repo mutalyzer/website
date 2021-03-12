@@ -3,17 +3,21 @@
     <v-expansion-panels
       multiple
       flat
-      class="mt-5 mb-5"
+      class="mt-5"
       tile
       v-if="record"
       v-model="panel"
     >
       <v-expansion-panel v-if="record">
-        <v-expansion-panel-header>{{ record.id }}</v-expansion-panel-header>
+        <v-expansion-panel-header class="overline blue-grey--text text"
+          >Reference ID: {{ record.id }}</v-expansion-panel-header
+        >
         <v-expansion-panel-content>
           <v-list shaped>
             <v-list-item v-for="(detail, index) in record.details" :key="index">
-              <v-list-item-title>{{ detail.name }}</v-list-item-title>
+              <v-list-item-title color="blue">{{
+                detail.name
+              }}</v-list-item-title>
               <v-list-item-subtitle class="text-right">{{
                 detail.value
               }}</v-list-item-subtitle>
@@ -23,7 +27,11 @@
       </v-expansion-panel>
 
       <v-expansion-panel v-if="gene">
-        <v-expansion-panel-header>{{ gene.id }}</v-expansion-panel-header>
+        <v-expansion-panel-header
+          class="overline blue-grey--text text--lighten-2"
+          >selected transcript gene name:
+          {{ gene.id }}</v-expansion-panel-header
+        >
         <v-expansion-panel-content>
           <v-list>
             <v-list-item v-for="(detail, index) in gene.details" :key="index">
@@ -37,7 +45,9 @@
       </v-expansion-panel>
 
       <v-expansion-panel v-if="selector">
-        <v-expansion-panel-header>{{ selector.id }}</v-expansion-panel-header>
+        <v-expansion-panel-header class="overline blue-grey--text text"
+          >Selected transcript ID: {{ selector.id }}</v-expansion-panel-header
+        >
         <v-expansion-panel-content>
           <v-list shaped>
             <v-list-item
