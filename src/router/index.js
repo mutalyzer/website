@@ -38,7 +38,6 @@ const routes = [
   },
   {
     path: "/api",
-    name: "api",
   },
   {
     path: "*",

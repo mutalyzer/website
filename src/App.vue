@@ -41,7 +41,7 @@
               <v-list-item-title>Description Extractor</v-list-item-title>
             </v-list-item>
 
-            <v-list-item to="/api">
+            <v-list-item :href="apiBaseUrl">
               <v-list-item-icon>
                 <v-icon>mdi-description</v-icon>
               </v-list-item-icon>
@@ -66,11 +66,14 @@
 </template>
 
 <script>
+const apiBaseUrl = process.env.VUE_APP_API_URL;
+
 export default {
   name: "App",
 
   data: () => ({
     drawer: false,
+    apiBaseUrl: apiBaseUrl,
   }),
 };
 </script>
