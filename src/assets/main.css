@@ -104,6 +104,22 @@ li {
   cursor: pointer;
 }
 
+.other-description-link {
+  text-decoration: none;
+  margin-top: 2px;
+  padding: 5px 10px;
+  font-family: monospace;
+  display: inline-block;
+  color: #1e90ff;
+  background-color: #ffffff;
+}
+
+.other-description-link:hover {
+  color: #ffffff;
+  background-color: #1e90ff;
+  cursor: pointer;
+}
+
 .code {
   background-color: #ffffff;
   color: #b71c1c;
