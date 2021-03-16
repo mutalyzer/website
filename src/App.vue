@@ -58,7 +58,7 @@
 
             <v-list-item :href="apiBaseUrl">
               <v-list-item-icon>
-                <v-icon>mdi-description</v-icon>
+                <v-icon>mdi-cog</v-icon>
               </v-list-item-icon>
               <v-list-item-title>API</v-list-item-title>
             </v-list-item>
