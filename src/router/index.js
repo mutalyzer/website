@@ -42,7 +42,7 @@ const routes = [
   {
     path: "*",
     name: "catchAll",
-    component: Home,
+    redirect: "/",
   },
 ];
 
