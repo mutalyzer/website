@@ -8,9 +8,8 @@
           >
 
           <LiftItem
-            :model="updated_accession"
-            :model_type="'reference'"
             :description="description"
+            :reference_id="updated_accession"
           />
 
           <v-divider inset></v-divider>
@@ -18,27 +17,16 @@
 
         <v-subheader inset class="overline">Reference Standards</v-subheader>
 
-        <v-list-item
+        <div
           v-for="r_s in response.genes[0].gene.reference_standards"
           :key="r_s.gene_range.accession_version"
         >
-          <v-list-item-avatar>
-            <v-icon>mdi-book-arrow-up-outline</v-icon>
-          </v-list-item-avatar>
-
-          <v-list-item-content>
-            <v-list-item-title
-              v-text="r_s.gene_range.accession_version"
-            ></v-list-item-title>
-          </v-list-item-content>
-
-          <v-list-item-action>
-            <v-btn icon>
-              <v-icon color="grey lighten-1">mdi-information</v-icon>
-            </v-btn>
-          </v-list-item-action>
-        </v-list-item>
-
+          <LiftItem
+            :description="description"
+            :reference_id="r_s.gene_range.accession_version"
+            :selector_id="get_selector_id()"
+          />
+        </div>
         <v-divider inset></v-divider>
 
         <v-subheader inset class="overline">Transcripts</v-subheader>
@@ -47,10 +35,29 @@
           v-for="t in response.genes[0].gene.transcripts"
           :key="t.accession_version"
         >
-          <LiftItem :model="t" :description="description" />
+          <LiftItem
+            :description="description"
+            :reference_id="t.accession_version"
+          />
+        </div>
+
+        <v-subheader inset class="overline"
+          >Chromosome Selected Transcripts</v-subheader
+        >
+
+        <div
+          v-for="t in response.genes[0].gene.transcripts"
+          :key="t.accession_version + t"
+        >
+          <LiftItem
+            :description="description"
+            :reference_id="t.genomic_range.accession_version"
+            :selector_id="t.accession_version"
+          />
         </div>
       </v-list>
     </div>
+
     <v-expansion-panels focusable hover flat class="mb-3" v-if="response">
       <v-expansion-panel>
         <v-expansion-panel-header
@@ -155,6 +162,16 @@ export default {
               this.connectionErrors = { details: "Some error occured." };
             }
           });
+      }
+    },
+    get_selector_id() {
+      console.log("===");
+      console.log(this.response);
+      if (this.updated_accession) {
+        return this.updated_accession;
+      }
+      if (this.response) {
+        return this.response.genes[0].query[0];
       }
     },
   },

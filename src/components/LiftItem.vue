@@ -36,7 +36,10 @@
     </v-list-item-avatar>
 
     <v-list-item-content v-if="show_reference">
-      <v-list-item-title class="description">{{ reference }}</v-list-item-title>
+      <v-list-item-title class="description"
+        >{{ reference_id
+        }}{{ selector_id ? "(" + selector_id + ")" : "" }}</v-list-item-title
+      >
     </v-list-item-content>
 
     <v-list-item-content v-if="show_description">
@@ -69,8 +72,9 @@ export default {
   name: "LiftItem",
   props: {
     description: null,
-    model: null,
-    model_type: null,
+    reference_id: null,
+    selector_id: null,
+    details: null,
   },
   data() {
     return {
@@ -83,21 +87,17 @@ export default {
       error_tooltip: null,
     };
   },
-  created: function () {
-    if (this.model_type && this.model_type == "reference") {
-      this.reference = this.model;
-    } else {
-      this.reference = this.model.accession_version;
-    }
-  },
   methods: {
     lift() {
-      if (this.description && this.reference) {
+      if (this.description && this.reference_id) {
         this.show_loading = true;
-        const params = {
+        let params = {
           description: this.description,
-          reference_id: this.reference,
+          reference_id: this.reference_id,
         };
+        if (this.selector_id) {
+          params.selector_id = this.selector_id;
+        }
         MutalyzerService.lift(params)
           .then((response) => {
             if (response.data) {
@@ -107,6 +107,7 @@ export default {
           .catch((error) => {
             this.show_loading = false;
             this.show_error = true;
+            this.error_tooltip = "Some connection/server rrror occured.";
             if (error.response) {
               this.connectionErrors = {
                 details: "Some response error occured.",
