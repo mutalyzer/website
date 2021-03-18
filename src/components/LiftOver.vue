@@ -1,38 +1,56 @@
 <template>
   <div>
-    <v-alert v-if="updated_accession" tile color="white">
-      <div class="overline">New Reference Id Available</div>
-      <div>
-        <v-tooltip bottom>
-          <template v-slot:activator="{ on, attrs }">
-            <div
-              v-show="!show"
-              v-bind="attrs"
-              v-on="on"
-              class="example-item"
-              @click="lift()"
-            >
-              {{ updated_accession }}
-            </div>
-          </template>
-          <span>Lift to the new reference ID!</span>
-        </v-tooltip>
-        <v-expand-transition>
-          <div v-if="show">
-            <router-link
-              class="ok-description-link"
-              :to="{
-                name: 'NameChecker',
-                params: {
-                  descriptionRouter: lifted_description,
-                },
-              }"
-              >{{ lifted_description }}</router-link
-            >
-          </div>
-        </v-expand-transition>
-      </div>
-    </v-alert>
+    <div v-if="response && response.genes">
+      <v-list>
+        <div v-if="updated_accession">
+          <v-subheader inset class="overline"
+            >New Reference Id Available</v-subheader
+          >
+
+          <LiftItem
+            :model="updated_accession"
+            :model_type="'reference'"
+            :description="description"
+          />
+
+          <v-divider inset></v-divider>
+        </div>
+
+        <v-subheader inset class="overline">Reference Standards</v-subheader>
+
+        <v-list-item
+          v-for="r_s in response.genes[0].gene.reference_standards"
+          :key="r_s.gene_range.accession_version"
+        >
+          <v-list-item-avatar>
+            <v-icon>mdi-book-arrow-up-outline</v-icon>
+          </v-list-item-avatar>
+
+          <v-list-item-content>
+            <v-list-item-title
+              v-text="r_s.gene_range.accession_version"
+            ></v-list-item-title>
+          </v-list-item-content>
+
+          <v-list-item-action>
+            <v-btn icon>
+              <v-icon color="grey lighten-1">mdi-information</v-icon>
+            </v-btn>
+          </v-list-item-action>
+        </v-list-item>
+
+        <v-divider inset></v-divider>
+
+        <v-subheader inset class="overline">Transcripts</v-subheader>
+
+        <div
+          v-for="t in response.genes[0].gene.transcripts"
+          :key="t.accession_version"
+        >
+          <LiftItem :model="t" :description="description" />
+        </div>
+      </v-list>
+    </div>
     <v-expansion-panels focusable hover flat class="mb-3" v-if="response">
       <v-expansion-panel>
         <v-expansion-panel-header
@@ -51,11 +69,13 @@
 import MutalyzerService from "../services/MutalyzerService.js";
 import NcbiDatasetsApi from "../services/NcbiDatasetsApi";
 import JsonPretty from "./JsonPretty.vue";
+import LiftItem from "./LiftItem";
 
 export default {
   name: "LiftOver",
   components: {
     JsonPretty,
+    LiftItem,
   },
   props: {
     model: null,

@@ -3,6 +3,7 @@
   --light-blue-lighten-5: #E1F5FE;
   --red-accent-4: #D50000;
   --red-lighten-5: #FFEBEE;
+  --blue: #2196F3;
 }
 
 ul {
@@ -104,6 +105,22 @@ li {
   cursor: pointer;
 }
 
+.ex-description-link {
+  text-decoration: none;
+  margin-top: 2px;
+  padding: 5px 10px;
+  font-family: monospace;
+  display: inline-block;
+  color: var(--blue);
+  background-color: #ffffff;
+}
+
+.ex-description-link:hover {
+  color: #ffffff;
+  background-color: var(--blue);
+  cursor: pointer;
+}
+
 .other-description-link {
   text-decoration: none;
   margin-top: 2px;
@@ -116,7 +133,7 @@ li {
 
 .other-description-link:hover {
   color: #ffffff;
-  background-color: #1e90ff;
+  background-color:var(--blue);
   cursor: pointer;
 }
 
