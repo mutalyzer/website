@@ -11,8 +11,6 @@
             :description="description"
             :reference_id="updated_accession"
           />
-
-          <v-divider inset></v-divider>
         </div>
 
         <v-subheader inset class="overline">Reference Standards</v-subheader>
@@ -27,7 +25,6 @@
             :selector_id="get_selector_id()"
           />
         </div>
-        <v-divider inset></v-divider>
 
         <v-subheader inset class="overline">Transcripts</v-subheader>
 
@@ -134,8 +131,6 @@ export default {
       }
     },
     get_selector_id() {
-      console.log("===");
-      console.log(this.response);
       if (this.updated_accession) {
         return this.updated_accession;
       }
