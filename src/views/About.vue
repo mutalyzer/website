@@ -2,9 +2,24 @@
   <v-container>
     <v-layout>
       <v-flex xs12>
-        <h1 class="display-1 mt-10">About Page</h1>
-        <br />
-        <p>Website version: {{ version }}</p>
+        <h1 class="display-1 mt-10">About Mutalyzer</h1>
+        <p class="mt-5">Website version: {{ version }}</p>
+
+        <h1 class="display-1">Contact</h1>
+        <p class="mt-5">
+          If you have a private question or a security related issue to discuss,
+          please use the private address
+          <a href="mailto: info@mutalyzer.nl">info@mutalyzer.nl</a>.
+        </p>
+
+        <h1 class="display-1">Funding</h1>
+        <p class="mt-5">
+          This research was supported by a ZonMW Grant (Project Number
+          <a
+            href="https://www.zonmw.nl/nl/onderzoek-resultaten/geneesmiddelen/programmas/project-detail/personalised-medicine/fair-genomes-a-national-guideline-to-promote-optimal-reuse-of-ngs-data-in-research-and-healthcare/verslagen/"
+            >846003201</a
+          >) as part of the Personalised Medicine program.
+        </p>
       </v-flex>
     </v-layout>
   </v-container>
