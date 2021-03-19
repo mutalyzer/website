@@ -3,12 +3,12 @@
     <v-tooltip bottom v-if="show_reference && !show_loading && !show_error">
       <template v-slot:activator="{ on, attrs }">
         <v-list-item-avatar v-bind="attrs" v-on="on">
-          <v-btn color="blue lighten-1" icon @click="lift(false)">
+          <v-btn color="blue lighten-1" icon @click="map(false)">
             <v-icon> mdi-book-arrow-up-outline </v-icon>
           </v-btn>
         </v-list-item-avatar>
       </template>
-      <span>Lift</span>
+      <span>Map description to this reference sequence</span>
     </v-tooltip>
 
     <v-list-item-avatar v-if="show_loading">
@@ -49,10 +49,10 @@
           :to="{
             name: 'NameChecker',
             params: {
-              descriptionRouter: lifted_description,
+              descriptionRouter: mapped_description,
             },
           }"
-          >{{ lifted_description }}</router-link
+          >{{ mapped_description }}</router-link
         ></v-list-item-title
       >
     </v-list-item-content>
@@ -60,12 +60,12 @@
     <v-tooltip bottom v-if="show_description">
       <template v-slot:activator="{ on, attrs }">
         <v-list-item-avatar v-bind="attrs" v-on="on">
-          <v-btn color="blue lighten-1" icon @click="lift(true)">
+          <v-btn color="blue lighten-1" icon @click="map(true)">
             <v-icon> mdi-silverware-clean </v-icon>
           </v-btn>
         </v-list-item-avatar>
       </template>
-      <span>Clean variants due to sequences differences.</span>
+      <span>Filter out reference sequences differences</span>
     </v-tooltip>
 
     <v-list-item-action>
@@ -80,7 +80,7 @@
 import MutalyzerService from "../services/MutalyzerService.js";
 
 export default {
-  name: "LiftItem",
+  name: "MapItem",
   props: {
     description: null,
     reference_id: null,
@@ -90,7 +90,7 @@ export default {
   data() {
     return {
       reference: null,
-      lifted_description: null,
+      mapped_description: null,
       show_reference: true,
       show_description: false,
       show_loading: false,
@@ -99,7 +99,7 @@ export default {
     };
   },
   methods: {
-    lift(clean) {
+    map(clean) {
       if (this.description && this.reference_id) {
         this.show_loading = true;
         let params = {
@@ -110,7 +110,7 @@ export default {
         if (this.selector_id) {
           params.selector_id = this.selector_id;
         }
-        MutalyzerService.lift(params)
+        MutalyzerService.map(params)
           .then((response) => {
             if (response.data) {
               this.processResponse(response.data);
@@ -140,7 +140,7 @@ export default {
         this.show_error = true;
         this.error_tooltip = response.errors[0].details;
       } else {
-        this.lifted_description = response;
+        this.mapped_description = response;
         this.show_description = true;
         this.show_reference = false;
       }

@@ -27,7 +27,7 @@ export default {
   getSelectors(referenceId) {
     return apiClient.get("/get_selectors/" + encodeURIComponent(referenceId));
   },
-  lift(params) {
-    return apiClient.get("/lift/", { params });
+  map(params) {
+    return apiClient.get("/map/", { params });
   },
 };

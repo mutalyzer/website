@@ -7,7 +7,7 @@
             >New Reference Id Available</v-subheader
           >
 
-          <LiftItem
+          <MapDescription
             :description="description"
             :reference_id="updated_accession"
           />
@@ -21,7 +21,7 @@
           v-for="r_s in response.genes[0].gene.reference_standards"
           :key="r_s.gene_range.accession_version"
         >
-          <LiftItem
+          <MapDescription
             :description="description"
             :reference_id="r_s.gene_range.accession_version"
             :selector_id="get_selector_id()"
@@ -35,7 +35,7 @@
           v-for="t in response.genes[0].gene.transcripts"
           :key="t.accession_version"
         >
-          <LiftItem
+          <MapDescription
             :description="description"
             :reference_id="t.accession_version"
           />
@@ -49,7 +49,7 @@
           v-for="t in response.genes[0].gene.transcripts"
           :key="t.accession_version + t"
         >
-          <LiftItem
+          <MapDescription
             :description="description"
             :reference_id="t.genomic_range.accession_version"
             :selector_id="t.accession_version"
@@ -73,16 +73,15 @@
 </template>
 
 <script>
-import MutalyzerService from "../services/MutalyzerService.js";
 import NcbiDatasetsApi from "../services/NcbiDatasetsApi";
 import JsonPretty from "./JsonPretty.vue";
-import LiftItem from "./LiftItem";
+import MapDescription from "./MapDescription";
 
 export default {
-  name: "LiftOver",
+  name: "Map",
   components: {
     JsonPretty,
-    LiftItem,
+    MapDescription,
   },
   props: {
     model: null,
@@ -95,7 +94,6 @@ export default {
       updated_accession: null,
       connectionError: null,
       show: false,
-      lifted_description: null,
     };
   },
   mounted: function () {
@@ -133,35 +131,6 @@ export default {
       ) {
         this.updated_accession =
           response.genes[0].warnings[0].replaced_id.returned;
-      }
-    },
-    lift() {
-      if (this.description && this.updated_accession) {
-        const params = {
-          description: this.description,
-          reference_id: this.updated_accession,
-        };
-        MutalyzerService.lift(params)
-          .then((response) => {
-            if (response.data) {
-              this.lifted_description = response.data;
-              this.show = !this.show;
-            }
-          })
-          .catch((error) => {
-            console.log(error);
-            if (error.response) {
-              this.connectionErrors = {
-                details: "Some response error occured.",
-              };
-            } else if (error.request) {
-              this.connectionErrors = {
-                details: "Some connection or server error occured.",
-              };
-            } else {
-              this.connectionErrors = { details: "Some error occured." };
-            }
-          });
       }
     },
     get_selector_id() {
