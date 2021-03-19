@@ -3,7 +3,7 @@
     <v-tooltip bottom v-if="show_reference && !show_loading && !show_error">
       <template v-slot:activator="{ on, attrs }">
         <v-list-item-avatar v-bind="attrs" v-on="on">
-          <v-btn color="blue lighten-1" icon @click="lift()">
+          <v-btn color="blue lighten-1" icon @click="lift(false)">
             <v-icon> mdi-book-arrow-up-outline </v-icon>
           </v-btn>
         </v-list-item-avatar>
@@ -57,6 +57,17 @@
       >
     </v-list-item-content>
 
+    <v-tooltip bottom v-if="show_description">
+      <template v-slot:activator="{ on, attrs }">
+        <v-list-item-avatar v-bind="attrs" v-on="on">
+          <v-btn color="blue lighten-1" icon @click="lift(true)">
+            <v-icon> mdi-silverware-clean </v-icon>
+          </v-btn>
+        </v-list-item-avatar>
+      </template>
+      <span>Clean variants due to sequences differences.</span>
+    </v-tooltip>
+
     <v-list-item-action>
       <v-btn icon>
         <v-icon color="grey lighten-1">mdi-information</v-icon>
@@ -88,12 +99,13 @@ export default {
     };
   },
   methods: {
-    lift() {
+    lift(clean) {
       if (this.description && this.reference_id) {
         this.show_loading = true;
         let params = {
           description: this.description,
           reference_id: this.reference_id,
+          clean: clean,
         };
         if (this.selector_id) {
           params.selector_id = this.selector_id;
