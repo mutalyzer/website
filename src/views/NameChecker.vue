@@ -335,6 +335,29 @@
           </v-expansion-panel>
         </v-expansion-panels>
 
+        <v-expansion-panels
+          focusable
+          hover
+          class="mt-5 mb-5"
+          tile
+          v-if="
+            response &&
+            response.normalized_description &&
+            response.normalized_model
+          "
+        >
+          <v-expansion-panel>
+            <v-expansion-panel-header class="overline"
+              >View Variants</v-expansion-panel-header
+            >
+            <v-expansion-panel-content class="pt-5">
+              <ViewVariants
+                :description="this.response.normalized_description"
+              />
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+        </v-expansion-panels>
+
         <v-expansion-panels focusable hover class="mt-10 mb-10" v-if="response">
           <v-expansion-panel>
             <v-expansion-panel-header>Raw Response</v-expansion-panel-header>
@@ -356,6 +379,7 @@ import SelectorShort from "../components/SelectorShort.vue";
 import SyntaxError from "../components/SyntaxError.vue";
 import ReferenceInformation from "../components/ReferenceInformation.vue";
 import Map from "../components/Map.vue";
+import ViewVariants from "../components/ViewVariants.vue";
 
 export default {
   components: {
@@ -365,6 +389,7 @@ export default {
     SyntaxError,
     ReferenceInformation,
     Map,
+    ViewVariants,
   },
   props: ["descriptionRouter"],
   created: function () {

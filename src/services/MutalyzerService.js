@@ -30,4 +30,7 @@ export default {
   map(params) {
     return apiClient.get("/map/", { params });
   },
+  view(description) {
+    return apiClient.get("/view_variants/" + encodeURIComponent(description));
+  },
 };
