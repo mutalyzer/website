@@ -39,13 +39,11 @@ li {
 
 .examples-list {
   margin-top: 5px;
-  background-color: #ffffff;
 }
 
 .example-item {
   display: inline-block;
   color: #1e90ff;
-  background-color: #ffffff;
   padding: 5px 10px;
   margin-left: 2px;
   font-family: monospace;
@@ -218,4 +216,8 @@ li {
   font-family: monospace;
   background-color: #ffcdd2;
   display: inline-block;
+}
+
+.pointer:hover {
+  cursor: pointer;
 }
