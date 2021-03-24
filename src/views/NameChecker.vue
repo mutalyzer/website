@@ -348,9 +348,9 @@
         >
           <v-expansion-panel>
             <v-expansion-panel-header class="overline"
-              >View Variants</v-expansion-panel-header
+              >View Variants Sequence Overview</v-expansion-panel-header
             >
-            <v-expansion-panel-content class="pt-5">
+            <v-expansion-panel-content class="pt-2 pb-2">
               <ViewVariants
                 :description="this.response.normalized_description"
               />
