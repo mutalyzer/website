@@ -36,13 +36,35 @@
 
           <v-list>
             <v-list-item class="text-right">
-              <v-btn small text color="primary" @click="map(false)">
-                Map description to this reference sequence
+              <v-btn
+                small
+                text
+                color="primary"
+                @click="map('transcript', false)"
+              >
+                Map description to this reference sequence (transcript slice)
               </v-btn>
             </v-list-item>
             <v-list-item>
-              <v-btn small text color="primary" @click="map(true)">
+              <v-btn
+                small
+                text
+                color="primary"
+                @click="map('transcript', true)"
+              >
                 Map and filter description to this reference sequence
+                (transcript slice)
+              </v-btn>
+            </v-list-item>
+            <v-list-item class="text-right">
+              <v-btn small text color="primary" @click="map('gene', false)">
+                Map description to this reference sequence (gene slice)
+              </v-btn>
+            </v-list-item>
+            <v-list-item class="text-right">
+              <v-btn small text color="primary" @click="map('gene', true)">
+                Map and filter description to this reference sequence (gene
+                slice)
               </v-btn>
             </v-list-item>
           </v-list>
@@ -50,7 +72,7 @@
       </v-list-item-action>
     </v-list-item>
 
-    <v-list-item v-if="show_mapped_description">
+    <v-list-item v-if="mapped_description">
       <v-list-item-content>
         <v-list-item-title>
           <router-link
@@ -81,7 +103,7 @@
       </v-list-item-action>
     </v-list-item>
 
-    <v-list-item v-if="show_mapped_filtered_description">
+    <v-list-item v-if="mapped_filtered_description">
       <v-list-item-content>
         <v-list-item-title>
           <router-link
@@ -89,7 +111,7 @@
             :to="{
               name: 'NameChecker',
               params: {
-                descriptionRouter: mapped_description,
+                descriptionRouter: mapped_filtered_description,
               },
             }"
             >{{ mapped_filtered_description }}</router-link
@@ -112,6 +134,70 @@
         </v-tooltip>
       </v-list-item-action>
     </v-list-item>
+
+    <v-list-item v-if="mapped_description_gene">
+      <v-list-item-content>
+        <v-list-item-title>
+          <router-link
+            class="ex-description-link"
+            :to="{
+              name: 'NameChecker',
+              params: {
+                descriptionRouter: mapped_description_gene,
+              },
+            }"
+            >{{ mapped_description_gene }}</router-link
+          >
+        </v-list-item-title>
+      </v-list-item-content>
+
+      <v-list-item-action>
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn icon v-bind="attrs" v-on="on">
+              <v-icon color="grey lighten-1">mdi-information</v-icon>
+            </v-btn>
+          </template>
+          <span
+            >Input description mapped to {{ reference_id
+            }}{{ selector_id ? "(" + selector_id + ")" : "" }} (gene
+            slice)</span
+          >
+        </v-tooltip>
+      </v-list-item-action>
+    </v-list-item>
+
+    <v-list-item v-if="mapped_filtered_description_gene">
+      <v-list-item-content>
+        <v-list-item-title>
+          <router-link
+            class="ex-description-link"
+            :to="{
+              name: 'NameChecker',
+              params: {
+                descriptionRouter: mapped_filtered_description_gene,
+              },
+            }"
+            >{{ mapped_filtered_description_gene }}</router-link
+          >
+        </v-list-item-title>
+      </v-list-item-content>
+
+      <v-list-item-action>
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn icon v-bind="attrs" v-on="on">
+              <v-icon color="grey lighten-1">mdi-information</v-icon>
+            </v-btn>
+          </template>
+          <span
+            >Input description mapped to {{ reference_id
+            }}{{ selector_id ? "(" + selector_id + ")" : "" }} (gene
+            slice)</span
+          >
+        </v-tooltip>
+      </v-list-item-action>
+    </v-list-item>
     <v-divider></v-divider>
   </v-sheet>
 </template>
@@ -126,27 +212,29 @@ export default {
     reference_id: null,
     selector_id: null,
     details: null,
+    gene_id: null,
   },
   data() {
     return {
       reference: null,
       mapped_description: null,
       mapped_filtered_description: null,
+      mapped_description_gene: null,
+      mapped_filtered_description_gene: null,
       show_reference: true,
-      show_mapped_description: false,
-      show_mapped_filtered_description: false,
       show_loading: false,
       show_error: false,
       error_tooltip: null,
     };
   },
   methods: {
-    map(clean) {
+    map(slice_to, clean) {
       if (this.description && this.reference_id) {
         this.show_loading = true;
         let params = {
           description: this.description,
           reference_id: this.reference_id,
+          slice_to: slice_to,
           clean: clean,
         };
         if (this.selector_id) {
@@ -155,7 +243,7 @@ export default {
         MutalyzerService.map(params)
           .then((response) => {
             if (response.data) {
-              this.processResponse(response.data, clean);
+              this.processResponse(response.data, slice_to, clean);
             }
           })
           .catch((error) => {
@@ -176,18 +264,24 @@ export default {
           });
       }
     },
-    processResponse: function (response, clean) {
+    processResponse: function (response, slice_to, clean) {
       this.show_loading = false;
       if (this.errorsEncountered(response)) {
         this.show_error = true;
         this.error_tooltip = response.errors[0].details;
       } else {
-        if (clean) {
-          this.mapped_filtered_description = response;
-          this.show_mapped_filtered_description = true;
-        } else {
-          this.mapped_description = response;
-          this.show_mapped_description = true;
+        if (slice_to == "transcript") {
+          if (clean) {
+            this.mapped_filtered_description = response;
+          } else {
+            this.mapped_description = response;
+          }
+        } else if (slice_to == "gene") {
+          if (clean) {
+            this.mapped_filtered_description_gene = response;
+          } else {
+            this.mapped_description_gene = response;
+          }
         }
       }
     },
