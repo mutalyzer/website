@@ -1,100 +1,115 @@
 <template>
   <div>
-    <div v-if="response && response.genes">
-      <v-list>
-        <div v-if="updated_accession">
-          <v-subheader inset class="overline"
-            >New Reference Id Available</v-subheader
-          >
+    <v-progress-linear
+      indeterminate
+      v-if="progress_datasets"
+    ></v-progress-linear>
+    <div v-if="!progress_datasets">
+      <div v-if="response && response.genes">
+        <v-list>
+          <div v-if="updated_accession">
+            <v-subheader inset class="overline"
+              >New Reference Id Available</v-subheader
+            >
 
-          <MapDescription
-            :description="description"
-            :reference_id="updated_accession"
-          />
-        </div>
+            <MapDescription
+              :description="description"
+              :reference_id="updated_accession"
+            />
+          </div>
 
-        <v-subheader inset class="overline">Reference Standards</v-subheader>
-
-        <div
-          v-for="r_s in response.genes[0].gene.reference_standards"
-          :key="r_s.gene_range.accession_version"
-        >
-          <MapDescription
-            :description="description"
-            :reference_id="r_s.gene_range.accession_version"
-            :selector_id="get_selector_id()"
-          />
-        </div>
-
-        <v-subheader inset class="overline">Transcripts</v-subheader>
-
-        <div
-          v-for="t in response.genes[0].gene.transcripts"
-          :key="t.accession_version"
-        >
-          <MapDescription
-            :description="description"
-            :reference_id="t.accession_version"
-          />
-        </div>
-
-        <v-subheader inset class="overline"
-          >Chromosome Selected Transcripts</v-subheader
-        >
-
-        <div
-          v-for="t in response.genes[0].gene.transcripts"
-          :key="t.accession_version + t"
-        >
-          <MapDescription
-            :description="description"
-            :reference_id="t.genomic_range.accession_version"
-            :selector_id="t.accession_version"
-          />
-        </div>
-      </v-list>
-    </div>
-
-    <v-expansion-panels focusable hover flat class="mb-3" v-if="response">
-      <v-expansion-panel>
-        <v-expansion-panel-header
-          >View NCBI Datasets response as a tree</v-expansion-panel-header
-        >
-        <v-expansion-panel-content>
-          <JsonPretty :summary="response" />
-        </v-expansion-panel-content>
-      </v-expansion-panel>
-    </v-expansion-panels>
-
-    <div v-if="other_references">
-      <v-list>
-        <div>
-          <v-subheader inset class="overline">Other</v-subheader>
+          <v-subheader inset class="overline">Reference Standards</v-subheader>
 
           <div
-            v-for="t in other_references"
-            :key="t.reference_id + t.selector_id"
+            v-for="r_s in response.genes[0].gene.reference_standards"
+            :key="r_s.gene_range.accession_version"
           >
             <MapDescription
               :description="description"
-              :reference_id="t.reference_id"
-              :selector_id="t.selector_id"
+              :reference_id="r_s.gene_range.accession_version"
+              :selector_id="get_selector_id()"
             />
           </div>
-        </div>
-      </v-list>
+
+          <v-subheader inset class="overline">Transcripts</v-subheader>
+
+          <div
+            v-for="t in response.genes[0].gene.transcripts"
+            :key="t.accession_version"
+          >
+            <MapDescription
+              :description="description"
+              :reference_id="t.accession_version"
+            />
+          </div>
+
+          <v-subheader inset class="overline"
+            >Chromosome Selected Transcripts</v-subheader
+          >
+
+          <div
+            v-for="t in response.genes[0].gene.transcripts"
+            :key="t.accession_version + t"
+          >
+            <MapDescription
+              :description="description"
+              :reference_id="t.genomic_range.accession_version"
+              :selector_id="t.accession_version"
+            />
+          </div>
+        </v-list>
+      </div>
+
+      <v-expansion-panels focusable hover flat class="mb-3" v-if="response">
+        <v-expansion-panel>
+          <v-expansion-panel-header
+            >View NCBI Datasets response as a tree</v-expansion-panel-header
+          >
+          <v-expansion-panel-content>
+            <JsonPretty :summary="response" />
+          </v-expansion-panel-content>
+        </v-expansion-panel>
+      </v-expansion-panels>
     </div>
 
-    <v-expansion-panels focusable hover flat class="mb-3" v-if="eutils">
-      <v-expansion-panel>
-        <v-expansion-panel-header
-          >View NCBI Eutils response as a tree</v-expansion-panel-header
+    <v-progress-linear
+      indeterminate
+      color="cyan"
+      v-if="progress_other"
+    ></v-progress-linear>
+
+    <div v-if="!progress_datasets && !progress_other && other_references">
+      <v-list>
+        <v-subheader inset class="overline">Other</v-subheader>
+        <div
+          v-for="t in other_references"
+          :key="t.reference_id + t.selector_id"
         >
-        <v-expansion-panel-content>
-          <JsonPretty :summary="eutils" />
-        </v-expansion-panel-content>
-      </v-expansion-panel>
-    </v-expansion-panels>
+          <MapDescription
+            :description="description"
+            :reference_id="t.reference_id"
+            :selector_id="t.selector_id"
+          />
+        </div>
+      </v-list>
+
+      <v-expansion-panels
+        focusable
+        hover
+        flat
+        class="mb-3"
+        v-if="eutils && !progress_other"
+      >
+        <v-expansion-panel>
+          <v-expansion-panel-header
+            >View NCBI Eutils response as a tree</v-expansion-panel-header
+          >
+          <v-expansion-panel-content>
+            <JsonPretty :summary="eutils" />
+          </v-expansion-panel-content>
+        </v-expansion-panel>
+      </v-expansion-panels>
+    </div>
 
     <div v-if="!accession">Work in progress.</div>
   </div>
@@ -128,6 +143,8 @@ export default {
       eutils: null,
       chromosomes: [],
       other_references: [],
+      progress_datasets: true,
+      progress_other: false,
     };
   },
   mounted: function () {
@@ -183,6 +200,7 @@ export default {
       ) {
         this.gene_id = response.genes[0].gene.gene_id;
         let gene_name = response.genes[0].gene.symbol;
+        this.progress_other = true;
         NcbiEutils.get_gene_summary(this.gene_id).then((response) => {
           if (response.data) {
             this.eutils = response.data;
@@ -192,6 +210,7 @@ export default {
             }
           }
         });
+        this.progress_other = false;
       }
     },
     get_selector_id() {
@@ -227,6 +246,7 @@ export default {
       MutalyzerService.referenceModel(params).then((response) => {
         if (response.data) {
           this.eutils = response.data;
+          this.progress_datasets = false;
           if (response.data.id) {
             if (
               response.data.features &&
