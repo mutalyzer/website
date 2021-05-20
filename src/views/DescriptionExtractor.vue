@@ -40,7 +40,13 @@
                 class="mt-5"
                 color="primary"
                 :disabled="!valid"
-                @click.prevent="descriptionExtract()"
+                :to="{
+                  name: 'DescriptionExtractor',
+                  query: {
+                    reference: reference,
+                    observed: observed,
+                  },
+                }"
               >
                 Extract
               </v-btn>
@@ -74,7 +80,37 @@ export default {
     responseApi: null,
     example: { reference: "AAA", observed: "ATA" },
   }),
+  created: function () {
+    this.run();
+  },
+  watch: {
+    $route() {
+      this.run();
+    },
+  },
   methods: {
+    run: function () {
+      if (
+        this.$route.query.reference &&
+        0 !== this.$route.query.reference.length
+      ) {
+        this.reference = this.$route.query.reference;
+      }
+      if (
+        this.$route.query.observed &&
+        0 !== this.$route.query.observed.length
+      ) {
+        this.observed = this.$route.query.observed;
+      }
+      if (
+        this.$route.query.reference &&
+        0 !== this.$route.query.reference.length &&
+        this.$route.query.observed &&
+        0 !== this.$route.query.observed.length
+      ) {
+        this.descriptionExtract();
+      }
+    },
     setExample: function () {
       this.reference = this.example.reference;
       this.observed = this.example.observed;
@@ -96,35 +132,20 @@ export default {
           })
           .catch((error) => {
             if (error.response) {
-              // The request was made and the server responded with a status code
-              // that falls out of the range of 2xx
               this.errorMessages = "Some response error.";
-              // console.log(error.response.data);
-              // console.log(error.response.status);
-              // console.log(error.response.headers);
             } else if (error.request) {
               this.errorMessages = "Some request error.";
-              // The request was made but no response was received
-              // `error.request` is an instance of XMLHttpRequest in the browser and an instance of
-              // http.ClientRequest in node.js
-              // console.log(error.request);
             } else {
               this.errorMessages = "Some error.";
-              // console.log(error);
-              // Something happened in setting up the request that triggered an Error
-              // console.log("Error", error.message);
             }
-            // console.log(error.config);
           });
       }
     },
     responseHandler: function (response) {
       this.summary = response;
       if ("errors" in response) {
-        console.log("some error");
         this.errorsHandler(response.errors);
       } else {
-        console.log("we have some response");
         this.summary = response;
       }
     },
