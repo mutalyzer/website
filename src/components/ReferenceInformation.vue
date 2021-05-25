@@ -1,83 +1,97 @@
 <template>
   <div>
-    <v-expansion-panels
-      multiple
-      flat
+    <v-progress-linear
+      indeterminate
+      color="cyan"
       class="mt-5"
-      tile
-      v-if="record"
-      v-model="panel"
-    >
-      <v-expansion-panel v-if="record">
-        <v-expansion-panel-header class="overline blue-grey--text text"
-          >Reference ID: {{ record.id }}</v-expansion-panel-header
-        >
-        <v-expansion-panel-content>
-          <v-list shaped>
-            <v-list-item v-for="(detail, index) in record.details" :key="index">
-              <v-list-item-title color="blue">{{
-                detail.name
-              }}</v-list-item-title>
-              <v-list-item-subtitle class="text-right">{{
-                detail.value
-              }}</v-list-item-subtitle>
-            </v-list-item>
-          </v-list>
-        </v-expansion-panel-content>
-      </v-expansion-panel>
+      v-if="progress"
+    ></v-progress-linear>
+    <div v-if="!progress && no_response">
+      Reference information not retrieved.
+    </div>
+    <div v-if="!progress && !no_response">
+      <v-expansion-panels
+        multiple
+        flat
+        class="mt-5"
+        tile
+        v-if="record"
+        v-model="panel"
+      >
+        <v-expansion-panel v-if="record">
+          <v-expansion-panel-header class="overline blue-grey--text text"
+            >Reference ID: {{ record.id }}</v-expansion-panel-header
+          >
+          <v-expansion-panel-content>
+            <v-list shaped>
+              <v-list-item
+                v-for="(detail, index) in record.details"
+                :key="index"
+              >
+                <v-list-item-title color="blue">{{
+                  detail.name
+                }}</v-list-item-title>
+                <v-list-item-subtitle class="text-right">{{
+                  detail.value
+                }}</v-list-item-subtitle>
+              </v-list-item>
+            </v-list>
+          </v-expansion-panel-content>
+        </v-expansion-panel>
 
-      <v-expansion-panel v-if="gene">
-        <v-expansion-panel-header
-          class="overline blue-grey--text text--lighten-2"
-          >selected transcript gene name:
-          {{ gene.id }}</v-expansion-panel-header
-        >
-        <v-expansion-panel-content>
-          <v-list>
-            <v-list-item v-for="(detail, index) in gene.details" :key="index">
-              <v-list-item-title>{{ detail.name }}</v-list-item-title>
-              <v-list-item-subtitle class="text-right">{{
-                detail.value
-              }}</v-list-item-subtitle>
-            </v-list-item>
-          </v-list>
-        </v-expansion-panel-content>
-      </v-expansion-panel>
+        <v-expansion-panel v-if="gene">
+          <v-expansion-panel-header
+            class="overline blue-grey--text text--lighten-2"
+            >selected transcript gene name:
+            {{ gene.id }}</v-expansion-panel-header
+          >
+          <v-expansion-panel-content>
+            <v-list>
+              <v-list-item v-for="(detail, index) in gene.details" :key="index">
+                <v-list-item-title>{{ detail.name }}</v-list-item-title>
+                <v-list-item-subtitle class="text-right">{{
+                  detail.value
+                }}</v-list-item-subtitle>
+              </v-list-item>
+            </v-list>
+          </v-expansion-panel-content>
+        </v-expansion-panel>
 
-      <v-expansion-panel v-if="selector">
-        <v-expansion-panel-header class="overline blue-grey--text text"
-          >Selected transcript ID: {{ selector.id }}</v-expansion-panel-header
-        >
-        <v-expansion-panel-content>
-          <v-list shaped>
-            <v-list-item
-              v-for="(detail, index) in selector.details"
-              :key="index"
-            >
-              <v-list-item-title>{{ detail.name }}</v-list-item-title>
-              <v-list-item-subtitle class="text-right">{{
-                detail.value
-              }}</v-list-item-subtitle>
-            </v-list-item>
-          </v-list>
-        </v-expansion-panel-content>
-      </v-expansion-panel>
-    </v-expansion-panels>
+        <v-expansion-panel v-if="selector">
+          <v-expansion-panel-header class="overline blue-grey--text text"
+            >Selected transcript ID: {{ selector.id }}</v-expansion-panel-header
+          >
+          <v-expansion-panel-content>
+            <v-list shaped>
+              <v-list-item
+                v-for="(detail, index) in selector.details"
+                :key="index"
+              >
+                <v-list-item-title>{{ detail.name }}</v-list-item-title>
+                <v-list-item-subtitle class="text-right">{{
+                  detail.value
+                }}</v-list-item-subtitle>
+              </v-list-item>
+            </v-list>
+          </v-expansion-panel-content>
+        </v-expansion-panel>
+      </v-expansion-panels>
 
-    <v-expansion-panels
-      focusable
-      hover
-      flat
-      class="mt-10 mb-10"
-      v-if="record && false"
-    >
-      <v-expansion-panel>
-        <v-expansion-panel-header>View as a tree</v-expansion-panel-header>
-        <v-expansion-panel-content>
-          <JsonPretty :summary="reference_model" />
-        </v-expansion-panel-content>
-      </v-expansion-panel>
-    </v-expansion-panels>
+      <v-expansion-panels
+        focusable
+        hover
+        flat
+        class="mt-10 mb-10"
+        v-if="record && false"
+      >
+        <v-expansion-panel>
+          <v-expansion-panel-header>View as a tree</v-expansion-panel-header>
+          <v-expansion-panel-content>
+            <JsonPretty :summary="reference_model" />
+          </v-expansion-panel-content>
+        </v-expansion-panel>
+      </v-expansion-panels>
+    </div>
   </div>
 </template>
 
@@ -100,6 +114,8 @@ export default {
       record: null,
       gene: null,
       selector: null,
+      progress: true,
+      no_response: true,
     };
   },
   created: function () {
@@ -122,19 +138,20 @@ export default {
       };
     }
     MutalyzerService.referenceModel(params).then((response) => {
+      this.progress = false;
       if (response.data) {
         this.reference_model = response.data;
         this.record = this.getRecord(this.reference_model);
         this.gene = this.getGene(this.reference_model);
         this.selector = this.getSelector(this.reference_model);
+        this.no_response = false;
+      } else {
+        this.no_response = true;
       }
     });
   },
   methods: {
     getRecord(annotations) {
-      if (annotations.type != "record") {
-        return;
-      }
       let output = { id: annotations.id };
       if (annotations.qualifiers) {
         output.details = this.extractQualifiers(annotations.qualifiers);

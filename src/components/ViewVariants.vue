@@ -1,5 +1,11 @@
 <template>
   <div>
+    <v-progress-linear
+      indeterminate
+      color="cyan"
+      v-if="progress"
+    ></v-progress-linear>
+
     <div v-for="(variant, v_i) in variants" :key="v_i">
       <div class="variant">{{ variant.description }}</div>
       <div class="wrapper">
@@ -18,17 +24,30 @@
             >
           </v-tooltip>
         </div>
+
         <!-- left -->
         <div class="seq">
           <span class="seq-elem" v-for="(s, s_i) in variant.left" :key="s_i">
-            <v-tooltip bottom>
-              <template v-slot:activator="{ on, attrs }">
-                <span v-bind="attrs" v-on="on">
-                  <span>{{ s }}</span></span
-                ></template
-              >
-              <span>{{ get_left_position(variant, s_i) }}</span>
-            </v-tooltip>
+            <v-list-item-action class="ma-0 pa-0" style="min-width: unset">
+              <v-menu>
+                <template #activator="{ on: onMenu }">
+                  <v-tooltip bottom>
+                    <template #activator="{ on: onTooltip }">
+                      <span v-on="{ ...onMenu, ...onTooltip }">{{
+                        s
+                      }}</span></template
+                    ><span>{{ get_left_position(variant, s_i) }}</span>
+                  </v-tooltip>
+                </template>
+                <v-list>
+                  <v-list-item class="text-right">
+                    <v-btn small text color="primary" @click="map(false)">
+                      Get HGVS location
+                    </v-btn>
+                  </v-list-item>
+                </v-list>
+              </v-menu>
+            </v-list-item-action>
           </span>
         </div>
         <div class="seq-variant">
@@ -295,6 +314,7 @@ export default {
   data() {
     return {
       variants: [],
+      progress: true,
     };
   },
   created: function () {
@@ -304,6 +324,7 @@ export default {
     get_variants: function () {
       if (this.description) {
         MutalyzerService.view(this.description).then((response) => {
+          this.progress = false;
           if (response.data) {
             this.variants = response.data;
           }
@@ -459,6 +480,7 @@ export default {
 
 .seq-elem:hover {
   background-color: #b8b8b8;
+  cursor: pointer;
 }
 
 .seqdel {
