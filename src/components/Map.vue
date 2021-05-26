@@ -2,10 +2,14 @@
   <div>
     <v-progress-linear
       indeterminate
-      v-if="progress_datasets"
+      v-if="progress_datasets && progress_other"
     ></v-progress-linear>
-    <div v-if="!progress_datasets">
-      <div v-if="response && response.genes">
+
+    <div v-if="!(progress_datasets && progress_other)">
+      <div v-if="!response_datasets">
+        Related references from NCBI Datasets not retrieved.
+      </div>
+      <div v-if="response_datasets && response && response.genes">
         <v-list>
           <div v-if="updated_accession">
             <v-subheader inset class="overline"
@@ -70,48 +74,44 @@
           </v-expansion-panel-content>
         </v-expansion-panel>
       </v-expansion-panels>
-    </div>
 
-    <v-progress-linear
-      indeterminate
-      color="cyan"
-      v-if="progress_other"
-    ></v-progress-linear>
+      <div v-if="!response_other">
+        Related references from NCBI Entrez not retrieved.
+      </div>
 
-    <div v-if="!progress_datasets && !progress_other && other_references">
-      <v-list>
-        <v-subheader inset class="overline">Other</v-subheader>
-        <div
-          v-for="t in other_references"
-          :key="t.reference_id + t.selector_id"
-        >
-          <MapDescription
-            :description="description"
-            :reference_id="t.reference_id"
-            :selector_id="t.selector_id"
-          />
-        </div>
-      </v-list>
-
-      <v-expansion-panels
-        focusable
-        hover
-        flat
-        class="mb-3"
-        v-if="eutils && !progress_other"
-      >
-        <v-expansion-panel>
-          <v-expansion-panel-header
-            >View NCBI Eutils response as a tree</v-expansion-panel-header
+      <div v-if="other_references.length != 0">
+        <v-list>
+          <v-subheader inset class="overline">Other</v-subheader>
+          <div
+            v-for="t in other_references"
+            :key="t.reference_id + t.selector_id"
           >
-          <v-expansion-panel-content>
-            <JsonPretty :summary="eutils" />
-          </v-expansion-panel-content>
-        </v-expansion-panel>
-      </v-expansion-panels>
-    </div>
+            <MapDescription
+              :description="description"
+              :reference_id="t.reference_id"
+              :selector_id="t.selector_id"
+            />
+          </div>
+        </v-list>
 
-    <div v-if="!accession">Work in progress.</div>
+        <v-expansion-panels
+          focusable
+          hover
+          flat
+          class="mb-3"
+          v-if="eutils && !progress_other"
+        >
+          <v-expansion-panel>
+            <v-expansion-panel-header
+              >View NCBI Eutils response as a tree</v-expansion-panel-header
+            >
+            <v-expansion-panel-content>
+              <JsonPretty :summary="eutils" />
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+        </v-expansion-panels>
+      </div>
+    </div>
   </div>
 </template>
 
@@ -144,7 +144,7 @@ export default {
       chromosomes: [],
       other_references: [],
       progress_datasets: true,
-      progress_other: false,
+      progress_other: true,
     };
   },
   mounted: function () {
@@ -200,17 +200,19 @@ export default {
       ) {
         this.gene_id = response.genes[0].gene.gene_id;
         let gene_name = response.genes[0].gene.symbol;
-        this.progress_other = true;
         NcbiEutils.get_gene_summary(this.gene_id).then((response) => {
+          this.progress_other = false;
           if (response.data) {
+            this.response_other = true;
             this.eutils = response.data;
             let references = this.get_eutils_hist(response.data, this.gene_id);
             for (let reference of references) {
               this.get_eutils_related(reference, gene_name);
             }
+          } else {
+            this.response_other = false;
           }
         });
-        this.progress_other = false;
       }
     },
     get_selector_id() {
@@ -244,9 +246,10 @@ export default {
         descendats: true,
       };
       MutalyzerService.referenceModel(params).then((response) => {
+        this.progress_datasets = false;
         if (response.data) {
+          this.response_datasets = true;
           this.eutils = response.data;
-          this.progress_datasets = false;
           if (response.data.id) {
             if (
               response.data.features &&
@@ -265,6 +268,8 @@ export default {
               }
             }
           }
+        } else {
+          this.response_datasets = false;
         }
       });
     },

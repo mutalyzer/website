@@ -2,7 +2,6 @@
   <div>
     <v-progress-linear
       indeterminate
-      color="cyan"
       class="mt-5"
       v-if="progress"
     ></v-progress-linear>
