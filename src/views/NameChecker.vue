@@ -276,11 +276,54 @@
           hover
           class="mt-5 mb-5"
           tile
+          v-if="response && response.rna"
+        >
+          <v-expansion-panel>
+            <v-expansion-panel-header class="overline"
+              >RNA Prediction</v-expansion-panel-header
+            >
+            <v-expansion-panel-content class="pt-5">
+              <v-sheet v-if="response.rna.errors">
+                <v-alert
+                  color="red lighten-1"
+                  tile
+                  border="left"
+                  dark
+                  v-for="(error, index) in response.rna.errors"
+                  :key="index"
+                >
+                  <div>
+                    {{ getMessage(error) }}
+                  </div>
+                </v-alert>
+              </v-sheet>
+
+              <div class="ma-4" v-if="response.rna.description">
+                <router-link
+                  class="ok-description-link"
+                  :to="{
+                    name: 'NameChecker',
+                    params: {
+                      descriptionRouter: response.rna.description,
+                    },
+                  }"
+                  >{{ response.rna.description }}</router-link
+                >
+              </div>
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+        </v-expansion-panels>
+
+        <v-expansion-panels
+          focusable
+          hover
+          class="mt-5 mb-5"
+          tile
           v-if="response && response.protein"
         >
           <v-expansion-panel>
             <v-expansion-panel-header class="overline"
-              >Protein Details</v-expansion-panel-header
+              >Protein Prediction</v-expansion-panel-header
             >
             <v-expansion-panel-content>
               <AffectedProtein :protein="this.response.protein" />
