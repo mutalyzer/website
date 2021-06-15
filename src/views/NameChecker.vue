@@ -298,7 +298,7 @@
         >
           <v-expansion-panel>
             <v-expansion-panel-header class="overline"
-              >Reference Information</v-expansion-panel-header
+              >Reference Sequence Information</v-expansion-panel-header
             >
             <v-expansion-panel-content>
               <ReferenceInformation :model="this.response.corrected_model" />
