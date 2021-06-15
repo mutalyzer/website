@@ -63,13 +63,23 @@
           prominent
           tile
           v-if="isNormalized()"
+          :color="getNormalizedColor()"
           type="success"
         >
           <v-row align="center">
             <v-col class="grow">
-              <span style="font-family: monospace"
-                >{{ response.normalized_description }}
-              </span>
+              <v-tooltip bottom>
+                <template v-slot:activator="{ on, attrs }">
+                  <span style="font-family: monospace" v-bind="attrs" v-on="on">
+                    {{ response.normalized_description }}
+                  </span>
+                </template>
+                <span v-if="correctionsPerformed()"
+                  >Different than the input description</span
+                >
+                <span v-else>Same as the input description</span>
+
+              </v-tooltip>
             </v-col>
             <v-col class="shrink">
               <v-tooltip bottom>
@@ -173,17 +183,19 @@
                 <div :class="getInputDescriptionClass()">
                   {{ inputDescription }}
                 </div>
-                <div class="overline">Corrections</div>
-                <v-alert
-                  color="light-blue lighten-5"
-                  tile
-                  border="left"
-                  class="ml-2"
-                  v-for="(info, index) in response.infos"
-                  :key="index"
-                >
-                  {{ getMessage(info) }}
-                </v-alert>
+                <div v-if="response.infos">
+                  <div class="overline">Corrections</div>
+                  <v-alert
+                    color="light-blue lighten-5"
+                    tile
+                    border="left"
+                    class="ml-2"
+                    v-for="(info, index) in response.infos"
+                    :key="index"
+                  >
+                    {{ getMessage(info) }}
+                  </v-alert>
+                </div>
                 <div v-if="correctionsPerformed() && showCorrections">
                   <div class="overline">Corrected Description</div>
                   <div :class="getCorrectedDescriptionClass()">
@@ -192,6 +204,7 @@
                 </div>
               </v-sheet>
             </v-expand-transition>
+
             <v-sheet
               class="pt-10 pr-10 pb-8 pl-10"
               color="red lighten-5"
@@ -215,61 +228,6 @@
             </v-sheet>
           </v-sheet>
         </v-expand-transition>
-
-        <v-expansion-panels
-          focusable
-          hover
-          class="mt-5 mb-5"
-          tile
-          v-if="response && response.equivalent_descriptions"
-        >
-          <v-expansion-panel>
-            <v-expansion-panel-header class="overline"
-              >Equivalent Descriptions</v-expansion-panel-header
-            >
-            <v-expansion-panel-content class="pt-5">
-              <div
-                class="ml-4"
-                v-for="(values, c_s) in response.equivalent_descriptions"
-                :key="c_s"
-              >
-                <span v-if="c_s == 'c'">Coding</span>
-                <span v-else-if="c_s == 'n'">Noncoding</span>
-                <span v-else-if="c_s == 'g'">Genomic</span>
-                <span v-else> {{ c_s }} </span>
-                <div
-                  v-for="(equivalentDescription, index) in values"
-                  :key="index"
-                >
-                  <template v-if="c_s === 'c'">
-                    <div>
-                      <router-link
-                        class="ok-description-link"
-                        :to="{
-                          name: 'NameChecker',
-                          params: {
-                            descriptionRouter: equivalentDescription[0],
-                          },
-                        }"
-                        >{{ equivalentDescription[0] }}</router-link
-                      >
-                    </div>
-                  </template>
-                  <template v-else>
-                    <router-link
-                      class="ok-description-link"
-                      :to="{
-                        name: 'NameChecker',
-                        params: { descriptionRouter: equivalentDescription },
-                      }"
-                      >{{ equivalentDescription }}</router-link
-                    >
-                  </template>
-                </div>
-              </div>
-            </v-expansion-panel-content>
-          </v-expansion-panel>
-        </v-expansion-panels>
 
         <v-expansion-panels
           focusable
@@ -336,7 +294,7 @@
           hover
           class="mt-5 mb-5"
           tile
-          v-if="response && response.corrected_model"
+          v-if="showReferenceInformation()"
         >
           <v-expansion-panel>
             <v-expansion-panel-header class="overline"
@@ -513,6 +471,15 @@ export default {
         return false;
       }
     },
+    getNormalizedColor: function () {
+      if (this.isNormalized) {
+        if (this.response.normalized_description == this.inputDescription) {
+          return "green";
+        } else {
+          return "blue";
+        }
+      }
+    },
     correctionsPerformed: function () {
       return (
         this.response &&
@@ -596,6 +563,20 @@ export default {
         } else {
           return "description";
         }
+      }
+    },
+    showReferenceInformation() {
+      if (this.response && this.response.corrected_description) {
+        if (this.response.errors) {
+          for (let error of this.response.errors) {
+            if (error.code && error.code == "ERETR") {
+              return false;
+            }
+          }
+        }
+        return true;
+      } else {
+        return false;
       }
     },
   },
