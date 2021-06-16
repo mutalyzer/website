@@ -74,11 +74,10 @@
                     {{ response.normalized_description }}
                   </span>
                 </template>
-                <span v-if="correctionsPerformed()"
+                <span v-if="response.normalized_description != inputDescription"
                   >Different than the input description</span
                 >
                 <span v-else>Same as the input description</span>
-
               </v-tooltip>
             </v-col>
             <v-col class="shrink">
@@ -472,7 +471,7 @@ export default {
       }
     },
     getNormalizedColor: function () {
-      if (this.isNormalized) {
+      if (this.isNormalized()) {
         if (this.response.normalized_description == this.inputDescription) {
           return "green";
         } else {
