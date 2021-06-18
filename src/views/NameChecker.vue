@@ -282,7 +282,7 @@
             <v-expansion-panel-header class="overline"
               >Protein Prediction</v-expansion-panel-header
             >
-            <v-expansion-panel-content>
+            <v-expansion-panel-content class="pt-5 pb-5">
               <AffectedProtein :protein="this.response.protein" />
             </v-expansion-panel-content>
           </v-expansion-panel>

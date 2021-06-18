@@ -1,8 +1,17 @@
 <template>
   <div>
     <div class="overline">Affected Protein Description</div>
-    <div class="protein-description">
-      {{ protein.description }}
+    <div>
+      <router-link
+        class="ok-description-link"
+        :to="{
+          name: 'NameChecker',
+          params: {
+            descriptionRouter: protein.description,
+          },
+        }"
+        >{{ protein.description }}</router-link
+      >
     </div>
     <div class="overline">Affected Protein Reference Sequence</div>
     <div class="protein-seq">
@@ -96,6 +105,7 @@ export default {
   },
 };
 </script>
+<style scoped src="../assets/main.css"></style>
 <style lang="scss" scoped>
 .protein-description {
   text-decoration: none;
