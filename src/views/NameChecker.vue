@@ -227,6 +227,61 @@
             </v-sheet>
           </v-sheet>
         </v-expand-transition>
+        
+        <v-expansion-panels
+          focusable
+          hover
+          class="mt-5 mb-5"
+          tile
+          v-if="response && response.equivalent_descriptions"
+        >
+          <v-expansion-panel>
+            <v-expansion-panel-header class="overline"
+              >Equivalent Descriptions</v-expansion-panel-header
+            >
+            <v-expansion-panel-content class="pt-5">
+              <div
+                class="ml-4"
+                v-for="(values, c_s) in response.equivalent_descriptions"
+                :key="c_s"
+              >
+                <span v-if="c_s == 'c'">Coding</span>
+                <span v-else-if="c_s == 'n'">Noncoding</span>
+                <span v-else-if="c_s == 'g'">Genomic</span>
+                <span v-else> {{ c_s }} </span>
+                <div
+                  v-for="(equivalentDescription, index) in values"
+                  :key="index"
+                >
+                  <template v-if="c_s === 'c'">
+                    <div>
+                      <router-link
+                        class="ok-description-link"
+                        :to="{
+                          name: 'NameChecker',
+                          params: {
+                            descriptionRouter: equivalentDescription[0],
+                          },
+                        }"
+                        >{{ equivalentDescription[0] }}</router-link
+                      >
+                    </div>
+                  </template>
+                  <template v-else>
+                    <router-link
+                      class="ok-description-link"
+                      :to="{
+                        name: 'NameChecker',
+                        params: { descriptionRouter: equivalentDescription },
+                      }"
+                      >{{ equivalentDescription }}</router-link
+                    >
+                  </template>
+                </div>
+              </div>
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+        </v-expansion-panels>
 
         <v-expansion-panels
           focusable
