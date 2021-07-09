@@ -227,7 +227,7 @@
             </v-sheet>
           </v-sheet>
         </v-expand-transition>
-        
+
         <v-expansion-panels
           focusable
           hover
@@ -248,6 +248,7 @@
                 <span v-if="c_s == 'c'">Coding</span>
                 <span v-else-if="c_s == 'n'">Noncoding</span>
                 <span v-else-if="c_s == 'g'">Genomic</span>
+                <span v-else-if="c_s == 'p'"></span>
                 <span v-else> {{ c_s }} </span>
                 <div
                   v-for="(equivalentDescription, index) in values"
@@ -278,6 +279,53 @@
                     >
                   </template>
                 </div>
+              </div>
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+        </v-expansion-panels>
+
+        <v-expansion-panels
+          focusable
+          hover
+          class="mt-5 mb-5"
+          tile
+          v-if="response && response.back_translated_descriptions"
+        >
+          <v-expansion-panel>
+            <v-expansion-panel-header class="overline"
+              >Back Translated Descriptions</v-expansion-panel-header
+            >
+            <v-expansion-panel-content class="pt-5">
+              <div
+                v-for="(
+                  equivalentDescription, index
+                ) in response.back_translated_descriptions"
+                :key="index"
+              >
+                <template v-if="c_s === 'c'">
+                  <div>
+                    <router-link
+                      class="ok-description-link"
+                      :to="{
+                        name: 'NameChecker',
+                        params: {
+                          descriptionRouter: equivalentDescription,
+                        },
+                      }"
+                      >{{ equivalentDescription }}</router-link
+                    >
+                  </div>
+                </template>
+                <template v-else>
+                  <router-link
+                    class="ok-description-link"
+                    :to="{
+                      name: 'NameChecker',
+                      params: { descriptionRouter: equivalentDescription },
+                    }"
+                    >{{ equivalentDescription }}</router-link
+                  >
+                </template>
               </div>
             </v-expansion-panel-content>
           </v-expansion-panel>
