@@ -22,13 +22,27 @@
           </v-btn>
         </v-sheet>
 
-        <v-progress-linear
-          :active="progress"
-          :value="progressValue"
-        ></v-progress-linear>
+        <v-alert
+          prominent
+          type="error"
+          tile
+          elevation="2"
+          class="mt-10 mb-0"
+          v-if="!validVariantsNumber"
+        >
+          <v-row align="center">
+            <v-col class="grow overline"
+              >Maximum of 50 variants supported.</v-col
+            >
+          </v-row>
+        </v-alert>
 
-        <v-sheet v-if="done" elevation="2" class="pa-10 mt-10">
-          <p>Done!</p>
+        <v-sheet v-if="progress || done" elevation="2" class="pa-10 mt-10">
+          <p v-if="progress">In progress ...</p>
+          <p v-if="done">Done!</p>
+
+          <v-progress-linear :value="progressValue"></v-progress-linear>
+
           <v-btn
             v-if="!showDetails"
             class="mt-5"
@@ -45,7 +59,7 @@
           >
             Hide Details
           </v-btn>
-          <v-btn class="ml-5 mt-5" color="primary" @click="getCsv">
+          <v-btn v-if="done" class="ml-5 mt-5" color="primary" @click="getCsv">
             Download
           </v-btn>
         </v-sheet>
@@ -109,6 +123,39 @@
                 </v-col>
               </v-row>
             </v-alert>
+
+            <v-alert
+              prominent
+              type="error"
+              tile
+              elevation="2"
+              class="mt-10 mb-0"
+              v-if="variant.response && variant.response.errors"
+            >
+              <v-row align="center">
+                <v-col class="grow overline"
+                  >Description could not be interpreted</v-col
+                >
+              </v-row>
+            </v-alert>
+
+            <v-sheet
+              elevation="2"
+              v-if="variant.response && variant.response.errors"
+            >
+              <v-sheet class="pt-10 pr-10 pb-8 pl-10" color="red lighten-5">
+                <v-alert
+                  color="red lighten-1"
+                  tile
+                  border="left"
+                  dark
+                  v-for="(error, index) in variant.response.errors"
+                  :key="index"
+                >
+                  {{ getMessage(error) }}
+                </v-alert>
+              </v-sheet>
+            </v-sheet>
           </v-sheet>
         </div>
       </v-flex>
@@ -124,6 +171,7 @@ export default {
   data: () => ({
     filePath: null,
     fileData: null,
+    validVariantsNumber: true,
     variants: [],
     progress: false,
     progressValue: 0,
@@ -132,9 +180,9 @@ export default {
   }),
   methods: {
     loadFile() {
-      console.log("pressed");
       this.fileData = null;
       this.variants = [];
+      this.validVariantsNumber = true;
       this.progress = false;
       this.progressValue = 0;
       this.done = false;
@@ -152,7 +200,12 @@ export default {
             this.variants.push({ input: variant, progress: true });
           }
         }
-        this.batchCheck();
+        if (this.variants.length > 50) {
+          this.validVariantsNumber = false;
+        } else {
+          this.progress = true;
+          this.batchCheck();
+        }
       };
     },
     batchCheck() {
@@ -217,6 +270,12 @@ export default {
           return "blue";
         }
       }
+    },
+    getMessage: function (message) {
+      if (message.details) {
+        return message.details + " (" + message.code + ")";
+      }
+      return message;
     },
   },
 };
