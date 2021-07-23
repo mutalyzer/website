@@ -302,30 +302,14 @@
                 ) in response.back_translated_descriptions"
                 :key="index"
               >
-                <template v-if="c_s === 'c'">
-                  <div>
-                    <router-link
-                      class="ok-description-link"
-                      :to="{
-                        name: 'NameChecker',
-                        params: {
-                          descriptionRouter: equivalentDescription,
-                        },
-                      }"
-                      >{{ equivalentDescription }}</router-link
-                    >
-                  </div>
-                </template>
-                <template v-else>
-                  <router-link
-                    class="ok-description-link"
-                    :to="{
-                      name: 'NameChecker',
-                      params: { descriptionRouter: equivalentDescription },
-                    }"
-                    >{{ equivalentDescription }}</router-link
-                  >
-                </template>
+                <router-link
+                  class="ok-description-link"
+                  :to="{
+                    name: 'NameChecker',
+                    params: { descriptionRouter: equivalentDescription },
+                  }"
+                  >{{ equivalentDescription }}</router-link
+                >
               </div>
             </v-expansion-panel-content>
           </v-expansion-panel>
