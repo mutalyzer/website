@@ -32,13 +32,13 @@
         >
           <v-row align="center">
             <v-col class="grow overline"
-              >Maximum of 50 variants supported.</v-col
+              >A maximum of 50 variants are supported.</v-col
             >
           </v-row>
         </v-alert>
 
         <v-sheet v-if="progress || done" elevation="2" class="pa-10 mt-10">
-          <p v-if="progress">In progress ...</p>
+          <p v-if="progress">Processing {{ variants.length }} variants ...</p>
           <p v-if="done">Done!</p>
 
           <v-progress-linear :value="progressValue"></v-progress-linear>
@@ -248,13 +248,41 @@ export default {
       }
     },
     getCsv() {
-      let rows = [];
+      let rows = [
+        ["Input", "Status", "Normalized", "DNA g.", "RNA", "Protein"],
+      ];
       for (let variant of this.variants) {
+        let row = [variant.input];
         if (variant.response.errors) {
-          rows.push([variant.input, "error"]);
-        } else {
-          rows.push([variant.input, variant.response.normalized_description]);
+          row.push("Failed");
+          row.push("");
+        } else if (variant.response.normalized_description != variant.input) {
+          row.push("Corrected");
+          row.push(variant.response.normalized_description);
+        } else if (variant.response.normalized_description) {
+          row.push("Success");
+          row.push(variant.response.normalized_description);
         }
+        if (
+          variant.response &&
+          variant.response.equivalent_descriptions &&
+          variant.response.equivalent_descriptions.g
+        ) {
+          row.push(variant.response.equivalent_descriptions.g[0]);
+        } else {
+          row.push("");
+        }
+        if (variant.response.rna && variant.response.rna.description) {
+          row.push(variant.response.rna.description);
+        } else {
+          row.push("");
+        }
+        if (variant.response.protein && variant.response.protein.description) {
+          row.push(variant.response.protein.description);
+        } else {
+          row.push("");
+        }
+        rows.push(row);
       }
       let outputContent =
         "data:text/csv;charset=utf-8," +
