@@ -2,16 +2,12 @@
   <div>
     <div class="overline">Affected Protein Description</div>
     <div>
-      <router-link
-        class="ok-description-link"
-        :to="{
-          name: 'NameChecker',
-          params: {
-            descriptionRouter: protein.description,
-          },
-        }"
-        >{{ protein.description }}</router-link
-      >
+      <Description
+        :description="protein.description"
+        :css_class="'ok-description-link'"
+        :to_name="'NameChecker'"
+        :to_params="{ descriptionRouter: protein.description }"
+      />
     </div>
     <div class="overline">Affected Protein Reference Sequence</div>
     <div class="protein-seq">
@@ -29,8 +25,13 @@
 </template>
 
 <script>
+import Description from "../components/Description.vue";
+
 export default {
   name: "AffectedProtein",
+  components: {
+    Description,
+  },
   props: {
     protein: null,
   },

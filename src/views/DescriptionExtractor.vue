@@ -58,7 +58,7 @@
           </v-form>
         </v-sheet>
         <v-sheet elevation="2" class="pa-10 mt-10" v-if="summary">
-          {{ summary }}
+          <Description :description="summary" />
         </v-sheet>
       </v-flex>
     </v-layout>
@@ -67,8 +67,12 @@
 
 <script>
 import MutalyzerService from "../services/MutalyzerService.js";
+import Description from "../components/Description.vue";
 
 export default {
+  components: {
+    Description,
+  },
   data: () => ({
     valid: true,
     lazy: false,

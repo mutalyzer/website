@@ -1,9 +1,11 @@
 :root {
   --green: #4CAF50;
+  --green-lighten-5: #E8F5E9;
   --light-blue-lighten-5: #E1F5FE;
   --red-accent-4: #D50000;
   --red-lighten-5: #FFEBEE;
   --blue: #2196F3;
+  --blue-lighten-5: #E3F2FD;
   --blue-grey-lighten-5: #ECEFF1;
   --blue-grey-lighten-4: #CFD8DC;
   --grey-lighten-5: #FAFAFA;
@@ -78,6 +80,22 @@ li {
   font-family: monospace;
 }
 
+.corrected-description-link-reverse {
+  text-decoration: none;
+  margin-top: 2px;
+  padding: 5px 10px;
+  font-family: monospace;
+  display: inline-block;
+  color: #ffffff;
+  background-color: var(--blue);
+}
+
+.corrected-description-link-reverse:hover {
+  color: var(--blue-lighten-5);
+  background-color: var(--blue);
+  cursor: pointer;
+}
+
 .normalized-description {
   color: #000399;
   padding: 5px 10px;
@@ -103,6 +121,22 @@ li {
 
 .ok-description-link:hover {
   color: #ffffff;
+  background-color: var(--green);
+  cursor: pointer;
+}
+
+.ok-description-link-reverse {
+  text-decoration: none;
+  margin-top: 2px;
+  padding: 5px 10px;
+  font-family: monospace;
+  display: inline-block;
+  color: #ffffff;
+  background-color: var(--green);
+}
+
+.ok-description-link-reverse:hover {
+  color: var(--green-lighten-5);
   background-color: var(--green);
   cursor: pointer;
 }

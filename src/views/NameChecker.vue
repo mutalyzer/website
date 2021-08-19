@@ -68,32 +68,59 @@
         >
           <v-row align="center">
             <v-col class="grow">
-              <v-tooltip bottom>
-                <template v-slot:activator="{ on, attrs }">
-                  <span style="font-family: monospace" v-bind="attrs" v-on="on">
-                    {{ response.normalized_description }}
-                  </span>
-                </template>
-                <span v-if="response.normalized_description != inputDescription"
-                  >Different than the input description</span
-                >
-                <span v-else>Same as the input description</span>
-              </v-tooltip>
-            </v-col>
-            <v-col class="shrink">
-              <v-tooltip bottom>
-                <template v-slot:activator="{ on, attrs }">
-                  <v-btn
-                    v-bind="attrs"
-                    v-on="on"
-                    icon
-                    v-clipboard="response.normalized_description"
-                  >
-                    <v-icon>mdi-content-copy</v-icon>
-                  </v-btn>
-                </template>
-                <span>Copy</span>
-              </v-tooltip>
+              <Description
+                :description="response.normalized_description"
+                :tooltip="
+                  response.normalized_description != inputDescription
+                    ? 'Different than the input description'
+                    : 'Same as the input description'
+                "
+                :css_class="
+                  response.normalized_description != inputDescription
+                    ? 'corrected-description-link-reverse'
+                    : 'ok-description-link-reverse'
+                "
+                :to_name="'NameChecker'"
+                :to_params="{
+                  descriptionRouter: response.normalized_description,
+                }"
+              />
+
+              <!-- <v-row align="center">
+                <v-col class="grow">
+                  <v-tooltip bottom>
+                    <template v-slot:activator="{ on, attrs }">
+                      <span
+                        style="font-family: monospace"
+                        v-bind="attrs"
+                        v-on="on"
+                      >
+                        {{ response.normalized_description }}
+                      </span>
+                    </template>
+                    <span
+                      v-if="response.normalized_description != inputDescription"
+                      >Different than the input description</span
+                    >
+                    <span v-else>Same as the input description</span>
+                  </v-tooltip>
+                </v-col>
+                <v-col class="shrink">
+                  <v-tooltip bottom>
+                    <template v-slot:activator="{ on, attrs }">
+                      <v-btn
+                        v-bind="attrs"
+                        v-on="on"
+                        icon
+                        v-clipboard="response.normalized_description"
+                      >
+                        <v-icon>mdi-content-copy</v-icon>
+                      </v-btn>
+                    </template>
+                    <span>Copy</span>
+                  </v-tooltip>
+                </v-col>
+              </v-row> -->
             </v-col>
             <v-col class="shrink" v-if="correctionsPerformed()">
               <v-tooltip bottom>
@@ -255,28 +282,22 @@
                   :key="index"
                 >
                   <template v-if="c_s === 'c'">
-                    <div>
-                      <router-link
-                        class="ok-description-link"
-                        :to="{
-                          name: 'NameChecker',
-                          params: {
-                            descriptionRouter: equivalentDescription[0],
-                          },
-                        }"
-                        >{{ equivalentDescription[0] }}</router-link
-                      >
-                    </div>
+                    <Description
+                      :description="equivalentDescription[0]"
+                      :css_class="'ok-description-link'"
+                      :to_name="'NameChecker'"
+                      :to_params="{
+                        descriptionRouter: equivalentDescription[0],
+                      }"
+                    />
                   </template>
                   <template v-else>
-                    <router-link
-                      class="ok-description-link"
-                      :to="{
-                        name: 'NameChecker',
-                        params: { descriptionRouter: equivalentDescription },
-                      }"
-                      >{{ equivalentDescription }}</router-link
-                    >
+                    <Description
+                      :description="equivalentDescription"
+                      :css_class="'ok-description-link'"
+                      :to_name="'NameChecker'"
+                      :to_params="{ descriptionRouter: equivalentDescription }"
+                    />
                   </template>
                 </div>
               </div>
@@ -342,17 +363,13 @@
                 </v-alert>
               </v-sheet>
 
-              <div class="ma-4" v-if="response.rna.description">
-                <router-link
-                  class="ok-description-link"
-                  :to="{
-                    name: 'NameChecker',
-                    params: {
-                      descriptionRouter: response.rna.description,
-                    },
-                  }"
-                  >{{ response.rna.description }}</router-link
-                >
+              <div class="mt-4 mb-4" v-if="response.rna.description">
+                <Description
+                  :description="response.rna.description"
+                  :css_class="'ok-description-link'"
+                  :to_name="'NameChecker'"
+                  :to_params="{ descriptionRouter: response.rna.description }"
+                />
               </div>
             </v-expansion-panel-content>
           </v-expansion-panel>
@@ -467,6 +484,7 @@ import SyntaxError from "../components/SyntaxError.vue";
 import ReferenceInformation from "../components/ReferenceInformation.vue";
 import Map from "../components/Map.vue";
 import ViewVariants from "../components/ViewVariants.vue";
+import Description from "../components/Description.vue";
 
 export default {
   components: {
@@ -477,6 +495,7 @@ export default {
     ReferenceInformation,
     Map,
     ViewVariants,
+    Description,
   },
   props: ["descriptionRouter"],
   created: function () {
