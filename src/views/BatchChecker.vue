@@ -3,7 +3,10 @@
     <v-layout>
       <v-flex xs12>
         <h1 class="display-1 mt-10">Batch Checker</h1>
-        <p>The Batch Checker ...</p>
+        <p>
+          The Batch Checker can be used to process up to 50 descriptions with
+          the Name Checker.
+        </p>
         <v-sheet elevation="2" class="pa-10 mt-10">
           <v-file-input
             truncate-length="15"
@@ -32,7 +35,7 @@
         >
           <v-row align="center">
             <v-col class="grow overline"
-              >A maximum of 50 variants are supported.</v-col
+              >A maximum of 50 variant descriptionss are supported.</v-col
             >
           </v-row>
         </v-alert>
@@ -270,17 +273,17 @@ export default {
         ) {
           row.push(variant.response.equivalent_descriptions.g[0]);
         } else {
-          row.push("");
+          row.push("N/A");
         }
         if (variant.response.rna && variant.response.rna.description) {
           row.push(variant.response.rna.description);
         } else {
-          row.push("");
+          row.push("N/A");
         }
         if (variant.response.protein && variant.response.protein.description) {
           row.push(variant.response.protein.description);
         } else {
-          row.push("");
+          row.push("N/A");
         }
         rows.push(row);
       }
