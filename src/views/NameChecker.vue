@@ -85,42 +85,6 @@
                   descriptionRouter: response.normalized_description,
                 }"
               />
-
-              <!-- <v-row align="center">
-                <v-col class="grow">
-                  <v-tooltip bottom>
-                    <template v-slot:activator="{ on, attrs }">
-                      <span
-                        style="font-family: monospace"
-                        v-bind="attrs"
-                        v-on="on"
-                      >
-                        {{ response.normalized_description }}
-                      </span>
-                    </template>
-                    <span
-                      v-if="response.normalized_description != inputDescription"
-                      >Different than the input description</span
-                    >
-                    <span v-else>Same as the input description</span>
-                  </v-tooltip>
-                </v-col>
-                <v-col class="shrink">
-                  <v-tooltip bottom>
-                    <template v-slot:activator="{ on, attrs }">
-                      <v-btn
-                        v-bind="attrs"
-                        v-on="on"
-                        icon
-                        v-clipboard="response.normalized_description"
-                      >
-                        <v-icon>mdi-content-copy</v-icon>
-                      </v-btn>
-                    </template>
-                    <span>Copy</span>
-                  </v-tooltip>
-                </v-col>
-              </v-row> -->
             </v-col>
             <v-col class="shrink" v-if="correctionsPerformed()">
               <v-tooltip bottom>
