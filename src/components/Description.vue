@@ -1,19 +1,20 @@
 <template>
   <v-row align="center">
-    <v-col v-if="tooltip" class="grow">
+    <v-col v-if="tooltip && to_name" class="grow">
       <v-tooltip bottom>
         <template v-slot:activator="{ on, attrs }">
           <router-link
             v-if="to_name"
             :class="css_class"
-            v-bind="attrs"
-            v-on="on"
             :to="{
               name: to_name,
               params: to_params,
             }"
-            >{{ description }}</router-link
           >
+            <div :class="css_class" v-bind="attrs" v-on="on">
+              {{ description }}
+            </div>
+          </router-link>
           <div v-else :class="css_class" v-bind="attrs" v-on="on">
             {{ description }}
           </div>
