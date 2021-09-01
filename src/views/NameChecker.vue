@@ -86,7 +86,7 @@
                 }"
               />
             </v-col>
-            <v-col class="shrink" v-if="correctionsPerformed()">
+            <v-col class="shrink" v-if="infoMessages()">
               <v-tooltip bottom>
                 <template v-slot:activator="{ on, attrs }">
                   <v-btn
@@ -135,7 +135,7 @@
             <v-col class="grow overline"
               >Description could not be interpreted</v-col
             >
-            <v-col class="shrink" v-if="correctionsPerformed()">
+            <v-col class="shrink" v-if="infoMessages()">
               <v-tooltip bottom>
                 <template v-slot:activator="{ on, attrs }">
                   <v-btn
@@ -158,23 +158,26 @@
         <v-expand-transition>
           <v-sheet
             elevation="2"
-            v-if="
-              (correctionsPerformed() && showCorrections) || errorsEncountered()
-            "
+            v-if="(infoMessages() && showCorrections) || errorsEncountered()"
           >
             <v-expand-transition>
               <v-sheet
                 ref="refCorrections"
                 class="pt-5 pr-10 pb-5 pl-10"
                 color="grey lighten-5"
-                v-if="correctionsPerformed() && showCorrections"
+                v-if="infoMessages() && showCorrections"
               >
-                <div class="overline">Input Description</div>
-                <div :class="getInputDescriptionClass()">
+                <div v-if="correctionsPerformed()" class="overline">
+                  Input Description
+                </div>
+                <div
+                  v-if="correctionsPerformed()"
+                  :class="getInputDescriptionClass()"
+                >
                   {{ inputDescription }}
                 </div>
                 <div v-if="response.infos">
-                  <div class="overline">Corrections</div>
+                  <div class="overline">Corrections / Info Messages</div>
                   <v-alert
                     color="light-blue lighten-5"
                     tile
@@ -555,6 +558,9 @@ export default {
         this.response.corrected_description &&
         this.response.corrected_description != this.inputDescription
       );
+    },
+    infoMessages: function () {
+      return this.response && this.response.infos;
     },
     syntaxError: function () {
       if (this.getSyntaxError()) {
