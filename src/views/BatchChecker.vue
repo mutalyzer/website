@@ -35,7 +35,7 @@
         >
           <v-row align="center">
             <v-col class="grow overline"
-              >A maximum of 50 variant descriptionss are supported.</v-col
+              >A maximum number of 50 variant descriptions are supported.</v-col
             >
           </v-row>
         </v-alert>
@@ -291,7 +291,11 @@ export default {
         "data:text/csv;charset=utf-8," +
         rows.map((e) => e.join("\t")).join("\n");
       var encodedUri = encodeURI(outputContent);
-      window.open(encodedUri);
+      var download_link = document.createElement("a");
+      download_link.setAttribute("href", encodedUri);
+      download_link.setAttribute("download", "batch_output.csv");
+      document.body.appendChild(download_link);
+      download_link.click();
     },
     getNormalizedColor: function (variant) {
       if (variant.response && variant.response.normalized_description) {
