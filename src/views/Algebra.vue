@@ -28,7 +28,7 @@
               </v-col>
             </v-row>
             <v-row class="pl-2 pr-2">
-              <v-col cols="12" sm="9" lg="3">
+              <v-col cols="12" sm="9" lg="9">
                 <v-text-field
                   :rules="rules"
                   v-model="lhs"
@@ -48,7 +48,7 @@
               </v-col>
             </v-row>
             <v-row class="pl-2 pr-2">
-              <v-col cols="12" sm="9" lg="3">
+              <v-col cols="12" sm="9" lg="9">
                 <v-text-field
                   :rules="rules"
                   v-model="rhs"
