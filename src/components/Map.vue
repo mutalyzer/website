@@ -2,8 +2,42 @@
   <div>
     <v-progress-linear
       indeterminate
-      v-if="progress_datasets && progress_other"
+      v-if="progress_related_references_retriever"
     ></v-progress-linear>
+
+    <div v-if="related_references_retriever">
+      <div
+        v-for="(references, source) in related_references_retriever"
+        :key="source"
+      >
+        <v-subheader inset class="overline">{{ source }}</v-subheader>
+        <div
+          v-for="reference in references"
+          :key="
+            reference.selector
+              ? reference.id + reference.selector.id
+              : reference.id
+          "
+        >
+          <MapDescription
+            v-if="reference.selector"
+            :description="description"
+            :reference_id="reference.id"
+            :selector_id="reference.selector.id"
+          />
+          <MapDescription
+            v-else
+            :description="description"
+            :reference_id="reference.id"
+          />
+        </div>
+      </div>
+    </div>
+
+    <!-- <v-progress-linear
+      indeterminate
+      v-if="progress_datasets && progress_other"
+    ></v-progress-linear> -->
 
     <div v-if="!(progress_datasets && progress_other)">
       <div v-if="!response_datasets">
@@ -145,13 +179,29 @@ export default {
       other_references: [],
       progress_datasets: true,
       progress_other: true,
+      response_datasets: false,
+      related_references_retriever: null,
+      progress_related_references_retriever: true,
     };
   },
   mounted: function () {
     this.get_accession();
-    this.get_response();
+    // this.get_response();
+    this.get_related_references_retriever();
   },
   methods: {
+    get_related_references_retriever() {
+      console.log("here");
+      MutalyzerService.relatedReferences(this.accession).then((response) => {
+        if (response.data) {
+          this.progress_related_references_retriever = false;
+          console.log(response.data);
+          this.related_references_retriever = response.data;
+        } else {
+          console.log("didn't work");
+        }
+      });
+    },
     get_accession() {
       if (
         ["c", "n"].includes(this.model.coordinate_system) &&
@@ -262,8 +312,9 @@ export default {
                     reference_id: response.data.id,
                     selector_id: selector.id,
                   };
-                  if (!this.in_chromosomes(other_reference))
+                  if (!this.in_chromosomes(other_reference)) {
                     this.other_references.push(other_reference);
+                  }
                 }
               }
             }

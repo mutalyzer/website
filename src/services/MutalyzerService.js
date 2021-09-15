@@ -12,6 +12,9 @@ const apiClient = axios.create({
 });
 
 export default {
+  compare(params) {
+    return apiClient.get("/compare/", { params });
+  },
   nameCheck(description) {
     return apiClient.get("/name_check/" + encodeURIComponent(description));
   },
@@ -32,5 +35,10 @@ export default {
   },
   view(description) {
     return apiClient.get("/view_variants/" + encodeURIComponent(description));
+  },
+  relatedReferences(reference_id) {
+    return apiClient.get(
+      "/related_references/" + encodeURIComponent(reference_id)
+    );
   },
 };

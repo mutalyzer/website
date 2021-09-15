@@ -71,6 +71,13 @@
               <v-list-item-title>Batch Checker</v-list-item-title>
             </v-list-item>
 
+            <v-list-item to="/algebra">
+              <v-list-item-icon>
+                <v-icon>mdi-description</v-icon>
+              </v-list-item-icon>
+              <v-list-item-title>Algebra</v-list-item-title>
+            </v-list-item>
+
             <v-list-item :href="apiBaseUrl">
               <v-list-item-icon>
                 <v-icon>mdi-cog</v-icon>
