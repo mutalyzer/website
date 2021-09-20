@@ -41,7 +41,7 @@
 
               <v-col cols="12" sm="6" lg="3">
                 <v-select
-                  :items="['Reference', 'Selector', 'g', 'c', 'n']"
+                  :items="['g', 'c', 'n']"
                   v-model="fromCoordinateSystem"
                   label="Coordinate system"
                   :clearable="true"
@@ -80,7 +80,7 @@
               <v-col cols="12" sm="6" lg="3">
                 <v-select
                   v-model="toCoordinateSystem"
-                  :items="['Reference', 'Selector', 'g', 'c', 'n']"
+                  :items="['g', 'c', 'n']"
                   :clearable="true"
                   label="Coordinate system"
                 ></v-select>

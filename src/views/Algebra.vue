@@ -4,95 +4,139 @@
       <v-flex xs12>
         <h1 class="display-1 mt-10">Algebra</h1>
         <p>Compute the relation between variants.</p>
-        <v-sheet elevation="2" class="mt-10 pa-10">
-          <v-form ref="form" v-model="valid" :lazy-validation="lazy">
-            <v-row class="pl-2 pr-2">
-              <v-col cols="12" sm="9" lg="9">
-                <v-text-field
-                  :rules="rules"
-                  v-model="reference"
-                  :label="'Reference ID / sequence'"
-                  :hint="'E.g. NG_012337.3'"
-                  :clearable="true"
-                ></v-text-field>
-              </v-col>
+        <v-sheet elevation="2" class="mt-10">
+          <v-sheet class="pl-10 pt-5 pb-5 pr-10" color="light-blue lighten-5">
+            <v-row>
+              <strong class="overline">{{ getTitleText() }}</strong>
+              <v-spacer></v-spacer>
+              <v-menu open-on-hover bottom left content-class="elevation-2">
+                <template v-slot:activator="{ on, attrs }">
+                  <v-btn color="blue" icon v-bind="attrs" v-on="on">
+                    <v-icon>mdi-dots-vertical</v-icon>
+                  </v-btn>
+                </template>
 
-              <v-col cols="12" sm="3" lg="3">
-                <v-select
-                  :rules="rules"
-                  :items="['id', 'sequence']"
-                  v-model="referenceType"
-                  label="Type"
-                  :clearable="true"
-                ></v-select>
-              </v-col>
+                <v-list>
+                  <v-list-item class="text-right">
+                    <v-btn
+                      small
+                      text
+                      color="primary"
+                      @click="switchReferenceType()"
+                      >{{ getSwitchText() }}</v-btn
+                    >
+                  </v-list-item>
+                </v-list>
+              </v-menu>
             </v-row>
-            <v-row class="pl-2 pr-2">
-              <v-col cols="12" sm="9" lg="9">
-                <v-text-field
-                  :rules="rules"
-                  v-model="lhs"
-                  :label="'LHS'"
-                  :hint="'E.g. NG_012337.3:g.100del'"
-                  :clearable="true"
-                ></v-text-field>
-              </v-col>
+          </v-sheet>
+          <v-sheet class="pa-10">
+            <v-form ref="form" v-model="valid" :lazy-validation="lazy">
+              <v-row v-if="referenceType == 'sequence'" class="pl-2 pr-2">
+                <v-col cols="12">
+                  <v-text-field
+                    :rules="rules"
+                    v-model="reference"
+                    :label="'Reference sequence'"
+                    :hint="'E.g. ATTAAA'"
+                    :clearable="true"
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+              <v-row v-if="referenceType == 'sequence'" class="pl-2 pr-2">
+                <v-col cols="12" sm="9" lg="9">
+                  <v-text-field
+                    :rules="rules"
+                    v-model="lhs"
+                    :label="'LHS'"
+                    :hint="'E.g. ATTAA'"
+                    :clearable="true"
+                  ></v-text-field>
+                </v-col>
 
-              <v-col cols="12" sm="3" lg="3">
-                <v-select
-                  v-model="lhsType"
-                  :items="['sequence', 'hgvs', 'variant']"
-                  :clearable="true"
-                  label="Type"
-                ></v-select>
-              </v-col>
-            </v-row>
-            <v-row class="pl-2 pr-2">
-              <v-col cols="12" sm="9" lg="9">
-                <v-text-field
-                  :rules="rules"
-                  v-model="rhs"
-                  :label="'RHS'"
-                  :hint="'E.g. NM_001232.3'"
-                  :clearable="true"
-                ></v-text-field>
-              </v-col>
+                <v-col cols="12" sm="3" lg="3">
+                  <v-select
+                    v-model="lhsType"
+                    :rules="rules"
+                    :items="['sequence', 'variant']"
+                    :clearable="true"
+                    label="Type"
+                  ></v-select>
+                </v-col>
+              </v-row>
 
-              <v-col cols="12" sm="3" lg="3">
-                <v-select
-                  v-model="rhsType"
-                  :items="['sequence', 'hgvs', 'variant']"
-                  :clearable="true"
-                  label="Type"
-                ></v-select>
-              </v-col>
+              <v-row v-if="referenceType == 'id'" class="pl-2 pr-2">
+                <v-col cols="12">
+                  <v-text-field
+                    :rules="rules"
+                    v-model="lhs"
+                    :label="'LHS'"
+                    :hint="'E.g. NG_012337.3:g.274T>A'"
+                    :clearable="true"
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+
+              <v-row v-if="referenceType == 'sequence'" class="pl-2 pr-2">
+                <v-col cols="12" sm="9" lg="9">
+                  <v-text-field
+                    v-model="rhs"
+                    :rules="rules"
+                    :label="'RHS'"
+                    :hint="'E.g. TTTTT'"
+                    :clearable="true"
+                  ></v-text-field>
+                </v-col>
+
+                <v-col cols="12" sm="3" lg="3">
+                  <v-select
+                    v-model="rhsType"
+                    :rules="rules"
+                    :items="['sequence', 'variant']"
+                    :clearable="true"
+                    label="Type"
+                  ></v-select>
+                </v-col>
+              </v-row>
+
+              <v-row v-if="referenceType == 'id'" class="pl-2 pr-2">
+                <v-col cols="12">
+                  <v-text-field
+                    :rules="rules"
+                    v-model="rhs"
+                    :label="'RHS'"
+                    :hint="'E.g. NG_012337.3:g.274del'"
+                    :clearable="true"
+                  ></v-text-field>
+                </v-col>
+              </v-row>
+            </v-form>
+            <v-row>
+              <v-btn
+                ref="convert"
+                class="mt-5"
+                color="primary"
+                :disabled="!valid"
+                :to="{
+                  name: 'Algebra',
+                  query: {
+                    reference: reference,
+                    referenceType: referenceType,
+                    lhs: lhs,
+                    lhsType: lhsType,
+                    rhs: rhs,
+                    rhsType: rhsType,
+                  },
+                }"
+              >
+                Compare
+              </v-btn>
+              <v-spacer></v-spacer>
+              <v-btn color="success" class="mt-5" @click="setExample()">
+                Example
+              </v-btn>
             </v-row>
-          </v-form>
-          <v-row>
-            <v-btn
-              ref="convert"
-              class="mt-5"
-              color="primary"
-              :disabled="!valid"
-              :to="{
-                name: 'Algebra',
-                query: {
-                  reference: reference,
-                  referenceType: referenceType,
-                  lhs: lhs,
-                  lhsType: lhsType,
-                  rhs: rhs,
-                  rhsType: rhsType,
-                },
-              }"
-            >
-              Compare
-            </v-btn>
-            <v-spacer></v-spacer>
-            <v-btn color="success" class="mt-5" @click="setExample()">
-              Example
-            </v-btn>
-          </v-row>
+          </v-sheet>
         </v-sheet>
 
         <v-overlay :absolute="true" :value="loadingOverlay">
@@ -193,30 +237,7 @@ export default {
   },
   methods: {
     run: function () {
-      if (
-        this.$route.query.reference &&
-        0 !== this.$route.query.reference.length
-      ) {
-        this.reference = this.$route.query.reference;
-      }
-      if (
-        this.$route.query.referenceType &&
-        0 !== this.$route.query.referenceType.length
-      ) {
-        this.referenceType = this.$route.query.referenceType;
-      }
-      if (this.$route.query.lhs && 0 !== this.$route.query.lhs.length) {
-        this.lhs = this.$route.query.lhs;
-      }
-      if (this.$route.query.lhsType && 0 !== this.$route.query.lhsType.length) {
-        this.lhsType = this.$route.query.lhsType;
-      }
-      if (this.$route.query.rhs && 0 !== this.$route.query.rhs.length) {
-        this.rhs = this.$route.query.rhs;
-      }
-      if (this.$route.query.rhsType && 0 !== this.$route.query.rhsType.length) {
-        this.rhsType = this.$route.query.rhsType;
-      }
+      this.setRouterParams();
       if (
         this.$route.query.reference &&
         0 !== this.$route.query.reference.length &&
@@ -234,13 +255,117 @@ export default {
         this.compare();
       }
     },
+    setRouterParams: function () {
+      if (
+        this.$route.query.referenceType &&
+        0 !== this.$route.query.referenceType.length
+      ) {
+        if (this.$route.query.referenceType == "sequence") {
+          this.referenceType = this.$route.query.referenceType;
+        } else if (this.$route.query.referenceType == "id") {
+          this.referenceType = this.$route.query.referenceType;
+        } else {
+          this.referenceType = "id";
+        }
+      } else {
+        this.referenceType = "id";
+      }
+      if (
+        this.$route.query.reference &&
+        0 !== this.$route.query.reference.length
+      ) {
+        this.reference = this.$route.query.reference;
+      }
+      if (this.$route.query.lhs && 0 !== this.$route.query.lhs.length) {
+        this.lhs = this.$route.query.lhs;
+      }
+      if (this.$route.query.lhsType && 0 !== this.$route.query.lhsType.length) {
+        if (
+          (this.referenceType == "sequence" &&
+            (this.$route.query.lhsType == "sequence" ||
+              this.$route.query.lhsType == "variant")) ||
+          (this.referenceType == "id" && this.$route.query.lhsType == "hgvs")
+        ) {
+          this.lhsType = this.$route.query.lhsType;
+        } else {
+          this.lhsType = null;
+        }
+      }
+      if (this.$route.query.rhs && 0 !== this.$route.query.rhs.length) {
+        this.rhs = this.$route.query.rhs;
+      }
+      if (this.$route.query.rhsType && 0 !== this.$route.query.rhsType.length) {
+        if (
+          (this.referenceType == "sequence" &&
+            (this.$route.query.rhsType == "sequence" ||
+              this.$route.query.rhsType == "variant")) ||
+          (this.referenceType == "id" && this.$route.query.rhsType == "hgvs")
+        ) {
+          this.rhsType = this.$route.query.rhsType;
+        } else {
+          this.rhsType = null;
+        }
+      }
+    },
+    switchReferenceType: function () {
+      if (this.referenceType == "sequence") {
+        this.$router.push({
+          name: "Algebra",
+          query: {
+            referenceType: "id",
+            lhsType: "hgvs",
+            rhsType: "hgvs",
+          },
+        });
+        // this.referenceType = "id";
+        // this.lhsType = "hgvs";
+        // this.rhsType = "hgvs";
+      } else if (this.referenceType == "id") {
+        this.$router.push({
+          name: "Algebra",
+          query: {
+            referenceType: "sequence",
+          },
+        });
+        // this.referenceType = "sequence";
+        // this.lhsType = null;
+        // this.rhsType = null;
+      }
+      this.relation = null;
+      // this.reference = null;
+      // this.lhs = null;
+      // this.rhs = null;
+    },
+    getSwitchText: function () {
+      if (this.referenceType == "id") {
+        return "Switch to sequence mode";
+      } else if (this.referenceType == "sequence") {
+        return "Switch to HGVS mode";
+      }
+    },
+    getTitleText: function () {
+      if (this.referenceType == "id") {
+        return "HGVS Mode";
+      } else if (this.referenceType == "sequence") {
+        return "Sequence Mode";
+      }
+    },
     setExample: function () {
-      this.reference = "NG_012337.3";
-      this.referenceType = "id";
-      this.lhs = "NG_012337.3:g.274T>A";
-      this.lhsType = "hgvs";
-      this.rhs = "NG_012337.3:g.274del";
-      this.rhsType = "hgvs";
+      if (this.referenceType == "id") {
+        this.reference = "NG_012337.3";
+        this.referenceType = "id";
+        this.lhs = "NG_012337.3:g.274T>A";
+        this.lhsType = "hgvs";
+        this.rhs = "NG_012337.3:g.274del";
+        this.rhsType = "hgvs";
+      } else if (this.referenceType == "sequence") {
+        this.reference = "AAAAA";
+        this.referenceType = "sequence";
+        this.lhs = "ATAAAAA";
+        this.lhsType = "sequence";
+        this.rhs = "2_3insT";
+        this.rhsType = "variant";
+      }
     },
     compare: function () {
       this.errorMessages = [];

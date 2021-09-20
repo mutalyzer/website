@@ -212,7 +212,6 @@ export default {
     reference_id: null,
     selector_id: null,
     details: null,
-    gene_id: null,
   },
   data() {
     return {
