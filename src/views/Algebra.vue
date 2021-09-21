@@ -309,6 +309,12 @@ export default {
     },
     switchReferenceType: function () {
       if (this.referenceType == "sequence") {
+        this.referenceType = "id";
+        this.lhsType = "hgvs";
+        this.rhsType = "hgvs";
+        this.reference = null;
+        this.lhs = null;
+        this.rhs = null;
         this.$router.push({
           name: "Algebra",
           query: {
@@ -317,24 +323,21 @@ export default {
             rhsType: "hgvs",
           },
         });
-        // this.referenceType = "id";
-        // this.lhsType = "hgvs";
-        // this.rhsType = "hgvs";
       } else if (this.referenceType == "id") {
+        this.referenceType = "sequence";
+        this.lhsType = null;
+        this.rhsType = null;
+        this.reference = null;
+        this.lhs = null;
+        this.rhs = null;
         this.$router.push({
           name: "Algebra",
           query: {
             referenceType: "sequence",
           },
         });
-        // this.referenceType = "sequence";
-        // this.lhsType = null;
-        // this.rhsType = null;
       }
       this.relation = null;
-      // this.reference = null;
-      // this.lhs = null;
-      // this.rhs = null;
     },
     getSwitchText: function () {
       if (this.referenceType == "id") {
