@@ -18,13 +18,9 @@
 
                 <v-list>
                   <v-list-item class="text-right">
-                    <v-btn
-                      small
-                      text
-                      color="primary"
-                      @click="switchReferenceType()"
-                      >{{ getSwitchText() }}</v-btn
-                    >
+                    <v-btn small text color="primary" @click="switchMode()">{{
+                      getSwitchText()
+                    }}</v-btn>
                   </v-list-item>
                 </v-list>
               </v-menu>
@@ -32,7 +28,7 @@
           </v-sheet>
           <v-sheet class="pa-10">
             <v-form ref="form" v-model="valid" :lazy-validation="lazy">
-              <v-row v-if="referenceType == 'sequence'" class="pl-2 pr-2">
+              <v-row v-if="mode == 'sequence'" class="pl-2 pr-2">
                 <v-col cols="12">
                   <v-text-field
                     :rules="rules"
@@ -43,7 +39,7 @@
                   ></v-text-field>
                 </v-col>
               </v-row>
-              <v-row v-if="referenceType == 'sequence'" class="pl-2 pr-2">
+              <v-row v-if="mode == 'sequence'" class="pl-2 pr-2">
                 <v-col cols="12" sm="9" lg="9">
                   <v-text-field
                     :rules="rules"
@@ -56,7 +52,7 @@
 
                 <v-col cols="12" sm="3" lg="3">
                   <v-select
-                    v-model="lhsType"
+                    v-model="lhs_type"
                     :rules="rules"
                     :items="['sequence', 'variant']"
                     :clearable="true"
@@ -65,7 +61,7 @@
                 </v-col>
               </v-row>
 
-              <v-row v-if="referenceType == 'id'" class="pl-2 pr-2">
+              <v-row v-if="mode == 'hgvs'" class="pl-2 pr-2">
                 <v-col cols="12">
                   <v-text-field
                     :rules="rules"
@@ -77,7 +73,7 @@
                 </v-col>
               </v-row>
 
-              <v-row v-if="referenceType == 'sequence'" class="pl-2 pr-2">
+              <v-row v-if="mode == 'sequence'" class="pl-2 pr-2">
                 <v-col cols="12" sm="9" lg="9">
                   <v-text-field
                     v-model="rhs"
@@ -90,7 +86,7 @@
 
                 <v-col cols="12" sm="3" lg="3">
                   <v-select
-                    v-model="rhsType"
+                    v-model="rhs_type"
                     :rules="rules"
                     :items="['sequence', 'variant']"
                     :clearable="true"
@@ -99,7 +95,7 @@
                 </v-col>
               </v-row>
 
-              <v-row v-if="referenceType == 'id'" class="pl-2 pr-2">
+              <v-row v-if="mode == 'hgvs'" class="pl-2 pr-2">
                 <v-col cols="12">
                   <v-text-field
                     :rules="rules"
@@ -119,14 +115,7 @@
                 :disabled="!valid"
                 :to="{
                   name: 'Algebra',
-                  query: {
-                    reference: reference,
-                    referenceType: referenceType,
-                    lhs: lhs,
-                    lhsType: lhsType,
-                    rhs: rhs,
-                    rhsType: rhsType,
-                  },
+                  query: getParams(),
                 }"
               >
                 Compare
@@ -232,14 +221,16 @@ export default {
     valid: true,
     lazy: false,
 
+    mode: "hgvs",
+
     loadingOverlay: false,
 
     reference: null,
-    referenceType: null,
+    reference_type: null,
     lhs: null,
-    lhsType: null,
+    lhs_type: null,
     rhs: null,
-    rhsType: null,
+    rhs_type: null,
 
     rules: [(value) => !!value || "Required."],
 
@@ -261,144 +252,140 @@ export default {
       this.setRouterParams();
       this.compare();
     },
-    setRouterParams: function () {
-      console.log("setRouterParams");
-      if (
-        this.$route.query.referenceType &&
-        0 !== this.$route.query.referenceType.length
-      ) {
-        if (this.$route.query.referenceType == "sequence") {
-          this.referenceType = this.$route.query.referenceType;
-        } else if (this.$route.query.referenceType == "id") {
-          this.referenceType = this.$route.query.referenceType;
-        } else {
-          this.referenceType = "id";
-        }
+    _equals: function (p, e) {
+      if (p && 0 !== p.length && p == e) {
+        return true;
       } else {
-        this.referenceType = "id";
-      }
-      if (
-        this.$route.query.reference &&
-        0 !== this.$route.query.reference.length
-      ) {
-        this.reference = this.$route.query.reference;
-      }
-      if (this.$route.query.lhs && 0 !== this.$route.query.lhs.length) {
-        this.lhs = this.$route.query.lhs;
-      }
-      if (this.$route.query.lhsType && 0 !== this.$route.query.lhsType.length) {
-        if (
-          (this.referenceType == "sequence" &&
-            (this.$route.query.lhsType == "sequence" ||
-              this.$route.query.lhsType == "variant")) ||
-          (this.referenceType == "id" && this.$route.query.lhsType == "hgvs")
-        ) {
-          this.lhsType = this.$route.query.lhsType;
-        } else {
-          this.lhsType = null;
-        }
-      }
-      if (this.$route.query.rhs && 0 !== this.$route.query.rhs.length) {
-        this.rhs = this.$route.query.rhs;
-      }
-      if (this.$route.query.rhsType && 0 !== this.$route.query.rhsType.length) {
-        if (
-          (this.referenceType == "sequence" &&
-            (this.$route.query.rhsType == "sequence" ||
-              this.$route.query.rhsType == "variant")) ||
-          (this.referenceType == "id" && this.$route.query.rhsType == "hgvs")
-        ) {
-          this.rhsType = this.$route.query.rhsType;
-        } else {
-          this.rhsType = null;
-        }
+        return false;
       }
     },
-    switchReferenceType: function () {
-      if (this.referenceType == "sequence") {
-        this.referenceType = "id";
-        this.lhsType = "hgvs";
-        this.rhsType = "hgvs";
-        this.reference = null;
-        this.lhs = null;
-        this.rhs = null;
+    reset: function () {
+      this.reference = null;
+      this.reference_type = null;
+      this.lhs = null;
+      this.lhs_type = null;
+      this.rhs = null;
+      this.rhs_type = null;
+      this.relation = null;
+    },
+    setRouterParams: function () {
+      if (
+        this._equals(this.$route.query.reference_type, "sequence") &&
+        (this._equals(this.$route.query.lhs_type, "sequence") ||
+          this._equals(this.$route.query.lhs_type, "variant")) &&
+        (this._equals(this.$route.query.rhs_type, "sequence") ||
+          this._equals(this.$route.query.rhs_type, "variant"))
+      ) {
+        this.mode = "sequence";
+        this.reference = this.$route.query.reference;
+        this.reference_type = this.$route.query.reference_type;
+        this.lhs = this.$route.query.lhs;
+        this.lhs_type = this.$route.query.lhs_type;
+        this.rhs = this.$route.query.rhs;
+        this.rhs_type = this.$route.query.rhs_type;
+      } else if (
+        !this.$route.query.reference_type &&
+        this._equals(this.$route.query.lhs_type, "hgvs") &&
+        this._equals(this.$route.query.rhs_type, "hgvs")
+      ) {
+        this.mode = "hgvs";
+        this.lhs = this.$route.query.lhs;
+        this.lhs_type = this.$route.query.lhs_type;
+        this.rhs = this.$route.query.rhs;
+        this.rhs_type = this.$route.query.rhs_type;
+      } else if (
+        !this.$route.query.reference &&
+        !this.$route.query.reference_type &&
+        !this.$route.query.lhs &&
+        !this.$route.query.lhs_type &&
+        !this.$route.query.rhs &&
+        !this.$route.query.rhs_type
+      ) {
+        this.mode = "hgvs";
+        this.reset();
+      } else {
+        this.mode = "hgvs";
+        this.reset();
         this.$router.push({
           name: "Algebra",
-          query: {
-            referenceType: "id",
-            lhsType: "hgvs",
-            rhsType: "hgvs",
-          },
         });
-      } else if (this.referenceType == "id") {
-        this.referenceType = "sequence";
-        this.lhsType = null;
-        this.rhsType = null;
-        this.reference = null;
-        this.lhs = null;
-        this.rhs = null;
-        this.$router.push({
-          name: "Algebra",
-          query: {
-            referenceType: "sequence",
-          },
-        });
+      }
+    },
+    switchMode: function () {
+      if (this.mode == "sequence") {
+        this.mode = "hgvs";
+        this.reset();
+        if (
+          !(
+            !this.$route.query.reference &&
+            !this.$route.query.reference_type &&
+            !this.$route.query.lhs &&
+            !this.$route.query.lhs_type &&
+            !this.$route.query.rhs &&
+            !this.$route.query.rhs_type
+          )
+        ) {
+          this.$router.push({
+            name: "Algebra",
+          });
+        }
+      } else if (this.mode == "hgvs") {
+        this.mode = "sequence";
+        this.reset();
       }
       this.relation = null;
     },
     getSwitchText: function () {
-      if (this.referenceType == "id") {
+      if (this.mode == "hgvs") {
         return "Switch to sequence mode";
-      } else if (this.referenceType == "sequence") {
+      } else if (this.mode == "sequence") {
         return "Switch to HGVS mode";
       }
     },
     getTitleText: function () {
-      if (this.referenceType == "id") {
+      if (this.mode == "hgvs") {
         return "HGVS Mode";
-      } else if (this.referenceType == "sequence") {
+      } else if (this.mode == "sequence") {
         return "Sequence Mode";
       }
     },
     setExample: function () {
-      if (this.referenceType == "id") {
-        this.reference = null;
-        this.referenceType = "id";
+      if (this.mode == "hgvs") {
         this.lhs = "NG_012337.3:g.274T>A";
-        this.lhsType = "hgvs";
+        this.lhs_type = "hgvs";
         this.rhs = "NG_012337.3:g.274del";
-        this.rhsType = "hgvs";
-      } else if (this.referenceType == "sequence") {
+        this.rhs_type = "hgvs";
+      } else if (this.mode == "sequence") {
         this.reference = "AAAAA";
-        this.referenceType = "sequence";
+        this.reference_type = "sequence";
         this.lhs = "ATAAAAA";
-        this.lhsType = "sequence";
+        this.lhs_type = "sequence";
         this.rhs = "2_3insT";
-        this.rhsType = "variant";
+        this.rhs_type = "variant";
       }
     },
     getParams: function () {
-      if (this.lhs && this.lhsType && this.rhs && this.rhsType) {
-        if (this.reference && this.referenceType) {
+      if (this.lhs && this.lhs_type && this.rhs && this.rhs_type) {
+        if (this.reference && this.reference_type) {
           return {
             reference: this.reference,
-            reference_type: this.referenceType,
+            reference_type: this.reference_type,
             lhs: this.lhs,
-            lhs_type: this.lhsType,
+            lhs_type: this.lhs_type,
             rhs: this.rhs,
-            rhs_type: this.rhsType,
+            rhs_type: this.rhs_type,
           };
         }
         return {
           lhs: this.lhs,
-          lhs_type: this.lhsType,
+          lhs_type: this.lhs_type,
           rhs: this.rhs,
-          rhs_type: this.rhsType,
+          rhs_type: this.rhs_type,
         };
       }
     },
     compare: function () {
-      if (this.lhs && this.lhsType && this.rhs && this.rhsType) {
+      if (this.lhs && this.lhs_type && this.rhs && this.rhs_type) {
         this.loadingOverlay = true;
         this.response = null;
         this.relation = null;
