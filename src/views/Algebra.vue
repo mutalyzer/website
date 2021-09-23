@@ -237,6 +237,7 @@
                   {{ response.influence_lhs.min_pos }},
                   {{ response.influence_lhs.max_pos }}
                 </div>
+                <div v-else class="sequence">Equal.</div>
               </div>
               <div v-if="response.influence_rhs">
                 <div class="overline">RHS Influence Interval</div>
@@ -250,6 +251,7 @@
                   {{ response.influence_rhs.min_pos }},
                   {{ response.influence_rhs.max_pos }}
                 </div>
+                <div v-else class="sequence">Equal.</div>
               </div>
             </v-expansion-panel-content>
           </v-expansion-panel>
