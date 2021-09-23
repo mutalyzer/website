@@ -177,24 +177,44 @@
         </v-alert>
 
         <v-sheet
-          class="pt-10 pr-10 pb-8 pl-10"
+          class="pt-10 pr-10 pb-8 pl-10 mb-10"
           elevation="2"
           color="red lighten-5"
           v-if="errorsEncountered()"
         >
-          <v-alert
-            color="red lighten-1"
-            tile
-            border="left"
-            dark
-            v-for="(error, index) in response.errors"
-            :key="index"
-          >
-            <div>
-              {{ getMessage(error) }}
-            </div>
-          </v-alert>
+          <div v-for="(errors, key) in response.errors" :key="key">
+            <div class="overline">{{ key }}</div>
+            <v-alert
+              color="red lighten-1"
+              tile
+              border="left"
+              dark
+              v-for="(error, index) in errors"
+              :key="index"
+            >
+              <div>
+                {{ getMessage(error) }}
+              </div>
+            </v-alert>
+          </div>
         </v-sheet>
+
+        <v-alert
+          prominent
+          type="error"
+          tile
+          elevation="2"
+          class="mt-10"
+          icon="mdi-network-off-outline"
+          color="grey darken-4"
+          v-if="connectionErrors"
+        >
+          <v-row align="center">
+            <v-col class="grow">
+              {{ connectionErrors.details }}
+            </v-col>
+          </v-row>
+        </v-alert>
       </v-flex>
     </v-layout>
   </v-container>
@@ -226,6 +246,7 @@ export default {
     relation: null,
 
     response: null,
+    connectionErrors: null,
   }),
   created: function () {
     this.run();
@@ -238,24 +259,10 @@ export default {
   methods: {
     run: function () {
       this.setRouterParams();
-      if (
-        this.$route.query.reference &&
-        0 !== this.$route.query.reference.length &&
-        this.$route.query.referenceType &&
-        0 !== this.$route.query.referenceType.length &&
-        this.$route.query.lhs &&
-        0 !== this.$route.query.lhs.length &&
-        this.$route.query.lhsType &&
-        0 !== this.$route.query.lhsType.length &&
-        this.$route.query.rhs &&
-        0 !== this.$route.query.rhs.length &&
-        this.$route.query.rhsType &&
-        0 !== this.$route.query.rhsType.length
-      ) {
-        this.compare();
-      }
+      this.compare();
     },
     setRouterParams: function () {
+      console.log("setRouterParams");
       if (
         this.$route.query.referenceType &&
         0 !== this.$route.query.referenceType.length
@@ -355,7 +362,7 @@ export default {
     },
     setExample: function () {
       if (this.referenceType == "id") {
-        this.reference = "NG_012337.3";
+        this.reference = null;
         this.referenceType = "id";
         this.lhs = "NG_012337.3:g.274T>A";
         this.lhsType = "hgvs";
@@ -370,28 +377,33 @@ export default {
         this.rhsType = "variant";
       }
     },
-    compare: function () {
-      this.errorMessages = [];
-      if (
-        this.reference !== null &&
-        this.referenceType !== null &&
-        this.lhs &&
-        this.lhsType &&
-        this.rhs &&
-        this.rhsType
-      ) {
-        this.loadingOverlay = true;
-        this.response = null;
-        this.relation = null;
-        const params = {
-          reference: this.reference,
-          reference_type: this.referenceType,
+    getParams: function () {
+      if (this.lhs && this.lhsType && this.rhs && this.rhsType) {
+        if (this.reference && this.referenceType) {
+          return {
+            reference: this.reference,
+            reference_type: this.referenceType,
+            lhs: this.lhs,
+            lhs_type: this.lhsType,
+            rhs: this.rhs,
+            rhs_type: this.rhsType,
+          };
+        }
+        return {
           lhs: this.lhs,
           lhs_type: this.lhsType,
           rhs: this.rhs,
           rhs_type: this.rhsType,
         };
-        MutalyzerService.compare(params)
+      }
+    },
+    compare: function () {
+      if (this.lhs && this.lhsType && this.rhs && this.rhsType) {
+        this.loadingOverlay = true;
+        this.response = null;
+        this.relation = null;
+        this.connectionErrors = null;
+        MutalyzerService.compare(this.getParams())
           .then((response) => {
             this.loadingOverlay = false;
             if (response.data) {
