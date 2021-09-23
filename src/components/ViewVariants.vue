@@ -1,9 +1,6 @@
 <template>
   <div>
-    <v-progress-linear
-      indeterminate
-      v-if="progress"
-    ></v-progress-linear>
+    <v-progress-linear indeterminate v-if="progress"></v-progress-linear>
 
     <div v-for="(variant, v_i) in variants" :key="v_i">
       <div class="variant">{{ variant.description }}</div>

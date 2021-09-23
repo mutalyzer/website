@@ -188,6 +188,73 @@
           </div>
         </v-sheet>
 
+        <v-expansion-panels
+          focusable
+          hover
+          class="mt-5 mb-10"
+          tile
+          v-if="
+            response &&
+            (response.influence_lhs ||
+              response.influence_rhs ||
+              response.ref_seq ||
+              response.lhs_seq ||
+              response.rhs_seq)
+          "
+        >
+          <v-expansion-panel>
+            <v-expansion-panel-header class="overline"
+              >Details</v-expansion-panel-header
+            >
+            <v-expansion-panel-content class="pt-5">
+              <div v-if="response.ref_seq">
+                <div class="overline">Reference Sequence</div>
+                <div class="sequence">
+                  {{ response.ref_seq }}
+                </div>
+              </div>
+              <div v-if="response.lhs_seq">
+                <div class="overline">LHS Sequence</div>
+                <div class="sequence">
+                  {{ response.lhs_seq }}
+                </div>
+              </div>
+              <div v-if="response.lhs_seq">
+                <div class="overline">RHS Sequence</div>
+                <div class="sequence">
+                  {{ response.rhs_seq }}
+                </div>
+              </div>
+              <div v-if="response.influence_lhs">
+                <div class="overline">LHS Influence Interval</div>
+                <div
+                  v-if="
+                    response.influence_lhs.hasOwnProperty('min_pos') &&
+                    response.influence_lhs.hasOwnProperty('max_pos')
+                  "
+                  class="sequence"
+                >
+                  {{ response.influence_lhs.min_pos }},
+                  {{ response.influence_lhs.max_pos }}
+                </div>
+              </div>
+              <div v-if="response.influence_rhs">
+                <div class="overline">RHS Influence Interval</div>
+                <div
+                  v-if="
+                    response.influence_rhs.hasOwnProperty('min_pos') &&
+                    response.influence_rhs.hasOwnProperty('max_pos')
+                  "
+                  class="sequence"
+                >
+                  {{ response.influence_rhs.min_pos }},
+                  {{ response.influence_rhs.max_pos }}
+                </div>
+              </div>
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+        </v-expansion-panels>
+
         <v-alert
           prominent
           type="error"
@@ -267,6 +334,7 @@ export default {
       this.rhs = null;
       this.rhs_type = null;
       this.relation = null;
+      this.response = null;
     },
     setRouterParams: function () {
       if (
@@ -434,3 +502,15 @@ export default {
 </script>
 
 <style scoped src="../assets/main.css"></style>
+<style lang="scss" scoped>
+.sequence {
+  margin-left: 5px;
+  padding: 10px;
+  text-decoration: none;
+  font-family: monospace;
+  display: block;
+  color: #000000;
+  background-color: #efefef;
+  overflow-wrap: break-word;
+}
+</style>
