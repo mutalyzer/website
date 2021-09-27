@@ -45,7 +45,7 @@
                     :rules="rules"
                     v-model="lhs"
                     :label="'LHS'"
-                    :hint="'E.g. ATTAA'"
+                    :hint="getLhsHintText(lhs_type)"
                     :clearable="true"
                   ></v-text-field>
                 </v-col>
@@ -67,7 +67,7 @@
                     :rules="rules"
                     v-model="lhs"
                     :label="'LHS'"
-                    :hint="'E.g. NG_012337.3:g.274T>A'"
+                    :hint="getLhsHintText(lhs_type)"
                     :clearable="true"
                   ></v-text-field>
                 </v-col>
@@ -79,7 +79,7 @@
                     v-model="rhs"
                     :rules="rules"
                     :label="'RHS'"
-                    :hint="'E.g. TTTTT'"
+                    :hint="getLhsHintText(rhs_type)"
                     :clearable="true"
                   ></v-text-field>
                 </v-col>
@@ -101,7 +101,7 @@
                     :rules="rules"
                     v-model="rhs"
                     :label="'RHS'"
-                    :hint="'E.g. NG_012337.3:g.274del'"
+                    :hint="getLhsHintText(rhs_type)"
                     :clearable="true"
                   ></v-text-field>
                 </v-col>
@@ -298,8 +298,10 @@ export default {
     reference_type: null,
     lhs: null,
     lhs_type: null,
+    lhs_hint: null,
     rhs: null,
     rhs_type: null,
+    rhs_hint: null,
 
     rules: [(value) => !!value || "Required."],
 
@@ -374,6 +376,9 @@ export default {
         this.mode = "hgvs";
         this.reset();
       } else {
+        console.log("reached");
+        console.log(this._equals(this.$route.query.reference_type, "sequence"));
+        console.log(this._equals(this.$route.query.lhs_type, "variant"));
         this.mode = "hgvs";
         this.reset();
         this.$router.push({
@@ -402,6 +407,9 @@ export default {
       } else if (this.mode == "hgvs") {
         this.mode = "sequence";
         this.reset();
+        this.reference_type = "sequence";
+        this.lhs_type = "variant";
+        this.rhs_type = "variant";
       }
       this.relation = null;
     },
@@ -419,6 +427,17 @@ export default {
         return "Sequence Mode";
       }
     },
+    getLhsHintText: function (hs_type) {
+      if (this.mode == "hgvs") {
+        return "E.g. NG_012337.3:g.274del";
+      } else if (this.mode == "sequence") {
+        if (hs_type == null || hs_type == "variant") {
+          return "E.g. 2_3del";
+        } else if (hs_type == "sequence") {
+          return "E.g. ATTGAAT";
+        }
+      }
+    },
     setExample: function () {
       if (this.mode == "hgvs") {
         this.lhs = "NG_012337.3:g.274T>A";
@@ -428,10 +447,16 @@ export default {
       } else if (this.mode == "sequence") {
         this.reference = "AAAAA";
         this.reference_type = "sequence";
-        this.lhs = "ATAAAAA";
-        this.lhs_type = "sequence";
-        this.rhs = "2_3insT";
-        this.rhs_type = "variant";
+        if (this.lhs_type == "sequence") {
+          this.lhs = "ATAAAAA";
+        } else {
+          this.lhs = "1_2insTA";
+        }
+        if (this.rhs_type == "sequence") {
+          this.rhs = "AATAAA";
+        } else {
+          this.rhs = "2_3insT";
+        }
       }
     },
     getParams: function () {
