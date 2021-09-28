@@ -334,9 +334,9 @@ export default {
       this.reference = null;
       this.reference_type = null;
       this.lhs = null;
-      this.lhs_type = null;
+      this.lhs_type = "hgvs";
       this.rhs = null;
-      this.rhs_type = null;
+      this.rhs_type = "hgvs";
       this.relation = null;
       this.response = null;
     },
@@ -376,9 +376,6 @@ export default {
         this.mode = "hgvs";
         this.reset();
       } else {
-        console.log("reached");
-        console.log(this._equals(this.$route.query.reference_type, "sequence"));
-        console.log(this._equals(this.$route.query.lhs_type, "variant"));
         this.mode = "hgvs";
         this.reset();
         this.$router.push({
