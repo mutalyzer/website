@@ -424,7 +424,6 @@ export default {
       return variant.start;
     },
     get_after_length: function (variant) {
-      console.log(variant);
       let middle_length = this.get_middle_length(variant);
       if (variant.inverted) {
         return (

@@ -8,77 +8,75 @@
           whether it is correct.
         </p>
         <v-sheet elevation="2" class="pa-10 mt-10">
-          <v-form ref="form" v-model="valid" :lazy-validation="lazy">
-            <v-row class="pt-0 pr-1">
-              <v-spacer></v-spacer>
-              <v-menu open-on-hover bottom left content-class="elevation-2">
-                <template v-slot:activator="{ on, attrs }">
-                  <v-btn color="blue" icon v-bind="attrs" v-on="on">
-                    <v-icon>mdi-dots-vertical</v-icon>
-                  </v-btn>
-                </template>
+          <v-row class="pt-0 pr-1">
+            <v-spacer></v-spacer>
+            <v-menu open-on-hover bottom left content-class="elevation-2">
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn color="blue" icon v-bind="attrs" v-on="on">
+                  <v-icon>mdi-dots-vertical</v-icon>
+                </v-btn>
+              </template>
 
-                <v-list>
-                  <v-list-item class="text-right">
-                    <v-btn small text color="primary" @click="switchMode()">{{
-                      getSwitchText()
-                    }}</v-btn>
-                  </v-list-item>
-                </v-list>
-              </v-menu>
-            </v-row>
-            <v-row class="pt-5 pr-5 pl-5" v-if="mode == 'hgvs'">
-              <v-text-field
-                class="pa-0 ma-0"
-                :rules="rules"
-                ref="refInputDescriptionTextBox"
-                v-on:keydown.enter="
-                  $router.push({
-                    name: 'NameChecker',
-                    params: { descriptionRouter: equivalentDescription },
-                  })
-                "
-                v-model="inputDescriptionTextBox"
-                :label="inputDescriptionTextBoxLabel"
-                :clearable="true"
-                autofocus
-              ></v-text-field>
-            </v-row>
+              <v-list>
+                <v-list-item class="text-right">
+                  <v-btn small text color="primary" @click="switchMode()">{{
+                    getSwitchText()
+                  }}</v-btn>
+                </v-list-item>
+              </v-list>
+            </v-menu>
+          </v-row>
+          <v-row class="pt-5 pr-5 pl-5" v-if="mode == 'hgvs'">
+            <v-text-field
+              class="pa-0 ma-0"
+              :rules="rules"
+              ref="refInputDescriptionTextBox"
+              v-model="inputDescriptionTextBox"
+              :label="inputDescriptionTextBoxLabel"
+              v-on:keydown.enter="
+                $router.push({
+                  name: 'NameChecker',
+                  params: { descriptionRouter: inputDescriptionTextBox },
+                })
+              "
+              :clearable="true"
+              autofocus
+            ></v-text-field>
+          </v-row>
 
-            <v-row class="pl-5 pr-5 pt-5 mt-0" v-if="mode == 'hgvs'">
-              <div class="examples-list">
-                Examples:
-                <span
-                  class="example-item"
-                  v-for="(example, index) in descriptionExamples"
-                  :key="index"
-                  @click.prevent="selectDescriptionExample(index)"
-                  >{{ example }}</span
-                >
-              </div>
-            </v-row>
+          <v-row class="pl-5 pr-5 pt-5 mt-0" v-if="mode == 'hgvs'">
+            <div class="examples-list">
+              Examples:
+              <span
+                class="example-item"
+                v-for="(example, index) in descriptionExamples"
+                :key="index"
+                @click.prevent="selectDescriptionExample(index)"
+                >{{ example }}</span
+              >
+            </div>
+          </v-row>
 
-            <v-row class="pt-5 pr-5 pl-5" v-if="mode == 'sequence'">
-              <v-text-field
-                class="pa-0 ma-0"
-                :rules="rules"
-                v-model="sequence"
-                label="Reference Sequence"
-                :clearable="true"
-              ></v-text-field>
-            </v-row>
+          <v-row class="pt-5 pr-5 pl-5" v-if="mode == 'sequence'">
+            <v-text-field
+              class="pa-0 ma-0"
+              :rules="rules"
+              v-model="sequence"
+              label="Reference Sequence"
+              :clearable="true"
+            ></v-text-field>
+          </v-row>
 
-            <v-row class="pl-5 pr-5 pt-5" v-if="mode == 'sequence'">
-              <v-text-field
-                class="pa-0 ma-0"
-                :rules="rules"
-                ref="refInputDescriptionTextBox"
-                v-model="inputDescriptionTextBox"
-                label="Variants"
-                :clearable="true"
-              ></v-text-field>
-            </v-row>
-          </v-form>
+          <v-row class="pl-5 pr-5 pt-5" v-if="mode == 'sequence'">
+            <v-text-field
+              class="pa-0 ma-0"
+              :rules="rules"
+              ref="refInputDescriptionTextBox"
+              v-model="inputDescriptionTextBox"
+              label="Variants"
+              :clearable="true"
+            ></v-text-field>
+          </v-row>
 
           <v-row class="pl-5 pt-5 pb-5">
             <v-btn
@@ -529,7 +527,6 @@ export default {
   props: ["descriptionRouter"],
   data: () => ({
     valid: true,
-    lazy: false,
     inputDescriptionTextBox: null,
     rules: [(value) => !!value || "Required."],
     inputDescriptionTextBoxLabel: "HGVS Description",

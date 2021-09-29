@@ -191,14 +191,10 @@ export default {
   },
   methods: {
     get_related_references_retriever() {
-      console.log("here");
       MutalyzerService.relatedReferences(this.accession).then((response) => {
         if (response.data) {
           this.progress_related_references_retriever = false;
-          console.log(response.data);
           this.related_references_retriever = response.data;
-        } else {
-          console.log("didn't work");
         }
       });
     },
