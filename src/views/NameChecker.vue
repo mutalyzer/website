@@ -447,8 +447,7 @@
             response.normalized_description &&
             response.normalized_model &&
             response.normalized_model.reference &&
-            !response.normalized_model.reference.selector &&
-            ['c', 'n'].includes(response.normalized_model.coordinate_system)
+            !['p'].includes(response.normalized_model.coordinate_system)
           "
         >
           <v-expansion-panel>

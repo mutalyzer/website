@@ -199,12 +199,7 @@ export default {
       });
     },
     get_accession() {
-      if (
-        ["c", "n"].includes(this.model.coordinate_system) &&
-        !this.model.reference.selector
-      ) {
-        this.accession = this.model.reference.id;
-      }
+      this.accession = this.model.reference.id;
     },
     get_response() {
       if (this.accession) {
