@@ -15,8 +15,13 @@ export default {
   compare(params) {
     return apiClient.get("/compare/", { params });
   },
-  nameCheck(description) {
+  nameCheckHgvs(description) {
     return apiClient.get("/name_check/" + encodeURIComponent(description));
+  },
+  nameCheckSequence(description, params) {
+    return apiClient.get("/name_check/" + encodeURIComponent(description), {
+      params,
+    });
   },
   positionConvert(params) {
     return apiClient.get("/position_convert/", { params });
@@ -33,8 +38,10 @@ export default {
   map(params) {
     return apiClient.get("/map/", { params });
   },
-  view(description) {
-    return apiClient.get("/view_variants/" + encodeURIComponent(description));
+  view(description, params) {
+    return apiClient.get("/view_variants/" + encodeURIComponent(description), {
+      params,
+    });
   },
   relatedReferences(reference_id) {
     return apiClient.get(

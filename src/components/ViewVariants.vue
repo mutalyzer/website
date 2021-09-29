@@ -306,6 +306,8 @@ export default {
   },
   props: {
     description: null,
+    only_variants: null,
+    sequence: null,
   },
   data() {
     return {
@@ -318,8 +320,18 @@ export default {
   },
   methods: {
     get_variants: function () {
-      if (this.description) {
+      if (this.description && !this.only_variants && !this.sequence) {
         MutalyzerService.view(this.description).then((response) => {
+          this.progress = false;
+          if (response.data) {
+            this.variants = response.data;
+          }
+        });
+      } else if (this.description && this.only_variants && this.sequence) {
+        MutalyzerService.view(this.description, {
+          only_variants: this.only_variants,
+          sequence: this.sequence,
+        }).then((response) => {
           this.progress = false;
           if (response.data) {
             this.variants = response.data;
@@ -412,6 +424,7 @@ export default {
       return variant.start;
     },
     get_after_length: function (variant) {
+      console.log(variant);
       let middle_length = this.get_middle_length(variant);
       if (variant.inverted) {
         return (
@@ -424,7 +437,10 @@ export default {
       }
       return (
         variant.seq_length -
-        (variant.start + variant.left.length + middle_length)
+        (variant.start +
+          variant.left.length +
+          middle_length +
+          variant.right.length)
       );
     },
   },

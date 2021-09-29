@@ -8,43 +8,102 @@
           whether it is correct.
         </p>
         <v-sheet elevation="2" class="pa-10 mt-10">
-          <v-text-field
-            :rules="rules"
-            ref="refInputDescriptionTextBox"
-            v-on:keydown.enter="
-              $router.push({
+          <v-form ref="form" v-model="valid" :lazy-validation="lazy">
+            <v-row class="pt-0 pr-1">
+              <v-spacer></v-spacer>
+              <v-menu open-on-hover bottom left content-class="elevation-2">
+                <template v-slot:activator="{ on, attrs }">
+                  <v-btn color="blue" icon v-bind="attrs" v-on="on">
+                    <v-icon>mdi-dots-vertical</v-icon>
+                  </v-btn>
+                </template>
+
+                <v-list>
+                  <v-list-item class="text-right">
+                    <v-btn small text color="primary" @click="switchMode()">{{
+                      getSwitchText()
+                    }}</v-btn>
+                  </v-list-item>
+                </v-list>
+              </v-menu>
+            </v-row>
+            <v-row class="pt-5 pr-5 pl-5" v-if="mode == 'hgvs'">
+              <v-text-field
+                class="pa-0 ma-0"
+                :rules="rules"
+                ref="refInputDescriptionTextBox"
+                v-on:keydown.enter="
+                  $router.push({
+                    name: 'NameChecker',
+                    params: { descriptionRouter: equivalentDescription },
+                  })
+                "
+                v-model="inputDescriptionTextBox"
+                :label="inputDescriptionTextBoxLabel"
+                :clearable="true"
+                autofocus
+              ></v-text-field>
+            </v-row>
+
+            <v-row class="pl-5 pr-5 pt-5 mt-0" v-if="mode == 'hgvs'">
+              <div class="examples-list">
+                Examples:
+                <span
+                  class="example-item"
+                  v-for="(example, index) in descriptionExamples"
+                  :key="index"
+                  @click.prevent="selectDescriptionExample(index)"
+                  >{{ example }}</span
+                >
+              </div>
+            </v-row>
+
+            <v-row class="pt-5 pr-5 pl-5" v-if="mode == 'sequence'">
+              <v-text-field
+                class="pa-0 ma-0"
+                :rules="rules"
+                v-model="sequence"
+                label="Reference Sequence"
+                :clearable="true"
+              ></v-text-field>
+            </v-row>
+
+            <v-row class="pl-5 pr-5 pt-5" v-if="mode == 'sequence'">
+              <v-text-field
+                class="pa-0 ma-0"
+                :rules="rules"
+                ref="refInputDescriptionTextBox"
+                v-model="inputDescriptionTextBox"
+                label="Variants"
+                :clearable="true"
+              ></v-text-field>
+            </v-row>
+          </v-form>
+
+          <v-row class="pl-5 pt-5 pb-5">
+            <v-btn
+              ref="nameCheck"
+              class="mt-5"
+              color="primary"
+              :disabled="!valid"
+              :to="{
                 name: 'NameChecker',
                 params: { descriptionRouter: inputDescriptionTextBox },
-              })
-            "
-            v-model="inputDescriptionTextBox"
-            :label="inputDescriptionTextBoxLabel"
-            :clearable="true"
-            autofocus
-          ></v-text-field>
-
-          <div class="examples-list">
-            Examples:
-            <span
-              class="example-item"
-              v-for="(example, index) in descriptionExamples"
-              :key="index"
-              @click.prevent="selectDescriptionExample(index)"
-              >{{ example }}</span
+                query: getParams(),
+              }"
             >
-          </div>
-
-          <v-btn
-            ref="nameCheck"
-            class="mt-5"
-            color="primary"
-            :to="{
-              name: 'NameChecker',
-              params: { descriptionRouter: inputDescriptionTextBox },
-            }"
-          >
-            Normalize
-          </v-btn>
+              Normalize
+            </v-btn>
+            <v-spacer v-if="mode == 'sequence'"></v-spacer>
+            <v-btn
+              color="success"
+              class="mt-5 mr-5"
+              v-if="mode == 'sequence'"
+              @click="setSequenceExample()"
+            >
+              Example
+            </v-btn>
+          </v-row>
         </v-sheet>
 
         <v-overlay :absolute="true" :value="loadingOverlay">
@@ -389,6 +448,7 @@
             response &&
             response.normalized_description &&
             response.normalized_model &&
+            response.normalized_model.reference &&
             !response.normalized_model.reference.selector &&
             ['c', 'n'].includes(response.normalized_model.coordinate_system)
           "
@@ -424,6 +484,8 @@
             <v-expansion-panel-content class="pt-2 pb-2">
               <ViewVariants
                 :description="this.response.normalized_description"
+                :only_variants="this.response.only_variants"
+                :sequence="this.response.sequence"
               />
             </v-expansion-panel-content>
           </v-expansion-panel>
@@ -465,21 +527,9 @@ export default {
     Description,
   },
   props: ["descriptionRouter"],
-  created: function () {
-    if (this.descriptionRouter && 0 !== this.descriptionRouter.length) {
-      this.inputDescriptionTextBox = this.descriptionRouter;
-      this.nameCheck();
-    }
-  },
-  watch: {
-    $route() {
-      if (this.descriptionRouter && 0 !== this.descriptionRouter.length) {
-        this.inputDescriptionTextBox = this.descriptionRouter;
-        this.nameCheck();
-      }
-    },
-  },
   data: () => ({
+    valid: true,
+    lazy: false,
     inputDescriptionTextBox: null,
     rules: [(value) => !!value || "Required."],
     inputDescriptionTextBoxLabel: "HGVS Description",
@@ -492,13 +542,63 @@ export default {
     response: null,
     connectionErrors: null,
     showCorrections: false,
+    sequence: null,
+    only_variants: false,
+    mode: "hgvs",
   }),
+  created: function () {
+    this.run();
+  },
+  watch: {
+    $route() {
+      this.run();
+    },
+  },
   methods: {
-    selectDescriptionExample: function (i) {
-      this.inputDescriptionTextBox = this.descriptionExamples[i];
-      this.$refs.refInputDescriptionTextBox.focus();
+    run: function () {
+      this.setRouterParams();
+      this.nameCheck();
+    },
+    setRouterParams: function () {
+      if (
+        this.descriptionRouter &&
+        this.descriptionRouter.length !== 0 &&
+        !this.$route.query.only_variants &&
+        !this.$route.query.sequence
+      ) {
+        this.inputDescriptionTextBox = this.descriptionRouter;
+        this.mode = "hgvs";
+      } else if (
+        this.descriptionRouter &&
+        this.descriptionRouter.length !== 0 &&
+        this.$route.query.only_variants &&
+        this.$route.query.sequence &&
+        this.$route.query.sequence.length !== 0
+      ) {
+        this.inputDescriptionTextBox = this.descriptionRouter;
+        this.only_variants = this.$route.query.only_variants;
+        this.sequence = this.$route.query.sequence;
+        this.mode = "sequence";
+      } else if (
+        !this.descriptionRouter &&
+        !this.$route.query.only_variants &&
+        !this.$route.query.sequence
+      ) {
+        this.mode = "hgvs";
+      } else {
+        this.$router.push({
+          name: "NameChecker",
+        });
+      }
     },
     nameCheck: function () {
+      if (this.mode == "hgvs") {
+        this.nameCheckHgvs();
+      } else if (this.mode == "sequence") {
+        this.nameCheckSequence();
+      }
+    },
+    nameCheckHgvs: function () {
       if (this.inputDescriptionTextBox !== null) {
         this.loadingOverlay = true;
         this.inputDescription = null;
@@ -507,7 +607,48 @@ export default {
         this.showCorrections = false;
         this.inputDescriptionTextBox = this.inputDescriptionTextBox.trim();
 
-        MutalyzerService.nameCheck(this.inputDescriptionTextBox)
+        MutalyzerService.nameCheckHgvs(this.inputDescriptionTextBox)
+          .then((response) => {
+            if (response.data) {
+              this.loadingOverlay = false;
+              this.response = response.data;
+              this.inputDescription = this.inputDescriptionTextBox;
+              if (this.isNormalized()) {
+                this.$nextTick(() => {
+                  this.$vuetify.goTo(this.$refs.successAlert, this.options);
+                });
+              }
+            }
+          })
+          .catch((error) => {
+            this.loadingOverlay = false;
+            if (error.response) {
+              this.connectionErrors = {
+                details: "Some response error occured.",
+              };
+            } else if (error.request) {
+              this.connectionErrors = {
+                details: "Some connection or server error occured.",
+              };
+            } else {
+              this.connectionErrors = { details: "Some error occured." };
+            }
+          });
+      }
+    },
+    nameCheckSequence: function () {
+      if (this.inputDescriptionTextBox !== null) {
+        this.loadingOverlay = true;
+        this.inputDescription = null;
+        this.response = null;
+        this.connectionErrors = null;
+        this.showCorrections = false;
+        this.inputDescriptionTextBox = this.inputDescriptionTextBox.trim();
+
+        MutalyzerService.nameCheckSequence(this.inputDescriptionTextBox, {
+          only_variants: true,
+          sequence: this.sequence,
+        })
           .then((response) => {
             if (response.data) {
               this.loadingOverlay = false;
@@ -641,7 +782,11 @@ export default {
       }
     },
     showReferenceInformation() {
-      if (this.response && this.response.corrected_description) {
+      if (
+        this.response &&
+        this.response.corrected_description &&
+        !this.response.only_variants
+      ) {
         if (this.response.errors) {
           for (let error of this.response.errors) {
             if (error.code && error.code == "ERETR") {
@@ -653,6 +798,51 @@ export default {
       } else {
         return false;
       }
+    },
+    reset: function () {
+      this.inputDescriptionTextBox = null;
+      this.only_variants = false;
+      this.sequence = null;
+      this.response = null;
+    },
+    switchMode: function () {
+      if (this.mode == "sequence") {
+        this.mode = "hgvs";
+        this.reset();
+        if (this.$route.query.descriptionRouter) {
+          this.$router.push({
+            name: "NameChecker",
+          });
+        }
+      } else if (this.mode == "hgvs") {
+        this.mode = "sequence";
+        this.reset();
+      }
+    },
+    getSwitchText: function () {
+      if (this.mode == "hgvs") {
+        return "Switch to sequence mode";
+      } else if (this.mode == "sequence") {
+        return "Switch to HGVS mode";
+      }
+    },
+    getParams: function () {
+      if (this.mode == "hgvs") {
+        return {};
+      } else if (this.mode == "sequence") {
+        return {
+          only_variants: true,
+          sequence: this.sequence,
+        };
+      }
+    },
+    setSequenceExample: function () {
+      this.inputDescriptionTextBox = "2del";
+      this.sequence = "ATTAAC";
+    },
+    selectDescriptionExample: function (i) {
+      this.inputDescriptionTextBox = this.descriptionExamples[i];
+      this.$refs.refInputDescriptionTextBox.focus();
     },
   },
 };

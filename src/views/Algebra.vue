@@ -323,23 +323,6 @@ export default {
       this.setRouterParams();
       this.compare();
     },
-    _equals: function (p, e) {
-      if (p && 0 !== p.length && p == e) {
-        return true;
-      } else {
-        return false;
-      }
-    },
-    reset: function () {
-      this.reference = null;
-      this.reference_type = null;
-      this.lhs = null;
-      this.lhs_type = "hgvs";
-      this.rhs = null;
-      this.rhs_type = "hgvs";
-      this.relation = null;
-      this.response = null;
-    },
     setRouterParams: function () {
       if (
         this._equals(this.$route.query.reference_type, "sequence") &&
@@ -381,6 +364,55 @@ export default {
         this.$router.push({
           name: "Algebra",
         });
+      }
+    },
+    _equals: function (p, e) {
+      if (p && 0 !== p.length && p == e) {
+        return true;
+      } else {
+        return false;
+      }
+    },
+    reset: function () {
+      this.reference = null;
+      this.reference_type = null;
+      this.lhs = null;
+      this.lhs_type = "hgvs";
+      this.rhs = null;
+      this.rhs_type = "hgvs";
+      this.relation = null;
+      this.response = null;
+    },
+    compare: function () {
+      if (this.lhs && this.lhs_type && this.rhs && this.rhs_type) {
+        this.loadingOverlay = true;
+        this.response = null;
+        this.relation = null;
+        this.connectionErrors = null;
+        MutalyzerService.compare(this.getParams())
+          .then((response) => {
+            this.loadingOverlay = false;
+            if (response.data) {
+              this.response = response.data;
+              if (response.data.relation) {
+                this.relation = response.data.relation;
+              }
+            }
+          })
+          .catch((error) => {
+            this.loadingOverlay = false;
+            if (error.response) {
+              this.connectionErrors = {
+                details: "Some response error occured.",
+              };
+            } else if (error.request) {
+              this.connectionErrors = {
+                details: "Some connection or server error occured.",
+              };
+            } else {
+              this.connectionErrors = { details: "Some error occured." };
+            }
+          });
       }
     },
     switchMode: function () {
@@ -474,38 +506,6 @@ export default {
           rhs: this.rhs,
           rhs_type: this.rhs_type,
         };
-      }
-    },
-    compare: function () {
-      if (this.lhs && this.lhs_type && this.rhs && this.rhs_type) {
-        this.loadingOverlay = true;
-        this.response = null;
-        this.relation = null;
-        this.connectionErrors = null;
-        MutalyzerService.compare(this.getParams())
-          .then((response) => {
-            this.loadingOverlay = false;
-            if (response.data) {
-              this.response = response.data;
-              if (response.data.relation) {
-                this.relation = response.data.relation;
-              }
-            }
-          })
-          .catch((error) => {
-            this.loadingOverlay = false;
-            if (error.response) {
-              this.connectionErrors = {
-                details: "Some response error occured.",
-              };
-            } else if (error.request) {
-              this.connectionErrors = {
-                details: "Some connection or server error occured.",
-              };
-            } else {
-              this.connectionErrors = { details: "Some error occured." };
-            }
-          });
       }
     },
     errorsEncountered: function () {
