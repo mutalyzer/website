@@ -253,9 +253,11 @@
                 </div>
                 <div v-else class="sequence">Equal.</div>
               </div>
-              {{ response.view_rhs }}
               <div v-if="response.view_lhs">
                 <ViewVariantsCompare :view="response.view_lhs" />
+              </div>
+              <div v-if="response.view_rhs">
+                <ViewVariantsCompare :view="response.view_rhs" />
               </div>
             </v-expansion-panel-content>
           </v-expansion-panel>

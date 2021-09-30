@@ -7,8 +7,8 @@
           The Name Checker takes the variant description as input and checks
           whether it is correct.
         </p>
-        <v-sheet elevation="2" class="pa-10 mt-10">
-          <v-row class="pt-0 pr-1">
+        <v-sheet elevation="2" class="pa-5 mt-10">
+          <v-row class="pt-1 pr-0">
             <v-spacer></v-spacer>
             <v-menu open-on-hover bottom left content-class="elevation-2">
               <template v-slot:activator="{ on, attrs }">
@@ -44,7 +44,7 @@
             ></v-text-field>
           </v-row>
 
-          <v-row class="pl-5 pr-5 pt-5 mt-0" v-if="mode == 'hgvs'">
+          <v-row class="pl-5 pr-5 mt-0" v-if="mode == 'hgvs'">
             <div class="examples-list">
               Examples:
               <span
@@ -67,7 +67,7 @@
             ></v-text-field>
           </v-row>
 
-          <v-row class="pl-5 pr-5 pt-5" v-if="mode == 'sequence'">
+          <v-row class="pl-5 pr-5" v-if="mode == 'sequence'">
             <v-text-field
               class="pa-0 ma-0"
               :rules="rules"
@@ -78,7 +78,7 @@
             ></v-text-field>
           </v-row>
 
-          <v-row class="pl-5 pt-5 pb-5">
+          <v-row class="pl-5 pb-5">
             <v-btn
               ref="nameCheck"
               class="mt-5"
