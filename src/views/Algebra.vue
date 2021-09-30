@@ -253,6 +253,10 @@
                 </div>
                 <div v-else class="sequence">Equal.</div>
               </div>
+              {{ response.view_rhs }}
+              <div v-if="response.view_lhs">
+                <ViewVariantsCompare :view="response.view_lhs" />
+              </div>
             </v-expansion-panel-content>
           </v-expansion-panel>
         </v-expansion-panels>
@@ -281,10 +285,12 @@
 <script>
 import MutalyzerService from "../services/MutalyzerService.js";
 import Description from "../components/Description.vue";
+import ViewVariantsCompare from "../components/ViewVariantsCompare.vue";
 
 export default {
   components: {
     Description,
+    ViewVariantsCompare,
   },
   data: () => ({
     valid: true,
