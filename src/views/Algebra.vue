@@ -254,7 +254,10 @@
                 <div v-else class="sequence">Equal.</div>
               </div>
               <div v-if="response.view_lhs">
-                <ViewVariantsCompare :view="response.view_lhs" />
+                <ViewVariantsCompare
+                  :view="response.view_lhs"
+                  :influence="response.influence_lhs"
+                />
               </div>
               <div v-if="response.view_rhs">
                 <ViewVariantsCompare :view="response.view_rhs" />
@@ -279,6 +282,15 @@
             </v-col>
           </v-row>
         </v-alert>
+
+        <v-expansion-panels focusable hover class="mt-10 mb-10" v-if="response">
+          <v-expansion-panel>
+            <v-expansion-panel-header>Raw Response</v-expansion-panel-header>
+            <v-expansion-panel-content>
+              <JsonPretty :summary="response" />
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+        </v-expansion-panels>
       </v-flex>
     </v-layout>
   </v-container>
@@ -288,11 +300,13 @@
 import MutalyzerService from "../services/MutalyzerService.js";
 import Description from "../components/Description.vue";
 import ViewVariantsCompare from "../components/ViewVariantsCompare.vue";
+import JsonPretty from "../components/JsonPretty.vue";
 
 export default {
   components: {
     Description,
     ViewVariantsCompare,
+    JsonPretty,
   },
   data: () => ({
     valid: true,

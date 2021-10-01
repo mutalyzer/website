@@ -2,7 +2,23 @@
   <div>
     <div class="variant">
       <span v-for="(variant, v_i) in view" :key="v_i">
-        <span v-if="variant.type == 'variant'">
+        <span
+          v-if="variant.type == 'variant'"
+          @mouseover="
+            hover_variants[v_i] = true;
+            hover_sequence[v_i] = true;
+          "
+          @mouseleave="
+            hover_variants[v_i] = false;
+            hover_sequence[v_i] = false;
+          "
+          :class="
+            hover_variants[v_i] || hover_sequence[v_i]
+              ? 'variant-s-hover'
+              : 'variant-s'
+          "
+          @click="scroll_to_variant(v_i)"
+        >
           {{ variant.description
           }}<span v-if="v_i < view.length - 2">;</span></span
         >
@@ -25,7 +41,7 @@
                       <span v-on="{ ...onMenu, ...onTooltip }">{{
                         s
                       }}</span></template
-                    ><span> {{ get_position(v, s_i, "sequence") }}</span>
+                    ><span>{{ get_position(v, s_i, "sequence") }}</span>
                   </v-tooltip>
                 </template>
                 <v-list>
@@ -51,7 +67,7 @@
                       <span v-on="{ ...onMenu, ...onTooltip }">{{
                         s
                       }}</span></template
-                    ><span> get_left_position(variant, s_i)</span>
+                    ><span>{{ get_position(v, s_i, "left") }}</span>
                   </v-tooltip>
                 </template>
                 <v-list>
@@ -71,11 +87,11 @@
                   <span>...</span></span
                 ></template
               >
-              <span>other get_before_length(variant) bases</span>
+              <span>other {{ get_position(v, null, "other") }} bases</span>
             </v-tooltip>
           </div>
           <!-- right -->
-          <span class="seq-elem" v-for="(s, s_i) in v.left" :key="'r' + s_i">
+          <span class="seq-elem" v-for="(s, s_i) in v.right" :key="'r' + s_i">
             <v-list-item-action class="ma-0 pa-0" style="min-width: unset">
               <v-menu>
                 <template #activator="{ on: onMenu }">
@@ -84,7 +100,7 @@
                       <span v-on="{ ...onMenu, ...onTooltip }">{{
                         s
                       }}</span></template
-                    ><span> get_right_position(variant, s_i)</span>
+                    ><span>{{ get_position(v, s_i, "right") }}</span>
                   </v-tooltip>
                 </template>
                 <v-list>
@@ -98,9 +114,26 @@
             </v-list-item-action>
           </span>
         </div>
-        <!-- deleted & inserted -->
-        <div class="seq" v-if="v.type == 'variant'">
-          <!-- deleted not shrunk -->
+        <!-- variant: deleted & inserted -->
+        <div
+          class="seq"
+          :id="'variant_' + v_i"
+          v-if="v.type == 'variant'"
+          @mouseover="
+            hover_variants[v_i] = true;
+            hover_sequence[v_i] = true;
+          "
+          @mouseleave="
+            hover_variants[v_i] = false;
+            hover_sequence[v_i] = false;
+          "
+          :class="
+            hover_variants[v_i] || hover_sequence[v_i]
+              ? 'seq-variant'
+              : 'seq-variant-hover'
+          "
+        >
+          <!-- deleted sequence -->
           <div class="seqdel" v-if="v.deleted && v.deleted.sequence">
             <span
               class="seq-elem"
@@ -113,11 +146,11 @@
                     <span>{{ s }}</span></span
                   ></template
                 >
-                <span> get_deleted_not_shrunk_position(variant, s_i) </span>
+                <span>{{ get_position(v, s_i, "sequence") }}</span>
               </v-tooltip>
             </span>
           </div>
-          <!-- deleted shrunk left-->
+          <!-- deleted left-->
           <div class="seqdel" v-if="v.deleted && v.deleted.left">
             <span
               class="seq-elem"
@@ -130,11 +163,11 @@
                     <span>{{ s }}</span></span
                   ></template
                 >
-                <span> get_shrunk_left_position(variant, s_i) </span>
+                <span>{{ get_position(v, s_i, "left") }}</span>
               </v-tooltip>
             </span>
           </div>
-          <!-- deleted shrunk middle dots-->
+          <!-- deleted middle dots-->
           <div class="seqdel" v-if="v.deleted && v.deleted.right">
             <v-tooltip bottom>
               <template v-slot:activator="{ on, attrs }">
@@ -143,12 +176,11 @@
                 ></template
               >
               <span
-                >other get_shrunk_not_included_bases(variant, "deleted")
-                bases</span
+                >other {{ get_position(v, null, "other-deleted") }} bases</span
               >
             </v-tooltip>
           </div>
-          <!-- deleted shrunk right-->
+          <!-- deleted right-->
           <div class="seqdel" v-if="v.deleted && v.deleted.right">
             <span
               class="seq-elem"
@@ -161,7 +193,7 @@
                     <span>{{ s }}</span></span
                   ></template
                 >
-                <span>get_shrunk_right_position(variant, s_i, "deleted")</span>
+                <span>{{ get_position(v, s_i, "right-deleted") }}</span>
               </v-tooltip>
             </span>
           </div>
@@ -170,13 +202,16 @@
             <span class="seq">-</span>
           </div>
           <v-divider></v-divider>
-          <!-- inserted not shrunk -->
+          <!-- inserted sequence -->
           <div class="seqins" v-if="v.inserted && v.inserted.sequence">
-            <span class="seq-elem" v-for="(s, s_i) in v.inserted" :key="s_i">{{
-              s
-            }}</span>
+            <span
+              class="seq-elem"
+              v-for="(s, s_i) in v.inserted.sequence"
+              :key="s_i"
+              >{{ s }}</span
+            >
           </div>
-          <!-- inserted shrunk left-->
+          <!-- inserted left-->
           <div class="seqins" v-if="v.inserted && v.inserted.left">
             <span
               class="seq-elem"
@@ -185,7 +220,7 @@
               >{{ s }}</span
             >
           </div>
-          <!-- inserted shrunk middle dots-->
+          <!-- inserted middle dots-->
           <div class="seqins" v-if="v.inserted && v.inserted.right">
             <v-tooltip bottom>
               <template v-slot:activator="{ on, attrs }">
@@ -194,12 +229,11 @@
                 ></template
               >
               <span
-                >other get_shrunk_not_included_bases(variant, "inserted")
-                bases</span
+                >other {{ get_position(v, null, "other-inserted") }} bases</span
               >
             </v-tooltip>
           </div>
-          <!-- inserted shrunk right-->
+          <!-- inserted right-->
           <div class="seqins" v-if="v.inserted && v.inserted.right">
             <span
               class="seq-elem"
@@ -215,37 +249,67 @@
         </div>
       </div>
     </div>
-    <v-expansion-panels focusable hover flat class="mt-5 mb-10" v-if="view">
-      <v-expansion-panel>
-        <v-expansion-panel-header>View as a tree</v-expansion-panel-header>
-        <v-expansion-panel-content>
-          <JsonPretty :summary="view" />
-        </v-expansion-panel-content>
-      </v-expansion-panel>
-    </v-expansion-panels>
   </div>
 </template>
 
 <script>
-import JsonPretty from "./JsonPretty.vue";
-
 export default {
   name: "ViewVariantsCompare",
-  components: {
-    JsonPretty,
-  },
   props: {
     view: null,
+    influence: null,
+  },
+  data: function () {
+    return {
+      hover_variants: null,
+      hover_sequence: null,
+    };
+  },
+  created: function () {
+    this.hover_init();
   },
   methods: {
     get_position: function (view, s_i, key) {
       if (key == "sequence") {
         return s_i + view.start;
+      } else if (key == "left") {
+        return s_i + view.start;
+      } else if (key == "right") {
+        return view.end - view.right.length + s_i;
+      } else if (key == "right-deleted") {
+        console.log(view);
+        return view.end - view.deleted.right.length + s_i;
+      } else if (key == "other") {
+        return view.end - view.start - (view.left.length + view.right.length);
+      } else if (key == "other-deleted") {
+        return (
+          view.end -
+          view.start -
+          (view.deleted.left.length + view.deleted.right.length)
+        );
+      } else if (key == "other-inserted") {
+        return (
+          view.inserted.length -
+          (view.inserted.left.length + view.inserted.right.length)
+        );
       }
-      console.log(view);
-      console.log(s_i);
-      console.log(key);
       return s_i;
+    },
+    hover_init: function () {
+      let h_v = {};
+      let h_s = {};
+      for (const [i, v] of this.view.entries()) {
+        if (v.type == "variant") {
+          h_v[i] = false;
+          h_s[i] = false;
+        }
+      }
+      this.hover_variants = h_v;
+      this.hover_sequence = h_s;
+    },
+    scroll_to_variant: function (v_i) {
+      var elmnt = document.getElementById("variant_" + v_i);
+      elmnt.scrollIntoView();
     },
   },
 };
@@ -269,7 +333,30 @@ export default {
   background-color: var(--blue-grey-lighten-5);
 }
 
+.variant-s {
+  font-family: monospace;
+  padding: 5px;
+  background-color: var(--blue-grey-lighten-5);
+}
+
+.variant-s-hover {
+  font-family: monospace;
+  padding: 5px;
+  background-color: var(--blue-grey-lighten-4);
+  cursor: pointer;
+}
+
 .seq-variant {
+  background-color: var(--blue-grey-lighten-4);
+  display: inline-block;
+  vertical-align: middle;
+  text-align: center;
+  padding: 5px;
+  margin: 0 auto;
+  font-family: monospace;
+}
+
+.seq-variant-hover {
   background-color: var(--blue-grey-lighten-5);
   display: inline-block;
   vertical-align: middle;
