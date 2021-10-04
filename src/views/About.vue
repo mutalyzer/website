@@ -14,11 +14,13 @@
 
         <h1 class="display-1">Funding</h1>
         <p class="mt-5">
-          This research was supported by a ZonMW Grant (Project Number
+	  This project was supported by the Fair Genomes project as financed in
+	  the Personalised Medicine program from the the Netherlands
+          Organization for Health Research and Development (ZonMw) under grant number
           <a
             href="https://www.zonmw.nl/nl/onderzoek-resultaten/geneesmiddelen/programmas/project-detail/personalised-medicine/fair-genomes-a-national-guideline-to-promote-optimal-reuse-of-ngs-data-in-research-and-healthcare/verslagen/"
             >846003201</a
-          >) as part of the Personalised Medicine program.
+          >.
         </p>
       </v-flex>
     </v-layout>
