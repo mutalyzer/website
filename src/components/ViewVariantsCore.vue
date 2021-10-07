@@ -1,9 +1,9 @@
 <template>
   <div>
     <div class="variant">
-      <span v-for="(variant, v_i) in view" :key="v_i">
+      <span v-for="(v, v_i) in view.views" :key="v_i">
         <span
-          v-if="variant.type == 'variant'"
+          v-if="v.type == 'variant'"
           @mouseover="
             hover_variants[v_i] = true;
             hover_sequence[v_i] = true;
@@ -18,29 +18,26 @@
               : 'variant-s'
           "
           @click="scroll_to_variant(v_i)"
+          >{{ v.description }}</span
         >
-          {{ variant.description
-          }}<span v-if="v_i < view.length - 2">;</span></span
-        >
+        <span v-if="v.type == 'variant' && v_i < view.views.length - 2">;</span>
       </span>
     </div>
     <div class="wrapper">
-      <div v-for="(v, v_i) in view" :key="'v' + v_i" class="seq">
+      <div v-for="(v, v_i) in view.views" :key="'v' + v_i" class="seq">
         <!-- outside sequence -->
-        <div v-if="v.type == 'outside' && v.sequence" class="seq">
-          <span
-            class="seq-elem"
-            v-for="(s, s_i) in v.sequence"
-            :key="'s' + s_i"
-          >
+        <div v-if="v.type == 'outside' && v.sequence">
+          <span v-for="(s, s_i) in v.sequence" :key="'s' + s_i">
             <v-list-item-action class="ma-0 pa-0" style="min-width: unset">
               <v-menu>
                 <template #activator="{ on: onMenu }">
                   <v-tooltip bottom>
                     <template #activator="{ on: onTooltip }">
-                      <span v-on="{ ...onMenu, ...onTooltip }">{{
-                        s
-                      }}</span></template
+                      <span
+                        :class="get_seq_class(v, s_i, 'sequence')"
+                        v-on="{ ...onMenu, ...onTooltip }"
+                        >{{ s }}</span
+                      ></template
                     ><span>{{ get_position(v, s_i, "sequence") }}</span>
                   </v-tooltip>
                 </template>
@@ -56,17 +53,19 @@
           </span>
         </div>
         <!-- outside non sequence-->
-        <div v-if="v.type == 'outside' && v.left" class="seq">
+        <div v-if="v.type == 'outside' && v.left">
           <!-- left -->
-          <span class="seq-elem" v-for="(s, s_i) in v.left" :key="'l' + s_i">
+          <span v-for="(s, s_i) in v.left" :key="'l' + s_i">
             <v-list-item-action class="ma-0 pa-0" style="min-width: unset">
               <v-menu>
                 <template #activator="{ on: onMenu }">
                   <v-tooltip bottom>
                     <template #activator="{ on: onTooltip }">
-                      <span v-on="{ ...onMenu, ...onTooltip }">{{
-                        s
-                      }}</span></template
+                      <span
+                        :class="get_seq_class(v, s_i, 'left')"
+                        v-on="{ ...onMenu, ...onTooltip }"
+                        >{{ s }}</span
+                      ></template
                     ><span>{{ get_position(v, s_i, "left") }}</span>
                   </v-tooltip>
                 </template>
@@ -83,23 +82,25 @@
           <div class="seq">
             <v-tooltip bottom>
               <template v-slot:activator="{ on, attrs }">
-                <span class="seq-elem" v-bind="attrs" v-on="on">
-                  <span>...</span></span
+                <span class="seq-elem" v-bind="attrs" v-on="on"
+                  >...</span
                 ></template
               >
               <span>other {{ get_position(v, null, "other") }} bases</span>
             </v-tooltip>
           </div>
           <!-- right -->
-          <span class="seq-elem" v-for="(s, s_i) in v.right" :key="'r' + s_i">
+          <span v-for="(s, s_i) in v.right" :key="'r' + s_i">
             <v-list-item-action class="ma-0 pa-0" style="min-width: unset">
               <v-menu>
                 <template #activator="{ on: onMenu }">
                   <v-tooltip bottom>
                     <template #activator="{ on: onTooltip }">
-                      <span v-on="{ ...onMenu, ...onTooltip }">{{
-                        s
-                      }}</span></template
+                      <span
+                        :class="get_seq_class(v, s_i, 'right')"
+                        v-on="{ ...onMenu, ...onTooltip }"
+                        >{{ s }}</span
+                      ></template
                     ><span>{{ get_position(v, s_i, "right") }}</span>
                   </v-tooltip>
                 </template>
@@ -117,7 +118,7 @@
         <!-- variant: deleted & inserted -->
         <div
           class="seq"
-          :id="'variant_' + v_i"
+          :id="d_id + '_variant_' + v_i"
           v-if="v.type == 'variant'"
           @mouseover="
             hover_variants[v_i] = true;
@@ -254,10 +255,11 @@
 
 <script>
 export default {
-  name: "ViewVariantsCompare",
+  name: "ViewVariantsCore",
   props: {
     view: null,
     influence: null,
+    d_id: null,
   },
   data: function () {
     return {
@@ -270,46 +272,67 @@ export default {
   },
   methods: {
     get_position: function (view, s_i, key) {
+      let position = null;
       if (key == "sequence") {
-        return s_i + view.start;
+        position = s_i + view.start;
       } else if (key == "left") {
-        return s_i + view.start;
+        position = s_i + view.start;
       } else if (key == "right") {
-        return view.end - view.right.length + s_i;
+        position = view.end - view.right.length + s_i;
       } else if (key == "right-deleted") {
-        console.log(view);
-        return view.end - view.deleted.right.length + s_i;
+        position = view.end - view.deleted.right.length + s_i;
       } else if (key == "other") {
-        return view.end - view.start - (view.left.length + view.right.length);
+        position =
+          view.end - view.start - (view.left.length + view.right.length);
       } else if (key == "other-deleted") {
-        return (
+        position =
           view.end -
           view.start -
-          (view.deleted.left.length + view.deleted.right.length)
-        );
+          (view.deleted.left.length + view.deleted.right.length);
       } else if (key == "other-inserted") {
-        return (
+        position =
           view.inserted.length -
-          (view.inserted.left.length + view.inserted.right.length)
-        );
+          (view.inserted.left.length + view.inserted.right.length);
+      } else {
+        position = s_i;
       }
-      return s_i;
+      if (this.view.inverted) {
+        return this.view.seq_length - position - 1;
+      } else {
+        return position;
+      }
     },
     hover_init: function () {
       let h_v = {};
       let h_s = {};
-      for (const [i, v] of this.view.entries()) {
-        if (v.type == "variant") {
-          h_v[i] = false;
-          h_s[i] = false;
+      if (this.view && this.view.views) {
+        for (const [i, v] of this.view.views.entries()) {
+          if (v.type == "variant") {
+            h_v[i] = false;
+            h_s[i] = false;
+          }
         }
       }
       this.hover_variants = h_v;
       this.hover_sequence = h_s;
     },
     scroll_to_variant: function (v_i) {
-      var elmnt = document.getElementById("variant_" + v_i);
-      elmnt.scrollIntoView();
+      var elmnt = document.getElementById(this.d_id + "_variant_" + v_i);
+      elmnt.scrollIntoView({
+        behavior: "smooth",
+      });
+    },
+    get_seq_class: function (v, s_i, key) {
+      if (
+        this.influence &&
+        this.influence.min_pos &&
+        this.influence.max_pos &&
+        this.influence.min_pos <= this.get_position(v, s_i, key) &&
+        this.get_position(v, s_i, key) < this.influence.max_pos
+      ) {
+        return "seq-elem-influence";
+      }
+      return "seq-elem";
     },
   },
 };
@@ -367,8 +390,6 @@ export default {
 }
 
 .seq {
-  letter-spacing: 2px;
-  text-indent: 2px;
   display: inline-block;
   vertical-align: middle;
   text-align: center;
@@ -378,10 +399,24 @@ export default {
 }
 
 .seq-elem {
+  padding: 5px;
   text-align: center;
 }
 
 .seq-elem:hover {
+  padding: 5px;
+  background-color: #b8b8b8;
+  cursor: pointer;
+}
+
+.seq-elem-influence {
+  padding: 5px;
+  background-color: var(--blue-grey-lighten-5);
+  text-align: center;
+}
+
+.seq-elem-influence:hover {
+  padding: 5px;
   background-color: #b8b8b8;
   cursor: pointer;
 }

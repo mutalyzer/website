@@ -254,13 +254,18 @@
                 <div v-else class="sequence">Equal.</div>
               </div>
               <div v-if="response.view_lhs">
-                <ViewVariantsCompare
+                <ViewVariantsCore
                   :view="response.view_lhs"
                   :influence="response.influence_lhs"
+                  :d_id="lhs"
                 />
               </div>
               <div v-if="response.view_rhs">
-                <ViewVariantsCompare :view="response.view_rhs" />
+                <ViewVariantsCore
+                  :view="response.view_rhs"
+                  :influence="response.influence_rhs"
+                  :d_id="rhs"
+                />
               </div>
             </v-expansion-panel-content>
           </v-expansion-panel>
@@ -299,13 +304,13 @@
 <script>
 import MutalyzerService from "../services/MutalyzerService.js";
 import Description from "../components/Description.vue";
-import ViewVariantsCompare from "../components/ViewVariantsCompare.vue";
+import ViewVariantsCore from "../components/ViewVariantsCore.vue";
 import JsonPretty from "../components/JsonPretty.vue";
 
 export default {
   components: {
     Description,
-    ViewVariantsCompare,
+    ViewVariantsCore,
     JsonPretty,
   },
   data: () => ({
