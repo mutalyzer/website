@@ -325,7 +325,7 @@ export default {
     get_seq_class: function (v, s_i, key) {
       if (
         this.influence &&
-        this.influence.min_pos &&
+        (this.influence.min_pos || this.influence.min_pos == 0) &&
         this.influence.max_pos &&
         this.influence.min_pos <= this.get_position(v, s_i, key) &&
         this.get_position(v, s_i, key) < this.influence.max_pos
