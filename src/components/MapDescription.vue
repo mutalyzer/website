@@ -227,14 +227,14 @@ export default {
     };
   },
   methods: {
-    map(slice_to, clean) {
+    map(slice_to, filter) {
       if (this.description && this.reference_id) {
         this.show_loading = true;
         let params = {
           description: this.description,
           reference_id: this.reference_id,
           slice_to: slice_to,
-          clean: clean,
+          filter: filter,
         };
         if (this.selector_id) {
           params.selector_id = this.selector_id;
@@ -242,7 +242,7 @@ export default {
         MutalyzerService.map(params)
           .then((response) => {
             if (response.data) {
-              this.processResponse(response.data, slice_to, clean);
+              this.processResponse(response.data, slice_to, filter);
             }
           })
           .catch((error) => {
@@ -263,23 +263,23 @@ export default {
           });
       }
     },
-    processResponse: function (response, slice_to, clean) {
+    processResponse: function (response, slice_to, filter) {
       this.show_loading = false;
       if (this.errorsEncountered(response)) {
         this.show_error = true;
         this.error_tooltip = response.errors[0].details;
       } else {
         if (slice_to == "transcript") {
-          if (clean) {
-            this.mapped_filtered_description = response;
+          if (filter) {
+            this.mapped_filtered_description = response.mapped_description;
           } else {
-            this.mapped_description = response;
+            this.mapped_description = response.mapped_description;
           }
         } else if (slice_to == "gene") {
-          if (clean) {
-            this.mapped_filtered_description_gene = response;
+          if (filter) {
+            this.mapped_filtered_description_gene = response.mapped_description;
           } else {
-            this.mapped_description_gene = response;
+            this.mapped_description_gene = response.mapped_description;
           }
         }
       }
