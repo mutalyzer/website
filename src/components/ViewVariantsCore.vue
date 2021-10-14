@@ -24,6 +24,8 @@
       </span>
     </div>
     <div class="wrapper">
+      <v-icon v-if="!view.inverted" class="mr-2">mdi-arrow-right-bold</v-icon>
+      <v-icon v-if="view.inverted" class="mr-2">mdi-arrow-left-bold</v-icon>
       <div v-for="(v, v_i) in view.views" :key="'v' + v_i" class="seq">
         <!-- outside sequence -->
         <div v-if="v.type == 'outside' && v.sequence">
@@ -249,6 +251,8 @@
           </div>
         </div>
       </div>
+      <v-icon v-if="!view.inverted" class="ml-2">mdi-arrow-right-bold</v-icon>
+      <v-icon v-if="view.inverted" class="ml-2">mdi-arrow-left-bold</v-icon>
     </div>
   </div>
 </template>
