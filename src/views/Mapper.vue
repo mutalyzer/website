@@ -5,33 +5,71 @@
         <h1 class="display-1 mt-10">Mapper</h1>
         <p>Map a description to another reference.</p>
         <v-sheet elevation="2" class="pa-5 mt-10">
-          <v-row class="pt-5 pr-5 pl-5">
-            <v-text-field
-              class="pa-0 ma-0"
-              :rules="rules"
-              v-model="description"
-              label="HGVS Description"
-              :clearable="true"
-              autofocus
-            ></v-text-field>
+          <v-row>
+            <v-subheader>Map</v-subheader>
           </v-row>
 
-          <v-row class="pt-5 pr-5 pl-5">
-            <v-text-field
-              class="pa-0 ma-0"
-              :rules="rules"
-              v-model="reference_id"
-              label="Reference ID"
-              :clearable="true"
-            ></v-text-field>
+          <v-divider></v-divider>
+
+          <v-row class="pl-2 pr-2 mt-1">
+            <v-col>
+              <v-text-field
+                :rules="rules"
+                v-model="description"
+                :hint="'NG_012337.1:g.7125G>T'"
+                label="HGVS Description"
+                :clearable="true"
+                autofocus
+              ></v-text-field>
+            </v-col>
           </v-row>
 
-          <v-row class="pt-5 pr-5 pl-5">
-            <v-switch
-              v-model="filter"
-              label="Filter non original variant operations"
-              color="primary"
-            ></v-switch>
+          <v-row class="mt-0">
+            <v-subheader>To</v-subheader>
+          </v-row>
+
+          <v-divider></v-divider>
+
+          <v-row class="pl-2 pr-2 mt-1">
+            <v-col cols="12" sm="4" lg="4">
+              <v-text-field
+                :rules="rules"
+                :hint="'NG_012337.3'"
+                v-model="reference_id"
+                label="Reference ID"
+                :clearable="true"
+              ></v-text-field>
+            </v-col>
+
+            <v-col cols="12" sm="4" lg="4">
+              <v-combobox
+                v-model="selector_id"
+                :label="'Selector ID'"
+                :hint="'E.g. NM_003002.4'"
+                :items="availableSelectors.selectors"
+                :click="getAvailableSelectors()"
+                :clearable="true"
+              ></v-combobox>
+            </v-col>
+
+            <v-col cols="12" sm="4" lg="4">
+              <v-combobox
+                v-model="slice_to"
+                :label="'Slice to'"
+                :items="['gene', 'transcript']"
+                :clearable="true"
+              ></v-combobox>
+            </v-col>
+          </v-row>
+
+          <v-row class="pl-2 pr-2 mt-0">
+            <v-col cols="12" sm="6" lg="3">
+              <v-switch
+                v-model="filter"
+                label="Filter non original variant operations"
+                color="primary"
+              ></v-switch
+            ></v-col>
           </v-row>
 
           <v-row class="pl-5 pb-5">
@@ -250,11 +288,13 @@ export default {
     loadingOverlay: false,
     description: null,
     reference_id: null,
+    selector_id: null,
     slice_to: null,
     filter: null,
     response: null,
     connectionErrors: null,
     showCorrections: false,
+    availableSelectors: {},
   }),
   created: function () {
     this.run();
@@ -281,6 +321,15 @@ export default {
         this.$route.query.reference_id !== 0
       ) {
         this.reference_id = this.$route.query.reference_id;
+      }
+      if (
+        this.$route.query.selector_id &&
+        this.$route.query.selector_id !== 0
+      ) {
+        this.selector_id = this.$route.query.selector_id;
+      }
+      if (this.$route.query.slice_to && this.$route.query.slice_to !== 0) {
+        this.slice_to = this.$route.query.slice_to;
       }
       if (this.$route.query.filter && this.$route.query.filter !== 0) {
         this.filter = this.$route.query.filter;
@@ -386,16 +435,41 @@ export default {
       }
     },
     getParams: function () {
-      return {
+      let params = {
         description: this.description,
         reference_id: this.reference_id,
-        filter: this.filter,
       };
+      if (this.selector_id) {
+        params.selector_id = this.selector_id;
+      }
+      if (this.slice_to) {
+        params.slice_to = this.slice_to;
+      }
+      if (this.filter == true || this.filter == false) {
+        params.filter = this.filter;
+      }
+      return params;
     },
     setExample: function () {
       this.description = "NG_012337.1:g.7125G>T";
       this.reference_id = "NG_012337.3";
+      this.selector_id = null;
+      this.slice_to = null;
       this.filter = true;
+    },
+    getAvailableSelectors: function () {
+      if (this.reference_id !== null && 0 !== this.reference_id.length) {
+        if (
+          this.availableSelectors &&
+          this.availableSelectors.reference !== this.reference_id
+        ) {
+          MutalyzerService.getSelectors(this.reference_id).then((response) => {
+            if (response.data) {
+              this.availableSelectors = response.data;
+            }
+          });
+        }
+      }
     },
   },
 };
