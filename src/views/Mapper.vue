@@ -303,6 +303,11 @@ export default {
     $route() {
       this.run();
     },
+    reference_id() {
+      if (this.availableSelectors.reference !== this.reference_id) {
+        this.availableSelectors = {};
+      }
+    },
   },
   methods: {
     run: function () {

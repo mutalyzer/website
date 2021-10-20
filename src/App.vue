@@ -64,6 +64,13 @@
               <v-list-item-title>Description Extractor</v-list-item-title>
             </v-list-item>
 
+            <v-list-item to="/mapper">
+              <v-list-item-icon>
+                <v-icon>mdi-description</v-icon>
+              </v-list-item-icon>
+              <v-list-item-title>Mapper</v-list-item-title>
+            </v-list-item>
+
             <v-list-item to="/batchchecker">
               <v-list-item-icon>
                 <v-icon>mdi-description</v-icon>
