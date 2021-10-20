@@ -337,7 +337,11 @@ export default {
         this.slice_to = this.$route.query.slice_to;
       }
       if (this.$route.query.filter && this.$route.query.filter !== 0) {
-        this.filter = this.$route.query.filter;
+        if (this.$route.query.filter === "true") {
+          this.filter = true;
+        } else if (this.$route.query.filter === "false") {
+          this.filter = false;
+        }
       }
     },
     map: function () {
@@ -456,9 +460,9 @@ export default {
       return params;
     },
     setExample: function () {
-      this.description = "NG_012337.1:g.7125G>T";
+      this.description = "NM_003002.2:c.274G>T";
       this.reference_id = "NG_012337.3";
-      this.selector_id = null;
+      this.selector_id = "NM_003002.4";
       this.slice_to = null;
       this.filter = true;
     },
