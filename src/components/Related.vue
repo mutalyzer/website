@@ -22,6 +22,7 @@
           <router-link
             v-if="reference.selector"
             :class="'map-link'"
+            target="_blank"
             :to="{
               name: 'Mapper',
               query: {
@@ -31,11 +32,14 @@
                 not_run: true,
               },
             }"
-            >{{ reference.id }}({{ reference.selector.id }})</router-link
+            >{{
+              reference.id + "(" + reference.selector.id + ")"
+            }})</router-link
           >
           <router-link
             v-else
             :class="'map-link'"
+            target="_blank"
             :to="{
               name: 'Mapper',
               query: {
