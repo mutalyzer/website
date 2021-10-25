@@ -455,7 +455,7 @@
               >Related reference sequences</v-expansion-panel-header
             >
             <v-expansion-panel-content class="pt-5">
-              <Map
+              <Related
                 :model="this.response.normalized_model"
                 :description="this.response.normalized_description"
               />
@@ -508,7 +508,7 @@ import AffectedProtein from "../components/AffectedProtein.vue";
 import SelectorShort from "../components/SelectorShort.vue";
 import SyntaxError from "../components/SyntaxError.vue";
 import ReferenceInformation from "../components/ReferenceInformation.vue";
-import Map from "../components/Map.vue";
+import Related from "../components/Related.vue";
 import ViewVariants from "../components/ViewVariants.vue";
 import Description from "../components/Description.vue";
 
@@ -519,7 +519,7 @@ export default {
     AffectedProtein,
     SyntaxError,
     ReferenceInformation,
-    Map,
+    Related,
     ViewVariants,
     Description,
   },

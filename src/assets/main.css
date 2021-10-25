@@ -207,6 +207,24 @@ li {
   cursor: pointer;
 }
 
+.map-link {
+  text-decoration: none;
+  margin: 0;
+  padding: 0 1px;
+  font-family: monospace;
+  display: inline-block;
+  color:var(--blue);
+  background-color: #ffffff;
+  padding: 5px 10px;
+}
+
+.map-link:hover {
+  color: #f2f9f3;
+  background-color: var(--blue);
+  cursor: pointer;
+}
+
+
 .protein-description {
   text-decoration: none;
   margin: 0;

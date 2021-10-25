@@ -291,6 +291,7 @@ export default {
     selector_id: null,
     slice_to: null,
     filter: null,
+    not_run: null,
     response: null,
     connectionErrors: null,
     showCorrections: false,
@@ -312,7 +313,9 @@ export default {
   methods: {
     run: function () {
       this.setRouterParams();
-      this.map();
+      if (!this.not_run) {
+        this.map();
+      }
     },
     setRouterParams: function () {
       if (
@@ -335,6 +338,15 @@ export default {
       }
       if (this.$route.query.slice_to && this.$route.query.slice_to !== 0) {
         this.slice_to = this.$route.query.slice_to;
+      }
+      if (this.$route.query.not_run && this.$route.query.not_run !== 0) {
+        if (this.$route.query.not_run === "true") {
+          this.not_run = true;
+        } else if (this.$route.query.not_run === "false") {
+          this.not_run = false;
+        }
+      } else {
+        this.not_run = false;
       }
       if (this.$route.query.filter && this.$route.query.filter !== 0) {
         if (this.$route.query.filter === "true") {

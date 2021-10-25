@@ -19,132 +19,45 @@
               : reference.id
           "
         >
-          <MapDescription
+          <router-link
             v-if="reference.selector"
-            :description="description"
-            :reference_id="reference.id"
-            :selector_id="reference.selector.id"
-          />
-          <MapDescription
+            :class="'map-link'"
+            :to="{
+              name: 'Mapper',
+              query: {
+                description: description,
+                reference_id: reference.id,
+                selector_id: reference.selector.id,
+                not_run: true,
+              },
+            }"
+            >{{ reference.id }}({{ reference.selector.id }})</router-link
+          >
+          <router-link
             v-else
-            :description="description"
-            :reference_id="reference.id"
-          />
+            :class="'map-link'"
+            :to="{
+              name: 'Mapper',
+              query: {
+                description: description,
+                reference_id: reference.id,
+                not_run: true,
+              },
+            }"
+            >{{ reference.id }}</router-link
+          >
         </div>
       </div>
-    </div>
-
-    <!-- <v-progress-linear
-      indeterminate
-      v-if="progress_datasets && progress_other"
-    ></v-progress-linear> -->
-
-    <div v-if="!(progress_datasets && progress_other)">
-      <div v-if="!response_datasets">
-        Related references from NCBI Datasets not retrieved.
-      </div>
-      <div v-if="response_datasets && response && response.genes">
-        <v-list>
-          <div v-if="updated_accession">
-            <v-subheader inset class="overline"
-              >New Reference Id Available</v-subheader
-            >
-
-            <MapDescription
-              :description="description"
-              :reference_id="updated_accession"
-            />
-          </div>
-
-          <v-subheader inset class="overline">Reference Standards</v-subheader>
-
-          <div
-            v-for="r_s in response.genes[0].gene.reference_standards"
-            :key="r_s.gene_range.accession_version"
-          >
-            <MapDescription
-              :description="description"
-              :reference_id="r_s.gene_range.accession_version"
-              :selector_id="get_selector_id()"
-            />
-          </div>
-
-          <v-subheader inset class="overline">Transcripts</v-subheader>
-
-          <div
-            v-for="t in response.genes[0].gene.transcripts"
-            :key="t.accession_version"
-          >
-            <MapDescription
-              :description="description"
-              :reference_id="t.accession_version"
-            />
-          </div>
-
-          <v-subheader inset class="overline"
-            >Chromosome Selected Transcripts</v-subheader
-          >
-
-          <div
-            v-for="t in response.genes[0].gene.transcripts"
-            :key="t.accession_version + t"
-          >
-            <MapDescription
-              :description="description"
-              :reference_id="t.genomic_range.accession_version"
-              :selector_id="t.accession_version"
-            />
-          </div>
-        </v-list>
-      </div>
-
-      <v-expansion-panels focusable hover flat class="mb-3" v-if="response">
+      <v-expansion-panels focusable hover flat class="mt-3 mb-3">
         <v-expansion-panel>
           <v-expansion-panel-header
-            >View NCBI Datasets response as a tree</v-expansion-panel-header
+            >View response as a tree</v-expansion-panel-header
           >
           <v-expansion-panel-content>
-            <JsonPretty :summary="response" />
+            <JsonPretty :summary="related_references_retriever" />
           </v-expansion-panel-content>
         </v-expansion-panel>
       </v-expansion-panels>
-
-      <div v-if="!response_other">
-        Related references from NCBI Entrez not retrieved.
-      </div>
-
-      <div v-if="other_references.length != 0">
-        <v-list>
-          <v-subheader inset class="overline">Other</v-subheader>
-          <div
-            v-for="t in other_references"
-            :key="t.reference_id + t.selector_id"
-          >
-            <MapDescription
-              :description="description"
-              :reference_id="t.reference_id"
-              :selector_id="t.selector_id"
-            />
-          </div>
-        </v-list>
-
-        <v-expansion-panels
-          focusable
-          hover
-          flat
-          class="mb-3"
-          v-if="eutils && !progress_other"
-        >
-          <v-expansion-panel>
-            <v-expansion-panel-header
-              >View NCBI Eutils response as a tree</v-expansion-panel-header
-            >
-            <v-expansion-panel-content>
-              <JsonPretty :summary="eutils" />
-            </v-expansion-panel-content>
-          </v-expansion-panel>
-        </v-expansion-panels>
-      </div>
     </div>
   </div>
 </template>
@@ -154,13 +67,11 @@ import MutalyzerService from "../services/MutalyzerService";
 import NcbiDatasetsApi from "../services/NcbiDatasetsApi";
 import NcbiEutils from "../services/NcbiEutils";
 import JsonPretty from "./JsonPretty.vue";
-import MapDescription from "./MapDescription";
 
 export default {
-  name: "Map",
+  name: "Related",
   components: {
     JsonPretty,
-    MapDescription,
   },
   props: {
     model: null,
