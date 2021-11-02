@@ -429,9 +429,17 @@ export default {
           .catch((error) => {
             this.loadingOverlay = false;
             if (error.response) {
-              this.connectionErrors = {
-                details: "Some response error occured.",
-              };
+              if (
+                error.response.status == 422 &&
+                error.response.data &&
+                error.response.data.custom
+              ) {
+                this.response = error.response.data.custom;
+              } else {
+                this.connectionErrors = {
+                  details: "Some response error occured.",
+                };
+              }
             } else if (error.request) {
               this.connectionErrors = {
                 details: "Some connection or server error occured.",

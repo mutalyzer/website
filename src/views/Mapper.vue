@@ -304,8 +304,8 @@ export default {
     $route() {
       this.run();
     },
-    reference_id() {
-      if (this.availableSelectors.reference !== this.reference_id) {
+    referenceId() {
+      if (this.availableSelectors.reference !== this.referenceId) {
         this.availableSelectors = {};
       }
     },
@@ -372,9 +372,17 @@ export default {
           .catch((error) => {
             this.loadingOverlay = false;
             if (error.response) {
-              this.connectionErrors = {
-                details: "Some response error occured.",
-              };
+              if (
+                error.response.status == 422 &&
+                error.response.data &&
+                error.response.data.custom
+              ) {
+                this.response = error.response.data.custom;
+              } else {
+                this.connectionErrors = {
+                  details: "Some response error occured.",
+                };
+              }
             } else if (error.request) {
               this.connectionErrors = {
                 details: "Some connection or server error occured.",
@@ -484,11 +492,18 @@ export default {
           this.availableSelectors &&
           this.availableSelectors.reference !== this.reference_id
         ) {
-          MutalyzerService.getSelectors(this.reference_id).then((response) => {
-            if (response.data) {
-              this.availableSelectors = response.data;
-            }
-          });
+          MutalyzerService.getSelectors(this.reference_id)
+            .then((response) => {
+              if (response.data) {
+                this.availableSelectors = response.data;
+              }
+            })
+            .catch((error) => {
+              this.availableSelectors = {
+                reference: this.reference_id,
+                error: error,
+              };
+            });
         }
       }
     },

@@ -216,7 +216,7 @@ export default {
       let i = 0;
 
       for (let variant of this.variants) {
-        MutalyzerService.nameCheck(variant.input)
+        MutalyzerService.nameCheckHgvs(variant.input)
           .then((response) => {
             if (response.data) {
               i += 1;
@@ -232,9 +232,17 @@ export default {
           .catch((error) => {
             i += 1;
             if (error.response) {
-              variant.error = {
-                details: "Some response error occured.",
-              };
+              if (
+                error.response.status == 422 &&
+                error.response.data &&
+                error.response.data.custom
+              ) {
+                Vue.set(variant, "response", error.response.data.custom);
+              } else {
+                variant.error = {
+                  details: "Some response error occured.",
+                };
+              }
             } else if (error.request) {
               variant.error = {
                 details: "Some connection or server error occured.",

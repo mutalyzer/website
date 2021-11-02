@@ -136,7 +136,13 @@ export default {
           })
           .catch((error) => {
             if (error.response) {
-              this.errorMessages = "Some response error.";
+              if (
+                error.response.status == 422 &&
+                error.response.data &&
+                error.response.data.custom
+              ) {
+                this.errorMessages = "Some response error.";
+              }
             } else if (error.request) {
               this.errorMessages = "Some request error.";
             } else {
