@@ -12,8 +12,16 @@ const apiClient = axios.create({
 });
 
 export default {
-  nameCheck(description) {
+  compare(params) {
+    return apiClient.get("/compare/", { params });
+  },
+  nameCheckHgvs(description) {
     return apiClient.get("/name_check/" + encodeURIComponent(description));
+  },
+  nameCheckSequence(description, params) {
+    return apiClient.get("/name_check/" + encodeURIComponent(description), {
+      params,
+    });
   },
   positionConvert(params) {
     return apiClient.get("/position_convert/", { params });
@@ -27,7 +35,17 @@ export default {
   getSelectors(referenceId) {
     return apiClient.get("/get_selectors/" + encodeURIComponent(referenceId));
   },
-  lift(params) {
-    return apiClient.get("/lift/", { params });
+  map(params) {
+    return apiClient.get("/map/", { params });
+  },
+  view(description, params) {
+    return apiClient.get("/view_variants/" + encodeURIComponent(description), {
+      params,
+    });
+  },
+  relatedReferences(reference_id) {
+    return apiClient.get(
+      "/related_references/" + encodeURIComponent(reference_id)
+    );
   },
 };

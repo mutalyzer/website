@@ -1,8 +1,17 @@
 :root {
   --green: #4CAF50;
+  --green-lighten-5: #E8F5E9;
   --light-blue-lighten-5: #E1F5FE;
   --red-accent-4: #D50000;
   --red-lighten-5: #FFEBEE;
+  --blue: #2196F3;
+  --blue-lighten-5: #E3F2FD;
+  --blue-grey-lighten-5: #ECEFF1;
+  --blue-grey-lighten-4: #CFD8DC;
+  --grey-lighten-5: #FAFAFA;
+  --grey-lighten-3: #EEEEEE;
+  --grey-lighten-2: #E0E0E0;
+  --grey-lighten-1: #BDBDBD;
 }
 
 ul {
@@ -38,13 +47,11 @@ li {
 
 .examples-list {
   margin-top: 5px;
-  background-color: #ffffff;
 }
 
 .example-item {
   display: inline-block;
   color: #1e90ff;
-  background-color: #ffffff;
   padding: 5px 10px;
   margin-left: 2px;
   font-family: monospace;
@@ -58,8 +65,6 @@ li {
 }
 
 .description {
-  padding: 0 1px;
-  padding: 5px 10px;
   font-family: monospace;
 }
 
@@ -73,6 +78,22 @@ li {
   color: #00b6ad;
   padding: 5px 10px;
   font-family: monospace;
+}
+
+.corrected-description-link-reverse {
+  text-decoration: none;
+  margin-top: 2px;
+  padding: 5px 10px;
+  font-family: monospace;
+  display: inline-block;
+  color: #ffffff;
+  background-color: var(--blue);
+}
+
+.corrected-description-link-reverse:hover {
+  color: var(--blue-lighten-5);
+  background-color: var(--blue);
+  cursor: pointer;
 }
 
 .normalized-description {
@@ -104,6 +125,38 @@ li {
   cursor: pointer;
 }
 
+.ok-description-link-reverse {
+  text-decoration: none;
+  margin-top: 2px;
+  padding: 5px 10px;
+  font-family: monospace;
+  display: inline-block;
+  color: #ffffff;
+  background-color: var(--green);
+}
+
+.ok-description-link-reverse:hover {
+  color: var(--green-lighten-5);
+  background-color: var(--green);
+  cursor: pointer;
+}
+
+.ex-description-link {
+  text-decoration: none;
+  margin-top: 2px;
+  padding: 5px 10px;
+  font-family: monospace;
+  display: inline-block;
+  color: var(--blue);
+  background-color: #ffffff;
+}
+
+.ex-description-link:hover {
+  color: #ffffff;
+  background-color: var(--blue);
+  cursor: pointer;
+}
+
 .other-description-link {
   text-decoration: none;
   margin-top: 2px;
@@ -116,7 +169,7 @@ li {
 
 .other-description-link:hover {
   color: #ffffff;
-  background-color: #1e90ff;
+  background-color:var(--blue);
   cursor: pointer;
 }
 
@@ -153,6 +206,24 @@ li {
   background-color: #00c853;
   cursor: pointer;
 }
+
+.map-link {
+  text-decoration: none;
+  margin: 0;
+  padding: 0 1px;
+  font-family: monospace;
+  display: inline-block;
+  color:var(--blue);
+  background-color: #ffffff;
+  padding: 5px 10px;
+}
+
+.map-link:hover {
+  color: #f2f9f3;
+  background-color: var(--blue);
+  cursor: pointer;
+}
+
 
 .protein-description {
   text-decoration: none;
@@ -201,4 +272,8 @@ li {
   font-family: monospace;
   background-color: #ffcdd2;
   display: inline-block;
+}
+
+.pointer:hover {
+  cursor: pointer;
 }

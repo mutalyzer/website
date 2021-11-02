@@ -1,22 +1,29 @@
 <template>
   <v-container>
     <v-layout>
-      <v-flex xs12>
-        <h1 class="display-1 mt-10 ml-10 mb-5">Welcome!</h1>
-        <p class="ml-10">
-          The following tools are still to be tested/extended/etc. Use them with
-          care. Feedback is greatly appreciated.
-        </p>
-        <v-row class="pl-10 pr-10">
-          <v-col cols="12" sm="4" lg="4">
+      <v-flex>
+        <v-row>
+          <v-col cols="12">
+            <h1 class="display-1 mt-10 ml-10 mb-5">Welcome!</h1>
+            <p class="ml-10">
+              The following tools are still to be tested/extended/etc. Use them
+              with care. Feedback is greatly appreciated.
+            </p>
+          </v-col>
+        </v-row>
+        <v-row class="pl-10 pr-10 mb-5">
+          <v-col cols="12">
             <v-hover v-slot:default="{ hover }">
               <v-card
-                class="mx-auto transition-swing"
+                class="mx-auto transition-swing pb-7"
                 color="grey lighten-5"
                 :elevation="hover ? 4 : 2"
-                :to="{ name: 'NameChecker' }"
               >
-                <v-card-text class="pt-6" style="position: relative">
+                <v-card-text
+                  class="pt-6 mb-0 pb-0 pointer"
+                  style="position: relative"
+                  @click="$router.push({ name: 'NameChecker' })"
+                >
                   <h3 class="display-1 font-weight-light blue--text mb-2">
                     Name Checker
                   </h3>
@@ -25,10 +32,61 @@
                     is correct.
                   </div>
                 </v-card-text>
+                <v-flex>
+                  <v-row class="pr-5 pl-5">
+                    <v-col class="pb-2">
+                      <div class="font-weight-light mb-2">
+                        Examples:
+                        <span
+                          class="example-item"
+                          v-for="(example, index) in descriptionExamples"
+                          :key="index"
+                          @click.prevent="selectDescriptionExample(index)"
+                          >{{ example }}</span
+                        >
+                      </div>
+                    </v-col>
+                  </v-row>
+                  <v-row class="ml-5 mr-5 mt-0 pl-0">
+                    <v-text-field
+                      class="mr-5"
+                      background-color="grey lighten-5"
+                      ref="refInputDescriptionTextBox"
+                      v-on:keydown.enter="
+                        $router.push({
+                          name: 'NameChecker',
+                          params: {
+                            descriptionRouter: inputDescriptionTextBox,
+                          },
+                        })
+                      "
+                      v-model="inputDescriptionTextBox"
+                      label="HGVS Description"
+                      :clearable="true"
+                    ></v-text-field>
+                    <v-btn
+                      ref="nameCheck"
+                      class="mt-4"
+                      tile
+                      color="primary"
+                      :to="{
+                        name: 'NameChecker',
+                        params: {
+                          descriptionRouter: inputDescriptionTextBox,
+                        },
+                      }"
+                    >
+                      Normalize
+                    </v-btn>
+                  </v-row>
+                </v-flex>
               </v-card>
             </v-hover>
           </v-col>
-          <v-col cols="12" sm="4" lg="4">
+        </v-row>
+
+        <v-row class="pl-10 pr-10">
+          <v-col cols="12" sm="6" lg="6">
             <v-hover v-slot:default="{ hover }">
               <v-card
                 class="mx-auto transition-swing"
@@ -48,7 +106,8 @@
               </v-card>
             </v-hover>
           </v-col>
-          <v-col cols="12" sm="4" lg="4">
+
+          <v-col cols="12" sm="6" lg="6">
             <v-hover v-slot:default="{ hover }">
               <v-card
                 class="mx-auto transition-swing"
@@ -77,6 +136,19 @@
 <script>
 export default {
   name: "Home",
+  data: () => ({
+    inputDescriptionTextBox: null,
+    descriptionExamples: [
+      "NG_012337.1(NM_003002.2):c.274G>T",
+      "LRG_24:g.5525_5532del",
+    ],
+  }),
+  methods: {
+    selectDescriptionExample: function (i) {
+      this.inputDescriptionTextBox = this.descriptionExamples[i];
+      this.$refs.refInputDescriptionTextBox.focus();
+    },
+  },
 };
 </script>
 

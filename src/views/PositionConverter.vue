@@ -41,7 +41,7 @@
 
               <v-col cols="12" sm="6" lg="3">
                 <v-select
-                  :items="['Reference', 'Selector', 'g', 'c', 'n']"
+                  :items="['g', 'c', 'n']"
                   v-model="fromCoordinateSystem"
                   label="Coordinate system"
                   :clearable="true"
@@ -80,7 +80,7 @@
               <v-col cols="12" sm="6" lg="3">
                 <v-select
                   v-model="toCoordinateSystem"
-                  :items="['Reference', 'Selector', 'g', 'c', 'n']"
+                  :items="['g', 'c', 'n']"
                   :clearable="true"
                   label="Coordinate system"
                 ></v-select>
@@ -567,9 +567,7 @@ export default {
             if (response.data) {
               this.loadingOverlay = false;
               this.response = response.data;
-              if (response.data.errors) {
-                this.errorsHandler(response.data.errors);
-              }
+
               if (this.isConverted()) {
                 this.converted_description = this.modelToDescription(
                   this.response.converted_model
@@ -583,9 +581,18 @@ export default {
           .catch((error) => {
             this.loadingOverlay = false;
             if (error.response) {
-              this.connectionErrors = {
-                details: "Some response error occured.",
-              };
+              if (
+                error.response.status == 422 &&
+                error.response.data &&
+                error.response.data.custom &&
+                error.response.data.custom.errors
+              ) {
+                this.errorsHandler(error.response.data.custom.errors);
+              } else {
+                this.connectionErrors = {
+                  details: "Some response error occured.",
+                };
+              }
             } else if (error.request) {
               this.connectionErrors = {
                 details: "Some connection or server error occured.",
@@ -687,11 +694,18 @@ export default {
           this.availableSelectors &&
           this.availableSelectors.reference !== this.referenceId
         ) {
-          MutalyzerService.getSelectors(this.referenceId).then((response) => {
-            if (response.data) {
-              this.availableSelectors = response.data;
-            }
-          });
+          MutalyzerService.getSelectors(this.referenceId)
+            .then((response) => {
+              if (response.data) {
+                this.availableSelectors = response.data;
+              }
+            })
+            .catch((error) => {
+              this.availableSelectors = {
+                reference: this.referenceId,
+                error: error,
+              };
+            });
         }
       }
     },

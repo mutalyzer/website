@@ -65,7 +65,7 @@ export default {
       for (var i = 0; i < this.selector.exon.g.length; i++) {
         if (this.selector.exon.c) {
           output.push({
-            name: i,
+            name: i + 1,
             g_s: this.selector.exon.g[i][0],
             g_e: this.selector.exon.g[i][1],
             c_s: this.selector.exon.c[i][0],
@@ -73,7 +73,7 @@ export default {
           });
         } else if (this.selector.exon.n) {
           output.push({
-            name: i,
+            name: i + 1,
             g_s: this.selector.exon.g[i][0],
             g_e: this.selector.exon.g[i][1],
             n_s: this.selector.exon.n[i][0],
@@ -81,7 +81,7 @@ export default {
           });
         } else {
           output.push({
-            name: i,
+            name: i + 1,
             g_s: this.selector.exon.g[i][0],
             g_e: this.selector.exon.g[i][1],
           });
@@ -94,7 +94,6 @@ export default {
       var output = [];
       if (this.selector.cds) {
         output.push({
-          name: "0",
           g_s: this.selector.cds.g[0][0],
           g_e: this.selector.cds.g[0][1],
           c_s: this.selector.cds.c[0][0],
@@ -143,11 +142,6 @@ export default {
       if (this.selector.exon.c) {
         output.push(
           ...[
-            {
-              text: "Number",
-              value: "name",
-              sortable: false,
-            },
             { text: "Start (g.)", value: "g_s", sortable: false },
             { text: "End (g.)", value: "g_e", sortable: false },
             { text: "Start (c.)", value: "c_s", sortable: false },

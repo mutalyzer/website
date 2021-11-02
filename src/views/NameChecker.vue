@@ -7,44 +7,101 @@
           The Name Checker takes the variant description as input and checks
           whether it is correct.
         </p>
-        <v-sheet elevation="2" class="pa-10 mt-10">
-          <v-text-field
-            :rules="rules"
-            ref="refInputDescriptionTextBox"
-            v-on:keydown.enter="
-              $router.push({
+        <v-sheet elevation="2" class="pa-5 mt-10">
+          <v-row class="pt-1 pr-0">
+            <v-spacer></v-spacer>
+            <v-menu open-on-hover bottom left content-class="elevation-2">
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn color="blue" icon v-bind="attrs" v-on="on">
+                  <v-icon>mdi-dots-vertical</v-icon>
+                </v-btn>
+              </template>
+
+              <v-list>
+                <v-list-item class="text-right">
+                  <v-btn small text color="primary" @click="switchMode()">{{
+                    getSwitchText()
+                  }}</v-btn>
+                </v-list-item>
+              </v-list>
+            </v-menu>
+          </v-row>
+          <v-row class="pt-5 pr-5 pl-5" v-if="mode == 'hgvs'">
+            <v-text-field
+              class="pa-0 ma-0"
+              :rules="rules"
+              ref="refInputDescriptionTextBox"
+              v-model="inputDescriptionTextBox"
+              :label="inputDescriptionTextBoxLabel"
+              v-on:keydown.enter="
+                $router.push({
+                  name: 'NameChecker',
+                  params: { descriptionRouter: inputDescriptionTextBox },
+                })
+              "
+              :clearable="true"
+              autofocus
+            ></v-text-field>
+          </v-row>
+
+          <v-row class="pl-5 pr-5 mt-0" v-if="mode == 'hgvs'">
+            <div class="examples-list">
+              Examples:
+              <span
+                class="example-item"
+                v-for="(example, index) in descriptionExamples"
+                :key="index"
+                @click.prevent="selectDescriptionExample(index)"
+                >{{ example }}</span
+              >
+            </div>
+          </v-row>
+
+          <v-row class="pt-5 pr-5 pl-5" v-if="mode == 'sequence'">
+            <v-text-field
+              class="pa-0 ma-0"
+              :rules="rules"
+              v-model="sequence"
+              label="Reference Sequence"
+              :clearable="true"
+            ></v-text-field>
+          </v-row>
+
+          <v-row class="pl-5 pr-5" v-if="mode == 'sequence'">
+            <v-text-field
+              class="pa-0 ma-0"
+              :rules="rules"
+              ref="refInputDescriptionTextBox"
+              v-model="inputDescriptionTextBox"
+              label="Variants"
+              :clearable="true"
+            ></v-text-field>
+          </v-row>
+
+          <v-row class="pl-5 pb-5">
+            <v-btn
+              ref="nameCheck"
+              class="mt-5"
+              color="primary"
+              :disabled="!valid"
+              :to="{
                 name: 'NameChecker',
                 params: { descriptionRouter: inputDescriptionTextBox },
-              })
-            "
-            v-model="inputDescriptionTextBox"
-            :label="inputDescriptionTextBoxLabel"
-            :clearable="true"
-            autofocus
-          ></v-text-field>
-
-          <div class="examples-list">
-            Examples:
-            <span
-              class="example-item"
-              v-for="(example, index) in descriptionExamples"
-              :key="index"
-              @click.prevent="selectDescriptionExample(index)"
-              >{{ example }}</span
+                query: getParams(),
+              }"
             >
-          </div>
-
-          <v-btn
-            ref="nameCheck"
-            class="mt-5"
-            color="primary"
-            :to="{
-              name: 'NameChecker',
-              params: { descriptionRouter: inputDescriptionTextBox },
-            }"
-          >
-            Normalize
-          </v-btn>
+              Normalize
+            </v-btn>
+            <v-spacer v-if="mode == 'sequence'"></v-spacer>
+            <v-btn
+              color="success"
+              class="mt-5 mr-5"
+              v-if="mode == 'sequence'"
+              @click="setSequenceExample()"
+            >
+              Example
+            </v-btn>
+          </v-row>
         </v-sheet>
 
         <v-overlay :absolute="true" :value="loadingOverlay">
@@ -63,30 +120,30 @@
           prominent
           tile
           v-if="isNormalized()"
+          :color="getNormalizedColor()"
           type="success"
         >
           <v-row align="center">
             <v-col class="grow">
-              <span style="font-family: monospace"
-                >{{ response.normalized_description }}
-              </span>
+              <Description
+                :description="response.normalized_description"
+                :tooltip="
+                  response.normalized_description != inputDescription
+                    ? 'Different than the input description'
+                    : 'Same as the input description'
+                "
+                :css_class="
+                  response.normalized_description != inputDescription
+                    ? 'corrected-description-link-reverse'
+                    : 'ok-description-link-reverse'
+                "
+                :to_name="'NameChecker'"
+                :to_params="{
+                  descriptionRouter: response.normalized_description,
+                }"
+              />
             </v-col>
-            <v-col class="shrink">
-              <v-tooltip bottom>
-                <template v-slot:activator="{ on, attrs }">
-                  <v-btn
-                    v-bind="attrs"
-                    v-on="on"
-                    icon
-                    v-clipboard="response.normalized_description"
-                  >
-                    <v-icon>mdi-content-copy</v-icon>
-                  </v-btn>
-                </template>
-                <span>Copy</span>
-              </v-tooltip>
-            </v-col>
-            <v-col class="shrink" v-if="correctionsPerformed()">
+            <v-col class="shrink" v-if="infoMessages()">
               <v-tooltip bottom>
                 <template v-slot:activator="{ on, attrs }">
                   <v-btn
@@ -135,7 +192,7 @@
             <v-col class="grow overline"
               >Description could not be interpreted</v-col
             >
-            <v-col class="shrink" v-if="correctionsPerformed()">
+            <v-col class="shrink" v-if="infoMessages()">
               <v-tooltip bottom>
                 <template v-slot:activator="{ on, attrs }">
                   <v-btn
@@ -158,32 +215,37 @@
         <v-expand-transition>
           <v-sheet
             elevation="2"
-            v-if="
-              (correctionsPerformed() && showCorrections) || errorsEncountered()
-            "
+            v-if="(infoMessages() && showCorrections) || errorsEncountered()"
           >
             <v-expand-transition>
               <v-sheet
                 ref="refCorrections"
                 class="pt-5 pr-10 pb-5 pl-10"
                 color="grey lighten-5"
-                v-if="correctionsPerformed() && showCorrections"
+                v-if="infoMessages() && showCorrections"
               >
-                <div class="overline">Input Description</div>
-                <div :class="getInputDescriptionClass()">
+                <div v-if="correctionsPerformed()" class="overline">
+                  Input Description
+                </div>
+                <div
+                  v-if="correctionsPerformed()"
+                  :class="getInputDescriptionClass()"
+                >
                   {{ inputDescription }}
                 </div>
-                <div class="overline">Corrections</div>
-                <v-alert
-                  color="light-blue lighten-5"
-                  tile
-                  border="left"
-                  class="ml-2"
-                  v-for="(info, index) in response.infos"
-                  :key="index"
-                >
-                  {{ getMessage(info) }}
-                </v-alert>
+                <div v-if="response.infos">
+                  <div class="overline">Corrections / Info Messages</div>
+                  <v-alert
+                    color="light-blue lighten-5"
+                    tile
+                    border="left"
+                    class="ml-2"
+                    v-for="(info, index) in response.infos"
+                    :key="index"
+                  >
+                    {{ getMessage(info) }}
+                  </v-alert>
+                </div>
                 <div v-if="correctionsPerformed() && showCorrections">
                   <div class="overline">Corrected Description</div>
                   <div :class="getCorrectedDescriptionClass()">
@@ -192,6 +254,7 @@
                 </div>
               </v-sheet>
             </v-expand-transition>
+
             <v-sheet
               class="pt-10 pr-10 pb-8 pl-10"
               color="red lighten-5"
@@ -221,32 +284,6 @@
           hover
           class="mt-5 mb-5"
           tile
-          v-if="
-            response &&
-            response.normalized_description &&
-            response.normalized_model &&
-            !response.normalized_model.reference.selector &&
-            ['c', 'n'].includes(response.normalized_model.coordinate_system)
-          "
-        >
-          <v-expansion-panel>
-            <v-expansion-panel-header class="overline"
-              >Lift Over</v-expansion-panel-header
-            >
-            <v-expansion-panel-content class="pt-5">
-              <LiftOver
-                :model="this.response.normalized_model"
-                :description="this.response.normalized_description"
-              />
-            </v-expansion-panel-content>
-          </v-expansion-panel>
-        </v-expansion-panels>
-
-        <v-expansion-panels
-          focusable
-          hover
-          class="mt-5 mb-5"
-          tile
           v-if="response && response.equivalent_descriptions"
         >
           <v-expansion-panel>
@@ -262,36 +299,101 @@
                 <span v-if="c_s == 'c'">Coding</span>
                 <span v-else-if="c_s == 'n'">Noncoding</span>
                 <span v-else-if="c_s == 'g'">Genomic</span>
+                <span v-else-if="c_s == 'p'"></span>
                 <span v-else> {{ c_s }} </span>
                 <div
                   v-for="(equivalentDescription, index) in values"
                   :key="index"
                 >
                   <template v-if="c_s === 'c'">
-                    <div>
-                      <router-link
-                        class="ok-description-link"
-                        :to="{
-                          name: 'NameChecker',
-                          params: {
-                            descriptionRouter: equivalentDescription[0],
-                          },
-                        }"
-                        >{{ equivalentDescription[0] }}</router-link
-                      >
-                    </div>
+                    <Description
+                      :description="equivalentDescription[0]"
+                      :css_class="'ok-description-link'"
+                      :to_name="'NameChecker'"
+                      :to_params="{
+                        descriptionRouter: equivalentDescription[0],
+                      }"
+                    />
                   </template>
                   <template v-else>
-                    <router-link
-                      class="ok-description-link"
-                      :to="{
-                        name: 'NameChecker',
-                        params: { descriptionRouter: equivalentDescription },
-                      }"
-                      >{{ equivalentDescription }}</router-link
-                    >
+                    <Description
+                      :description="equivalentDescription"
+                      :css_class="'ok-description-link'"
+                      :to_name="'NameChecker'"
+                      :to_params="{ descriptionRouter: equivalentDescription }"
+                    />
                   </template>
                 </div>
+              </div>
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+        </v-expansion-panels>
+
+        <v-expansion-panels
+          focusable
+          hover
+          class="mt-5 mb-5"
+          tile
+          v-if="response && response.back_translated_descriptions"
+        >
+          <v-expansion-panel>
+            <v-expansion-panel-header class="overline"
+              >Back Translated Descriptions</v-expansion-panel-header
+            >
+            <v-expansion-panel-content class="pt-5">
+              <div
+                v-for="(
+                  equivalentDescription, index
+                ) in response.back_translated_descriptions"
+                :key="index"
+              >
+                <router-link
+                  class="ok-description-link"
+                  :to="{
+                    name: 'NameChecker',
+                    params: { descriptionRouter: equivalentDescription },
+                  }"
+                  >{{ equivalentDescription }}</router-link
+                >
+              </div>
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+        </v-expansion-panels>
+
+        <v-expansion-panels
+          focusable
+          hover
+          class="mt-5 mb-5"
+          tile
+          v-if="response && response.rna"
+        >
+          <v-expansion-panel>
+            <v-expansion-panel-header class="overline"
+              >RNA Prediction</v-expansion-panel-header
+            >
+            <v-expansion-panel-content class="pt-5">
+              <v-sheet v-if="response.rna.errors">
+                <v-alert
+                  color="red lighten-1"
+                  tile
+                  border="left"
+                  dark
+                  v-for="(error, index) in response.rna.errors"
+                  :key="index"
+                >
+                  <div>
+                    {{ getMessage(error) }}
+                  </div>
+                </v-alert>
+              </v-sheet>
+
+              <div class="mt-4 mb-4" v-if="response.rna.description">
+                <Description
+                  :description="response.rna.description"
+                  :css_class="'ok-description-link'"
+                  :to_name="'NameChecker'"
+                  :to_params="{ descriptionRouter: response.rna.description }"
+                />
               </div>
             </v-expansion-panel-content>
           </v-expansion-panel>
@@ -306,9 +408,9 @@
         >
           <v-expansion-panel>
             <v-expansion-panel-header class="overline"
-              >Protein Details</v-expansion-panel-header
+              >Protein Prediction</v-expansion-panel-header
             >
-            <v-expansion-panel-content>
+            <v-expansion-panel-content class="pt-5 pb-5">
               <AffectedProtein :protein="this.response.protein" />
             </v-expansion-panel-content>
           </v-expansion-panel>
@@ -319,17 +421,68 @@
           hover
           class="mt-5 mb-5"
           tile
-          v-if="response && response.corrected_model"
+          v-if="showReferenceInformation()"
         >
           <v-expansion-panel>
             <v-expansion-panel-header class="overline"
-              >Reference Information</v-expansion-panel-header
+              >Reference Sequence Information</v-expansion-panel-header
             >
             <v-expansion-panel-content>
               <ReferenceInformation :model="this.response.corrected_model" />
               <SelectorShort
                 v-if="response && response.selector_short"
                 :selector="response.selector_short"
+              />
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+        </v-expansion-panels>
+
+        <v-expansion-panels
+          focusable
+          hover
+          class="mt-5 mb-5"
+          tile
+          v-if="
+            response &&
+            response.normalized_description &&
+            response.normalized_model &&
+            response.normalized_model.reference &&
+            !['p'].includes(response.normalized_model.coordinate_system)
+          "
+        >
+          <v-expansion-panel>
+            <v-expansion-panel-header class="overline"
+              >Related reference sequences</v-expansion-panel-header
+            >
+            <v-expansion-panel-content class="pt-5">
+              <Related
+                :model="this.response.normalized_model"
+                :description="this.response.normalized_description"
+              />
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+        </v-expansion-panels>
+
+        <v-expansion-panels
+          focusable
+          hover
+          class="mt-5 mb-5"
+          tile
+          v-if="
+            response &&
+            response.normalized_description &&
+            response.normalized_model
+          "
+        >
+          <v-expansion-panel>
+            <v-expansion-panel-header class="overline"
+              >View Variants Sequence Overview</v-expansion-panel-header
+            >
+            <v-expansion-panel-content class="pt-2 pb-2">
+              <ViewVariants
+                :description="this.response.normalized_description"
+                :only_variants="this.response.only_variants"
+                :sequence="this.response.sequence"
               />
             </v-expansion-panel-content>
           </v-expansion-panel>
@@ -355,7 +508,9 @@ import AffectedProtein from "../components/AffectedProtein.vue";
 import SelectorShort from "../components/SelectorShort.vue";
 import SyntaxError from "../components/SyntaxError.vue";
 import ReferenceInformation from "../components/ReferenceInformation.vue";
-import LiftOver from "../components/LiftOver.vue";
+import Related from "../components/Related.vue";
+import ViewVariants from "../components/ViewVariants.vue";
+import Description from "../components/Description.vue";
 
 export default {
   components: {
@@ -364,24 +519,13 @@ export default {
     AffectedProtein,
     SyntaxError,
     ReferenceInformation,
-    LiftOver,
+    Related,
+    ViewVariants,
+    Description,
   },
   props: ["descriptionRouter"],
-  created: function () {
-    if (this.descriptionRouter && 0 !== this.descriptionRouter.length) {
-      this.inputDescriptionTextBox = this.descriptionRouter;
-      this.nameCheck();
-    }
-  },
-  watch: {
-    $route() {
-      if (this.descriptionRouter && 0 !== this.descriptionRouter.length) {
-        this.inputDescriptionTextBox = this.descriptionRouter;
-        this.nameCheck();
-      }
-    },
-  },
   data: () => ({
+    valid: true,
     inputDescriptionTextBox: null,
     rules: [(value) => !!value || "Required."],
     inputDescriptionTextBoxLabel: "HGVS Description",
@@ -394,13 +538,63 @@ export default {
     response: null,
     connectionErrors: null,
     showCorrections: false,
+    sequence: null,
+    only_variants: false,
+    mode: "hgvs",
   }),
+  created: function () {
+    this.run();
+  },
+  watch: {
+    $route() {
+      this.run();
+    },
+  },
   methods: {
-    selectDescriptionExample: function (i) {
-      this.inputDescriptionTextBox = this.descriptionExamples[i];
-      this.$refs.refInputDescriptionTextBox.focus();
+    run: function () {
+      this.setRouterParams();
+      this.nameCheck();
+    },
+    setRouterParams: function () {
+      if (
+        this.descriptionRouter &&
+        this.descriptionRouter.length !== 0 &&
+        !this.$route.query.only_variants &&
+        !this.$route.query.sequence
+      ) {
+        this.inputDescriptionTextBox = this.descriptionRouter;
+        this.mode = "hgvs";
+      } else if (
+        this.descriptionRouter &&
+        this.descriptionRouter.length !== 0 &&
+        this.$route.query.only_variants &&
+        this.$route.query.sequence &&
+        this.$route.query.sequence.length !== 0
+      ) {
+        this.inputDescriptionTextBox = this.descriptionRouter;
+        this.only_variants = this.$route.query.only_variants;
+        this.sequence = this.$route.query.sequence;
+        this.mode = "sequence";
+      } else if (
+        !this.descriptionRouter &&
+        !this.$route.query.only_variants &&
+        !this.$route.query.sequence
+      ) {
+        this.mode = "hgvs";
+      } else {
+        this.$router.push({
+          name: "NameChecker",
+        });
+      }
     },
     nameCheck: function () {
+      if (this.mode == "hgvs") {
+        this.nameCheckHgvs();
+      } else if (this.mode == "sequence") {
+        this.nameCheckSequence();
+      }
+    },
+    nameCheckHgvs: function () {
       if (this.inputDescriptionTextBox !== null) {
         this.loadingOverlay = true;
         this.inputDescription = null;
@@ -409,7 +603,7 @@ export default {
         this.showCorrections = false;
         this.inputDescriptionTextBox = this.inputDescriptionTextBox.trim();
 
-        MutalyzerService.nameCheck(this.inputDescriptionTextBox)
+        MutalyzerService.nameCheckHgvs(this.inputDescriptionTextBox)
           .then((response) => {
             if (response.data) {
               this.loadingOverlay = false;
@@ -425,9 +619,66 @@ export default {
           .catch((error) => {
             this.loadingOverlay = false;
             if (error.response) {
+              if (
+                error.response.status == 422 &&
+                error.response.data &&
+                error.response.data.custom
+              ) {
+                this.response = error.response.data.custom;
+              } else {
+                this.connectionErrors = {
+                  details: "Some response error occured.",
+                };
+              }
+            } else if (error.request) {
               this.connectionErrors = {
-                details: "Some response error occured.",
+                details: "Some connection or server error occured.",
               };
+            } else {
+              this.connectionErrors = { details: "Some error occured." };
+            }
+          });
+      }
+    },
+    nameCheckSequence: function () {
+      if (this.inputDescriptionTextBox !== null) {
+        this.loadingOverlay = true;
+        this.inputDescription = null;
+        this.response = null;
+        this.connectionErrors = null;
+        this.showCorrections = false;
+        this.inputDescriptionTextBox = this.inputDescriptionTextBox.trim();
+
+        MutalyzerService.nameCheckSequence(
+          this.inputDescriptionTextBox,
+          this.getParams()
+        )
+          .then((response) => {
+            if (response.data) {
+              this.loadingOverlay = false;
+              this.response = response.data;
+              this.inputDescription = this.inputDescriptionTextBox;
+              if (this.isNormalized()) {
+                this.$nextTick(() => {
+                  this.$vuetify.goTo(this.$refs.successAlert, this.options);
+                });
+              }
+            }
+          })
+          .catch((error) => {
+            this.loadingOverlay = false;
+            if (error.response) {
+              if (
+                error.response.status == 422 &&
+                error.response.data &&
+                error.response.data.custom
+              ) {
+                this.response = error.response.data.custom;
+              } else {
+                this.connectionErrors = {
+                  details: "Some response error occured.",
+                };
+              }
             } else if (error.request) {
               this.connectionErrors = {
                 details: "Some connection or server error occured.",
@@ -445,12 +696,24 @@ export default {
         return false;
       }
     },
+    getNormalizedColor: function () {
+      if (this.isNormalized()) {
+        if (this.response.normalized_description == this.inputDescription) {
+          return "green";
+        } else {
+          return "blue";
+        }
+      }
+    },
     correctionsPerformed: function () {
       return (
         this.response &&
         this.response.corrected_description &&
         this.response.corrected_description != this.inputDescription
       );
+    },
+    infoMessages: function () {
+      return this.response && this.response.infos;
     },
     syntaxError: function () {
       if (this.getSyntaxError()) {
@@ -529,6 +792,69 @@ export default {
           return "description";
         }
       }
+    },
+    showReferenceInformation() {
+      if (
+        this.response &&
+        this.response.corrected_description &&
+        !this.response.only_variants
+      ) {
+        if (this.response.errors) {
+          for (let error of this.response.errors) {
+            if (error.code && error.code == "ERETR") {
+              return false;
+            }
+          }
+        }
+        return true;
+      } else {
+        return false;
+      }
+    },
+    reset: function () {
+      this.inputDescriptionTextBox = null;
+      this.only_variants = false;
+      this.sequence = null;
+      this.response = null;
+    },
+    switchMode: function () {
+      if (this.mode == "sequence") {
+        this.mode = "hgvs";
+        this.reset();
+        if (this.$route.query.descriptionRouter) {
+          this.$router.push({
+            name: "NameChecker",
+          });
+        }
+      } else if (this.mode == "hgvs") {
+        this.mode = "sequence";
+        this.reset();
+      }
+    },
+    getSwitchText: function () {
+      if (this.mode == "hgvs") {
+        return "Switch to sequence mode";
+      } else if (this.mode == "sequence") {
+        return "Switch to HGVS mode";
+      }
+    },
+    getParams: function () {
+      if (this.mode == "hgvs") {
+        return {};
+      } else if (this.mode == "sequence") {
+        return {
+          only_variants: true,
+          sequence: this.sequence,
+        };
+      }
+    },
+    setSequenceExample: function () {
+      this.inputDescriptionTextBox = "2del";
+      this.sequence = "ATTAAC";
+    },
+    selectDescriptionExample: function (i) {
+      this.inputDescriptionTextBox = this.descriptionExamples[i];
+      this.$refs.refInputDescriptionTextBox.focus();
     },
   },
 };

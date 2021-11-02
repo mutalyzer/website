@@ -5,6 +5,9 @@ import About from "../views/About.vue";
 import NameChecker from "../views/NameChecker.vue";
 import PositionConverter from "../views/PositionConverter.vue";
 import DescriptionExtractor from "../views/DescriptionExtractor.vue";
+import Mapper from "../views/Mapper.vue";
+import BatchChecker from "../views/BatchChecker.vue";
+import Algebra from "../views/Algebra.vue";
 
 Vue.use(VueRouter);
 
@@ -35,6 +38,24 @@ const routes = [
     path: "/descriptionextractor",
     name: "DescriptionExtractor",
     component: DescriptionExtractor,
+  },
+  {
+    path: "/mapper",
+    props: true,
+    name: "Mapper",
+    component: Mapper,
+  },
+  {
+    path: "/batchchecker",
+    props: true,
+    name: "BatchChecker",
+    component: BatchChecker,
+  },
+  {
+    path: "/algebra",
+    props: true,
+    name: "Algebra",
+    component: Algebra,
   },
   {
     path: "/api",
