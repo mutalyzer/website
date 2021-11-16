@@ -410,8 +410,22 @@
             <v-expansion-panel-header class="overline"
               >Protein Prediction</v-expansion-panel-header
             >
-            <v-expansion-panel-content class="pt-5 pb-5">
-              <AffectedProtein :protein="this.response.protein" />
+            <v-expansion-panel-content class="pt-5">
+              <v-sheet v-if="response.protein.errors">
+                <v-alert
+                  color="red lighten-1"
+                  tile
+                  border="left"
+                  dark
+                  v-for="(error, index) in response.rna.errors"
+                  :key="index"
+                >
+                  <div>
+                    {{ getMessage(error) }}
+                  </div>
+                </v-alert>
+              </v-sheet>
+              <AffectedProtein v-else :protein="this.response.protein" />
             </v-expansion-panel-content>
           </v-expansion-panel>
         </v-expansion-panels>

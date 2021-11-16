@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div v-if="protein.errors">
     <div class="overline">Affected Protein Description</div>
     <div>
       <Description
