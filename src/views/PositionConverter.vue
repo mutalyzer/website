@@ -219,10 +219,12 @@
           tile
           elevation="2"
           class="mt-10 mb-0"
-          v-if="response && response.errors"
+          v-if="errorsEncountered()"
         >
           <v-row align="center">
-            <v-col class="grow overline">Error</v-col>
+            <v-col class="grow overline"
+              >Conversion could not be performed</v-col
+            >
             <v-col class="shrink" v-if="correctionsPerformed()">
               <v-tooltip bottom>
                 <template v-slot:activator="{ on, attrs }">
@@ -280,7 +282,7 @@
                 tile
                 border="left"
                 dark
-                v-for="(error, index) in response.errors"
+                v-for="(error, index) in errorMessages"
                 :key="index"
               >
                 <div v-if="error.code == 'EPOSITIONSYNTAX'">
@@ -374,7 +376,7 @@ export default {
 
     response: null,
     converted_description: null,
-    errorMessages: [],
+    errorMessages: null,
     errorReferenceId: null,
     errorReferenceIdMessage: null,
     errorFromSelectorId: null,
@@ -412,7 +414,6 @@ export default {
         fields: {
           referenceId: "NG_017013.2",
           fromSelectorId: "NM_000546.5",
-          fromCoordinateSystem: "Selector",
           position: "274",
         },
       },
@@ -429,7 +430,6 @@ export default {
         fields: {
           referenceId: "NC_000001.11",
           fromSelectorId: "NM_001232.4",
-          fromCoordinateSystem: "Selector",
           position: "274",
         },
       },
@@ -545,7 +545,7 @@ export default {
       }
     },
     positionConvert: function () {
-      this.errorMessages = [];
+      this.errorMessages = null;
       if (this.referenceId !== null && this.position !== null) {
         this.loadingOverlay = true;
         this.response = null;
@@ -553,16 +553,7 @@ export default {
         this.showCorrections = false;
         this.connectionErrors = null;
 
-        const params = {
-          reference_id: this.referenceId,
-          from_selector_id: this.fromSelectorId,
-          from_coordinate_system: this.fromCoordinateSystem,
-          position: this.position,
-          to_selector_id: this.toSelectorId,
-          to_coordinate_system: this.toCoordinateSystem,
-          include_overlapping: this.includeOverlapping,
-        };
-        MutalyzerService.positionConvert(params)
+        MutalyzerService.positionConvert(this.getParams())
           .then((response) => {
             if (response.data) {
               this.loadingOverlay = false;
@@ -614,7 +605,7 @@ export default {
       return this.response && this.response.infos;
     },
     errorsEncountered: function () {
-      if (this.response && this.response.errors) {
+      if (this.errorMessages) {
         return true;
       } else {
         return false;
@@ -627,8 +618,8 @@ export default {
       return message;
     },
     errorsHandler: function (errors) {
+      this.errorMessages = errors;
       for (const entry of errors) {
-        this.errorMessages.push(entry);
         if (entry.code === "ERETR") {
           this.errorReferenceId = this.referenceId;
           this.handleEretr();
@@ -717,6 +708,27 @@ export default {
       output += ":" + position.coordinate_system + ".";
       output += position.position;
       return output;
+    },
+    getParams: function () {
+      let params = {
+        reference_id: this.referenceId,
+        position: this.position,
+        include_overlapping: this.includeOverlapping,
+      };
+      if (this.fromSelectorId) {
+        params["from_selector_id"] = this.fromSelectorId;
+      }
+      if (this.fromCoordinateSystem) {
+        params["from_coordinate_system"] = this.fromCoordinateSystem;
+      }
+      if (this.toSelectorId) {
+        params["to_selector_id"] = this.toSelectorId;
+      }
+      if (this.toCoordinateSystem) {
+        params["to_coordinate_system"] = this.toCoordinateSystem;
+      }
+
+      return params;
     },
   },
 };
