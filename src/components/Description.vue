@@ -9,6 +9,7 @@
             :to="{
               name: to_name,
               params: to_params,
+              query: to_query,
             }"
           >
             <div :class="css_class" v-bind="attrs" v-on="on">
@@ -29,6 +30,7 @@
         :to="{
           name: to_name,
           params: to_params,
+          query: to_query,
         }"
         >{{ description }}</router-link
       >
@@ -58,6 +60,7 @@ export default {
     tooltip: null,
     to_name: null,
     to_params: null,
+    to_query: null,
   },
 };
 </script>

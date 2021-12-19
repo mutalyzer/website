@@ -141,6 +141,7 @@
                 :to_params="{
                   descriptionRouter: response.normalized_description,
                 }"
+                :to_query="getParams()"
               />
             </v-col>
             <v-col class="shrink" v-if="infoMessages()">
