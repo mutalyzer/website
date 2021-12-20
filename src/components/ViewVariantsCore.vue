@@ -357,6 +357,7 @@ export default {
   font-family: monospace;
   margin-top: 15px;
   padding: 5px;
+  word-break: break-all;
   background-color: var(--blue-grey-lighten-5);
 }
 
