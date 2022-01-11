@@ -74,13 +74,17 @@
             v-for="(variant, index) in variants"
             :key="index"
           >
+            <div style="font-family: monospace">
+              <strong>{{ index + 1 }}/{{ variants.length }}</strong>
+            </div>
+
             <span style="font-family: monospace">
               {{ variant.input }}
             </span>
 
             <v-alert
               ref="successAlert"
-              class="mt-10 mb-0"
+              class="mt-5 mb-0"
               elevation="2"
               prominent
               tile
@@ -132,7 +136,24 @@
               type="error"
               tile
               elevation="2"
-              class="mt-10 mb-0"
+              class="mt-5"
+              icon="mdi-network-off-outline"
+              color="grey darken-4"
+              v-if="variant.error"
+            >
+              <v-row align="center">
+                <v-col class="grow">
+                  {{ variant.error.details }}
+                </v-col>
+              </v-row>
+            </v-alert>
+
+            <v-alert
+              prominent
+              type="error"
+              tile
+              elevation="2"
+              class="mt-5 mb-0"
               v-if="variant.response && variant.response.errors"
             >
               <v-row align="center">
@@ -264,10 +285,13 @@ export default {
       ];
       for (let variant of this.variants) {
         let row = [variant.input];
-        if (variant.response.errors) {
+        if ((variant.response && variant.response.errors) || variant.error) {
           row.push("Failed");
           row.push("");
-        } else if (variant.response.normalized_description != variant.input) {
+        } else if (
+          variant.response.normalized_description &&
+          variant.response.normalized_description != variant.input
+        ) {
           row.push("Corrected");
           row.push(variant.response.normalized_description);
         } else if (variant.response.normalized_description) {
@@ -283,12 +307,20 @@ export default {
         } else {
           row.push("N/A");
         }
-        if (variant.response.rna && variant.response.rna.description) {
+        if (
+          variant.response &&
+          variant.response.rna &&
+          variant.response.rna.description
+        ) {
           row.push(variant.response.rna.description);
         } else {
           row.push("N/A");
         }
-        if (variant.response.protein && variant.response.protein.description) {
+        if (
+          variant.response &&
+          variant.response.protein &&
+          variant.response.protein.description
+        ) {
           row.push(variant.response.protein.description);
         } else {
           row.push("N/A");
