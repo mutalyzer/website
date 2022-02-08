@@ -72,6 +72,10 @@
             ></v-col>
           </v-row>
 
+          <v-row class="pl-5 pr-5 mt-2">
+            <span class="example-link" @click="setExample()">Example</span>
+          </v-row>
+
           <v-row class="pl-5 pb-5">
             <v-btn
               class="mt-5"
@@ -83,10 +87,6 @@
               }"
             >
               Map
-            </v-btn>
-            <v-spacer></v-spacer>
-            <v-btn color="success" class="mt-5 mr-5" @click="setExample()">
-              Example
             </v-btn>
           </v-row>
         </v-sheet>

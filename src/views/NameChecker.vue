@@ -44,9 +44,9 @@
             ></v-text-field>
           </v-row>
 
-          <v-row class="pl-5 pr-5 mt-0" v-if="mode == 'hgvs'">
+          <v-row class="pl-5 pr-5 mt-2" v-if="mode == 'hgvs'">
             <div class="examples-list">
-              Examples:
+              <span class="example-text">Examples:</span>
               <span
                 class="example-item"
                 v-for="(example, index) in descriptionExamples"
@@ -78,6 +78,14 @@
             ></v-text-field>
           </v-row>
 
+          <v-row class="pl-5" v-if="mode == 'sequence'">
+            <div class="examples-list">
+              <span class="example-link" @click="setSequenceExample()"
+                >Example</span
+              >
+            </div>
+          </v-row>
+
           <v-row class="pl-5 pb-5">
             <v-btn
               ref="nameCheck"
@@ -91,15 +99,6 @@
               }"
             >
               Normalize
-            </v-btn>
-            <v-spacer v-if="mode == 'sequence'"></v-spacer>
-            <v-btn
-              color="success"
-              class="mt-5 mr-5"
-              v-if="mode == 'sequence'"
-              @click="setSequenceExample()"
-            >
-              Example
             </v-btn>
           </v-row>
         </v-sheet>

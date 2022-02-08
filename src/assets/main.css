@@ -64,6 +64,23 @@ li {
   cursor: pointer;
 }
 
+.example-text {
+  display: inline-block;
+  color: #757575;
+  font-size: medium;
+}
+
+.example-link {
+  display: inline-block;
+  color: #757575;
+  font-size: medium;
+}
+
+.example-link:hover {
+  color: #1e90ff;
+  cursor: pointer;
+}
+
 .description {
   font-family: monospace;
 }

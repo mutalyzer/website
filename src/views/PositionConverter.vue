@@ -95,8 +95,33 @@
                 ></v-switch>
               </v-col>
             </v-row>
+            <v-row>
+              <v-col>
+                <v-menu transition="slide-x-transition">
+                  <template v-slot:activator="{ on, attrs }">
+                    <span
+                      class="example-link"
+                      color="success"
+                      v-bind="attrs"
+                      v-on="on"
+                    >
+                      Examples
+                    </span>
+                  </template>
+                  <v-list>
+                    <v-list-item v-for="(example, i) in examples" :key="i" link>
+                      <v-list-item-title
+                        color="success"
+                        v-text="example.item"
+                        @click.prevent="setExample(example.fields)"
+                      ></v-list-item-title>
+                    </v-list-item>
+                  </v-list>
+                </v-menu>
+              </v-col>
+            </v-row>
           </v-form>
-          <v-row>
+          <v-row class="pl-3">
             <v-btn
               ref="convert"
               class="mt-5"
@@ -117,23 +142,6 @@
             >
               Convert
             </v-btn>
-            <v-spacer></v-spacer>
-            <v-menu transition="slide-x-transition">
-              <template v-slot:activator="{ on, attrs }">
-                <v-btn color="success" class="mt-5" v-bind="attrs" v-on="on">
-                  Examples
-                </v-btn>
-              </template>
-              <v-list>
-                <v-list-item v-for="(example, i) in examples" :key="i" link>
-                  <v-list-item-title
-                    color="success"
-                    v-text="example.item"
-                    @click.prevent="setExample(example.fields)"
-                  ></v-list-item-title>
-                </v-list-item>
-              </v-list>
-            </v-menu>
           </v-row>
         </v-sheet>
 

@@ -26,7 +26,7 @@
               </v-menu>
             </v-row>
           </v-sheet>
-          <v-sheet class="pa-10">
+          <v-sheet class="pa-5">
             <v-form ref="form" v-model="valid" :lazy-validation="lazy">
               <v-row v-if="mode == 'sequence'" class="pl-2 pr-2">
                 <v-col cols="12">
@@ -106,8 +106,12 @@
                   ></v-text-field>
                 </v-col>
               </v-row>
+
+              <v-row class="pl-5 pr-5">
+                <span class="example-link" @click="setExample()">Example</span>
+              </v-row>
             </v-form>
-            <v-row>
+            <v-row class="pl-5 pr-5 mt-5 mb-5">
               <v-btn
                 ref="convert"
                 class="mt-5"
@@ -119,10 +123,6 @@
                 }"
               >
                 Compare
-              </v-btn>
-              <v-spacer></v-spacer>
-              <v-btn color="success" class="mt-5" @click="setExample()">
-                Example
               </v-btn>
             </v-row>
           </v-sheet>

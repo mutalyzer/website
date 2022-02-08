@@ -35,25 +35,27 @@
               </v-col>
             </v-row>
             <v-row>
-              <v-btn
-                ref="extract"
-                class="mt-5"
-                color="primary"
-                :disabled="!valid"
-                :to="{
-                  name: 'DescriptionExtractor',
-                  query: {
-                    reference: reference,
-                    observed: observed,
-                  },
-                }"
-              >
-                Extract
-              </v-btn>
-              <v-spacer></v-spacer>
-              <v-btn color="success" class="mt-5" @click.prevent="setExample()">
-                Example
-              </v-btn>
+              <v-col cols="12">
+                <span class="example-link" @click="setExample()">Example</span>
+              </v-col>
+            </v-row>
+            <v-row>
+              <v-col cols="12">
+                <v-btn
+                  ref="extract"
+                  color="primary"
+                  :disabled="!valid"
+                  :to="{
+                    name: 'DescriptionExtractor',
+                    query: {
+                      reference: reference,
+                      observed: observed,
+                    },
+                  }"
+                >
+                  Extract
+                </v-btn>
+              </v-col>
             </v-row>
           </v-form>
         </v-sheet>
