@@ -31,7 +31,7 @@
           <v-divider></v-divider>
 
           <v-row class="pl-2 pr-2 mt-1">
-            <v-col cols="12" sm="4" lg="4">
+            <v-col cols="12" sm="6" lg="6">
               <v-text-field
                 :rules="rules"
                 :hint="'NG_012337.3'"
@@ -41,7 +41,7 @@
               ></v-text-field>
             </v-col>
 
-            <v-col cols="12" sm="4" lg="4">
+            <v-col cols="12" sm="6" lg="6">
               <v-combobox
                 v-model="selector_id"
                 :label="'Selector ID'"
@@ -51,8 +51,12 @@
                 :clearable="true"
               ></v-combobox>
             </v-col>
+          </v-row>
 
-            <v-col cols="12" sm="4" lg="4">
+          <v-divider></v-divider>
+
+          <v-row class="pl-2 pr-2 mt-5">
+            <v-col cols="12" sm="6" lg="6">
               <v-combobox
                 v-model="slice_to"
                 :label="'Slice to'"
@@ -62,8 +66,8 @@
             </v-col>
           </v-row>
 
-          <v-row class="pl-2 pr-2 mt-0">
-            <v-col cols="12" sm="6" lg="3">
+          <v-row class="pl-2 pr-2 mt-0 mb-0">
+            <v-col cols="12" sm="6" lg="6">
               <v-switch
                 v-model="filter"
                 label="Filter non original variant operations"
@@ -72,7 +76,9 @@
             ></v-col>
           </v-row>
 
-          <v-row class="pl-5 pr-5 mt-2">
+          <v-divider></v-divider>
+
+          <v-row class="pl-5 pr-5 mt-5">
             <span class="example-link" @click="setExample()">Example</span>
           </v-row>
 
