@@ -23,7 +23,7 @@
               icon
               v-bind="attrs"
               v-on="on"
-              href="https://github.com/mutalyzer/normalizer/"
+              href="https://github.com/mutalyzer/mutalyzer/"
               target="_blank"
             >
               <v-icon>mdi-github</v-icon>
@@ -136,7 +136,7 @@
                 <v-col align="center" justify="center">
                   <v-btn
                     plain
-                    href="https://github.com/mutalyzer/normalizer/issues"
+                    href="https://github.com/mutalyzer/mutalyzer/issues"
                     target="_blank"
                     >backend</v-btn
                   >
