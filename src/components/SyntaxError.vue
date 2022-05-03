@@ -39,9 +39,6 @@ export default {
     unpackModel: function (model) {
       var values = { details: "Unexpected character:" };
       var pos_in_stream = model.pos_in_stream;
-      if (model.details == "Unexpected end of input.") {
-        pos_in_stream -= 1;
-      }
       values.correct = {
         view: model.description.slice(0, pos_in_stream),
       };
