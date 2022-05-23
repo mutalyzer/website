@@ -136,118 +136,191 @@
               : 'seq-variant-hover'
           "
         >
-          <!-- deleted sequence -->
-          <div class="seqdel" v-if="v.deleted && v.deleted.sequence">
-            <span
-              class="seq-elem"
-              v-for="(s, s_i) in v.deleted.sequence"
-              :key="'ds' + s_i"
-            >
-              <v-tooltip bottom>
-                <template v-slot:activator="{ on, attrs }">
-                  <span v-bind="attrs" v-on="on">
-                    <span>{{ s }}</span></span
-                  ></template
-                >
-                <span>{{ get_position(v, s_i, "sequence") }}</span>
-              </v-tooltip>
-            </span>
-          </div>
-          <!-- deleted left-->
-          <div class="seqdel" v-if="v.deleted && v.deleted.left">
-            <span
-              class="seq-elem"
-              v-for="(s, s_i) in v.deleted.left"
-              :key="s_i"
-            >
-              <v-tooltip bottom>
-                <template v-slot:activator="{ on, attrs }">
-                  <span v-bind="attrs" v-on="on">
-                    <span>{{ s }}</span></span
-                  ></template
-                >
-                <span>{{ get_position(v, s_i, "left") }}</span>
-              </v-tooltip>
-            </span>
-          </div>
-          <!-- deleted middle dots-->
-          <div class="seqdel" v-if="v.deleted && v.deleted.right">
-            <v-tooltip bottom>
-              <template v-slot:activator="{ on, attrs }">
-                <span class="seq-elem" v-bind="attrs" v-on="on">
-                  <span>...</span></span
-                ></template
-              >
+          <div
+            v-if="v.deleted && v.description && !v.description.includes('=')"
+          >
+            <!-- deleted sequence -->
+            <div class="seqdel" v-if="v.deleted && v.deleted.sequence">
               <span
-                >other {{ get_position(v, null, "other-deleted") }} bases</span
+                class="seq-elem"
+                v-for="(s, s_i) in v.deleted.sequence"
+                :key="'ds' + s_i"
               >
-            </v-tooltip>
-          </div>
-          <!-- deleted right-->
-          <div class="seqdel" v-if="v.deleted && v.deleted.right">
-            <span
-              class="seq-elem"
-              v-for="(s, s_i) in v.deleted.right"
-              :key="s_i"
-            >
+                <v-tooltip bottom>
+                  <template v-slot:activator="{ on, attrs }">
+                    <span v-bind="attrs" v-on="on">
+                      <span>{{ s }}</span></span
+                    ></template
+                  >
+                  <span>{{ get_position(v, s_i, "sequence") }}</span>
+                </v-tooltip>
+              </span>
+            </div>
+            <!-- deleted left-->
+            <div class="seqdel" v-if="v.deleted && v.deleted.left">
+              <span
+                class="seq-elem"
+                v-for="(s, s_i) in v.deleted.left"
+                :key="s_i"
+              >
+                <v-tooltip bottom>
+                  <template v-slot:activator="{ on, attrs }">
+                    <span v-bind="attrs" v-on="on">
+                      <span>{{ s }}</span></span
+                    ></template
+                  >
+                  <span>{{ get_position(v, s_i, "left") }}</span>
+                </v-tooltip>
+              </span>
+            </div>
+            <!-- deleted middle dots-->
+            <div class="seqdel" v-if="v.deleted && v.deleted.right">
               <v-tooltip bottom>
                 <template v-slot:activator="{ on, attrs }">
-                  <span v-bind="attrs" v-on="on">
-                    <span>{{ s }}</span></span
+                  <span class="seq-elem" v-bind="attrs" v-on="on">
+                    <span>...</span></span
                   ></template
                 >
-                <span>{{ get_position(v, s_i, "right-deleted") }}</span>
+                <span
+                  >other
+                  {{ get_position(v, null, "other-deleted") }} bases</span
+                >
               </v-tooltip>
-            </span>
-          </div>
-          <!-- deleted empty-->
-          <div v-if="!v.deleted">
-            <span class="seq">-</span>
-          </div>
-          <v-divider></v-divider>
-          <!-- inserted sequence -->
-          <div class="seqins" v-if="v.inserted && v.inserted.sequence">
-            <span
-              class="seq-elem"
-              v-for="(s, s_i) in v.inserted.sequence"
-              :key="s_i"
-              >{{ s }}</span
-            >
-          </div>
-          <!-- inserted left-->
-          <div class="seqins" v-if="v.inserted && v.inserted.left">
-            <span
-              class="seq-elem"
-              v-for="(s, s_i) in v.inserted.left"
-              :key="s_i"
-              >{{ s }}</span
-            >
-          </div>
-          <!-- inserted middle dots-->
-          <div class="seqins" v-if="v.inserted && v.inserted.right">
-            <v-tooltip bottom>
-              <template v-slot:activator="{ on, attrs }">
-                <span class="seq-elem" v-bind="attrs" v-on="on">
-                  <span>...</span></span
-                ></template
-              >
+            </div>
+            <!-- deleted right-->
+            <div class="seqdel" v-if="v.deleted && v.deleted.right">
               <span
-                >other {{ get_position(v, null, "other-inserted") }} bases</span
+                class="seq-elem"
+                v-for="(s, s_i) in v.deleted.right"
+                :key="s_i"
               >
-            </v-tooltip>
+                <v-tooltip bottom>
+                  <template v-slot:activator="{ on, attrs }">
+                    <span v-bind="attrs" v-on="on">
+                      <span>{{ s }}</span></span
+                    ></template
+                  >
+                  <span>{{ get_position(v, s_i, "right-deleted") }}</span>
+                </v-tooltip>
+              </span>
+            </div>
+            <!-- deleted empty-->
+            <div v-if="!v.deleted">
+              <span class="seq">-</span>
+            </div>
+            <v-divider></v-divider>
+            <!-- inserted sequence -->
+            <div class="seqins" v-if="v.inserted && v.inserted.sequence">
+              <span
+                class="seq-elem"
+                v-for="(s, s_i) in v.inserted.sequence"
+                :key="s_i"
+                >{{ s }}</span
+              >
+            </div>
+            <!-- inserted left-->
+            <div class="seqins" v-if="v.inserted && v.inserted.left">
+              <span
+                class="seq-elem"
+                v-for="(s, s_i) in v.inserted.left"
+                :key="s_i"
+                >{{ s }}</span
+              >
+            </div>
+            <!-- inserted middle dots-->
+            <div class="seqins" v-if="v.inserted && v.inserted.right">
+              <v-tooltip bottom>
+                <template v-slot:activator="{ on, attrs }">
+                  <span class="seq-elem" v-bind="attrs" v-on="on">
+                    <span>...</span></span
+                  ></template
+                >
+                <span
+                  >other
+                  {{ get_position(v, null, "other-inserted") }} bases</span
+                >
+              </v-tooltip>
+            </div>
+            <!-- inserted right-->
+            <div class="seqins" v-if="v.inserted && v.inserted.right">
+              <span
+                class="seq-elem"
+                v-for="(s, s_i) in v.inserted.right"
+                :key="s_i"
+                >{{ s }}</span
+              >
+            </div>
+            <!-- inserted empty -->
+            <div v-if="!v.inserted">
+              <span class="seq">-</span>
+            </div>
           </div>
-          <!-- inserted right-->
-          <div class="seqins" v-if="v.inserted && v.inserted.right">
-            <span
-              class="seq-elem"
-              v-for="(s, s_i) in v.inserted.right"
-              :key="s_i"
-              >{{ s }}</span
-            >
-          </div>
-          <!-- inserted empty -->
-          <div v-if="!v.inserted">
-            <span class="seq">-</span>
+          <div v-else>
+            <!-- equal -->
+            <div class="seqdelequal" v-if="v.deleted && v.deleted.sequence">
+              <span
+                class="seq-elem"
+                v-for="(s, s_i) in v.deleted.sequence"
+                :key="'ds' + s_i"
+              >
+                <v-tooltip bottom>
+                  <template v-slot:activator="{ on, attrs }">
+                    <span v-bind="attrs" v-on="on">
+                      <span>{{ s }}</span></span
+                    ></template
+                  >
+                  <span>{{ get_position(v, s_i, "sequence") }}</span>
+                </v-tooltip>
+              </span>
+            </div>
+            <!-- equal left-->
+            <div class="seqdelequal" v-if="v.deleted && v.deleted.left">
+              <span
+                class="seq-elem"
+                v-for="(s, s_i) in v.deleted.left"
+                :key="s_i"
+              >
+                <v-tooltip bottom>
+                  <template v-slot:activator="{ on, attrs }">
+                    <span v-bind="attrs" v-on="on">
+                      <span>{{ s }}</span></span
+                    ></template
+                  >
+                  <span>{{ get_position(v, s_i, "left") }}</span>
+                </v-tooltip>
+              </span>
+            </div>
+            <!-- equal middle dots-->
+            <div class="seqdelequal" v-if="v.deleted && v.deleted.right">
+              <v-tooltip bottom>
+                <template v-slot:activator="{ on, attrs }">
+                  <span class="seq-elem" v-bind="attrs" v-on="on">
+                    <span>...</span></span
+                  ></template
+                >
+                <span
+                  >other
+                  {{ get_position(v, null, "other-deleted") }} bases</span
+                >
+              </v-tooltip>
+            </div>
+            <!-- equal right-->
+            <div class="seqdelequal" v-if="v.deleted && v.deleted.right">
+              <span
+                class="seq-elem"
+                v-for="(s, s_i) in v.deleted.right"
+                :key="s_i"
+              >
+                <v-tooltip bottom>
+                  <template v-slot:activator="{ on, attrs }">
+                    <span v-bind="attrs" v-on="on">
+                      <span>{{ s }}</span></span
+                    ></template
+                  >
+                  <span>{{ get_position(v, s_i, "right-deleted") }}</span>
+                </v-tooltip>
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -431,6 +504,13 @@ export default {
   text-align: center;
   font-family: monospace;
   color: #b71c1c;
+}
+
+.seqdelequal {
+  display: inline-block;
+  text-align: center;
+  font-family: monospace;
+  color: #004D40;
 }
 
 .seqins {
