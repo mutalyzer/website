@@ -32,9 +32,7 @@
                 not_run: true,
               },
             }"
-            >{{
-              reference.id + "(" + reference.selector.id + ")"
-            }})</router-link
+            >{{ reference.id + "(" + reference.selector.id + ")" }}</router-link
           >
           <router-link
             v-else
