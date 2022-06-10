@@ -218,6 +218,21 @@ export default {
             output.cds = cds;
           }
         }
+        console.log(annotations);
+        if (selector.qualifiers) {
+          if (selector.qualifiers.added_annotation_id) {
+            details.push({
+              name: "Added from annotation",
+              value: selector.qualifiers.added_annotation_id,
+            });
+          }
+          if (selector.qualifiers.added_freeze_date_id) {
+            details.push({
+              name: "Added from freeze date",
+              value: selector.qualifiers.added_freeze_date_id,
+            });
+          }
+        }
         output.details = details;
         return output;
       }
@@ -255,6 +270,14 @@ export default {
           details.push({ name: "Sequence source", value: v });
         } else if (q == "creation_date") {
           details.push({ name: "Creation date", value: v });
+        } else if (q == "freeze_date_id") {
+          details.push({ name: "Annotation freeze date ID", value: v });
+        } else if (q == "annotation_id") {
+          details.push({ name: "Annotation ID", value: v });
+        } else if (q == "assembly_name") {
+          details.push({ name: "Assembly name", value: v });
+        } else if (q == "assembly_accession") {
+          details.push({ name: "Assembly accession", value: v });
         } else {
           details.push({ name: q, value: v });
         }
