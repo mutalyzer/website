@@ -137,7 +137,7 @@
           "
         >
           <div
-            v-if="v.deleted && v.description && !v.description.includes('=')"
+            v-if="(v.deleted || v.inserted) && v.description && !v.description.includes('=')"
           >
             <!-- deleted sequence -->
             <div class="seqdel" v-if="v.deleted && v.deleted.sequence">
