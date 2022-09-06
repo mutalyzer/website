@@ -23,6 +23,14 @@ export default {
       params,
     });
   },
+  nameCheckAltHgvs(description) {
+    return apiClient.get("/name_check_alt/" + encodeURIComponent(description));
+  },
+  nameCheckAltSequence(description, params) {
+    return apiClient.get("/name_check_alt/" + encodeURIComponent(description), {
+      params,
+    });
+  },
   positionConvert(params) {
     return apiClient.get("/position_convert/", { params });
   },
