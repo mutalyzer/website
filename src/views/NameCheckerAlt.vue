@@ -281,194 +281,22 @@
           hover
           class="mt-5 mb-5"
           tile
-          v-if="response && response.equivalent_descriptions"
+          v-if="response && response.supremal"
         >
           <v-expansion-panel>
             <v-expansion-panel-header class="overline"
-              >Equivalent Descriptions</v-expansion-panel-header
-            >
+              >Supremal Variant
+            </v-expansion-panel-header>
             <v-expansion-panel-content class="pt-5">
-              <div
-                class="ml-4"
-                v-for="(values, c_s) in response.equivalent_descriptions"
-                :key="c_s"
-              >
-                <span v-if="c_s == 'c'">Coding</span>
-                <span v-else-if="c_s == 'n'">Noncoding</span>
-                <span v-else-if="c_s == 'g'">Genomic</span>
-                <span v-else-if="c_s == 'p'"></span>
-                <span v-else> {{ c_s }} </span>
-                <div
-                  v-for="(equivalentDescription, index) in values"
-                  :key="index"
-                >
-                  <template v-if="c_s === 'c'">
-                    <Description
-                      :description="equivalentDescription[0]"
-                      :css_class="'ok-description-link'"
-                      :to_name="'NameCheckerAlt'"
-                      :to_params="{
-                        descriptionRouter: equivalentDescription[0],
-                      }"
-                    />
-                  </template>
-                  <template v-else>
-                    <Description
-                      :description="equivalentDescription"
-                      :css_class="'ok-description-link'"
-                      :to_name="'NameCheckerAlt'"
-                      :to_params="{ descriptionRouter: equivalentDescription }"
-                    />
-                  </template>
-                </div>
-              </div>
-            </v-expansion-panel-content>
-          </v-expansion-panel>
-        </v-expansion-panels>
-
-        <v-expansion-panels
-          focusable
-          hover
-          class="mt-5 mb-5"
-          tile
-          v-if="response && response.back_translated_descriptions"
-        >
-          <v-expansion-panel>
-            <v-expansion-panel-header class="overline"
-              >Back Translated Descriptions</v-expansion-panel-header
-            >
-            <v-expansion-panel-content class="pt-5">
-              <div
-                v-for="(
-                  equivalentDescription, index
-                ) in response.back_translated_descriptions"
-                :key="index"
-              >
-                <router-link
-                  class="ok-description-link"
-                  :to="{
-                    name: 'NameCheckerAlt',
-                    params: { descriptionRouter: equivalentDescription },
-                  }"
-                  >{{ equivalentDescription }}</router-link
-                >
-              </div>
-            </v-expansion-panel-content>
-          </v-expansion-panel>
-        </v-expansion-panels>
-
-        <v-expansion-panels
-          focusable
-          hover
-          class="mt-5 mb-5"
-          tile
-          v-if="response && response.rna"
-        >
-          <v-expansion-panel>
-            <v-expansion-panel-header class="overline"
-              >RNA Prediction</v-expansion-panel-header
-            >
-            <v-expansion-panel-content class="pt-5">
-              <v-sheet v-if="response.rna.errors">
-                <v-alert
-                  color="red lighten-1"
-                  tile
-                  border="left"
-                  dark
-                  v-for="(error, index) in response.rna.errors"
-                  :key="index"
-                >
-                  <div>
-                    {{ getMessage(error) }}
-                  </div>
-                </v-alert>
-              </v-sheet>
-
-              <div class="mt-4 mb-4" v-if="response.rna.description">
-                <Description
-                  :description="response.rna.description"
-                  :css_class="'ok-description-link'"
-                  :to_name="'NameCheckerAlt'"
-                  :to_params="{ descriptionRouter: response.rna.description }"
-                />
-              </div>
-            </v-expansion-panel-content>
-          </v-expansion-panel>
-        </v-expansion-panels>
-
-        <v-expansion-panels
-          focusable
-          hover
-          class="mt-5 mb-5"
-          tile
-          v-if="response && response.protein"
-        >
-          <v-expansion-panel>
-            <v-expansion-panel-header class="overline"
-              >Protein Prediction</v-expansion-panel-header
-            >
-            <v-expansion-panel-content class="pt-5">
-              <v-sheet v-if="response.protein.errors">
-                <v-alert
-                  color="red lighten-1"
-                  tile
-                  border="left"
-                  dark
-                  v-for="(error, index) in response.rna.errors"
-                  :key="index"
-                >
-                  <div>
-                    {{ getMessage(error) }}
-                  </div>
-                </v-alert>
-              </v-sheet>
-              <AffectedProtein v-else :protein="this.response.protein" />
-            </v-expansion-panel-content>
-          </v-expansion-panel>
-        </v-expansion-panels>
-
-        <v-expansion-panels
-          focusable
-          hover
-          class="mt-5 mb-5"
-          tile
-          v-if="showReferenceInformation()"
-        >
-          <v-expansion-panel>
-            <v-expansion-panel-header class="overline"
-              >Reference Sequence Information</v-expansion-panel-header
-            >
-            <v-expansion-panel-content>
-              <ReferenceInformation :model="this.response.corrected_model" />
-              <SelectorShort
-                v-if="response && response.selector_short"
-                :selector="response.selector_short"
+              <Description
+                :description="response.supremal.hgvs"
+                :css_class="'ok-description-link'"
+                :to_name="'NameCheckerAlt'"
+                :to_params="{ descriptionRouter: response.supremal.hgvs }"
               />
-            </v-expansion-panel-content>
-          </v-expansion-panel>
-        </v-expansion-panels>
-
-        <v-expansion-panels
-          focusable
-          hover
-          class="mt-5 mb-5"
-          tile
-          v-if="
-            response &&
-            response.normalized_description &&
-            response.normalized_model &&
-            response.normalized_model.reference &&
-            !['p'].includes(response.normalized_model.coordinate_system)
-          "
-        >
-          <v-expansion-panel>
-            <v-expansion-panel-header class="overline"
-              >Related reference sequences</v-expansion-panel-header
-            >
-            <v-expansion-panel-content class="pt-5">
-              <Related
-                :model="this.response.normalized_model"
-                :description="this.response.normalized_description"
+              <Description
+                :description="response.supremal.spdi"
+                :css_class="'ok-description'"
               />
             </v-expansion-panel-content>
           </v-expansion-panel>
@@ -515,22 +343,14 @@
 <script>
 import MutalyzerService from "../services/MutalyzerService.js";
 import JsonPretty from "../components/JsonPretty.vue";
-import AffectedProtein from "../components/AffectedProtein.vue";
-import SelectorShort from "../components/SelectorShort.vue";
 import SyntaxError from "../components/SyntaxError.vue";
-import ReferenceInformation from "../components/ReferenceInformation.vue";
-import Related from "../components/Related.vue";
 import ViewVariants from "../components/ViewVariants.vue";
 import Description from "../components/Description.vue";
 
 export default {
   components: {
     JsonPretty,
-    SelectorShort,
-    AffectedProtein,
     SyntaxError,
-    ReferenceInformation,
-    Related,
     ViewVariants,
     Description,
   },
