@@ -305,7 +305,7 @@
         <v-expansion-panels
           focusable
           hover
-          class="mt-5 mb-5"
+          class="mb-5"
           tile
           v-if="
             response &&
@@ -318,10 +318,37 @@
               >View Variants Sequence Overview</v-expansion-panel-header
             >
             <v-expansion-panel-content class="pt-2 pb-2">
-              <ViewVariants
-                :description="this.response.normalized_description"
-                :only_variants="this.response.only_variants"
-                :sequence="this.response.sequence"
+              <div
+                v-if="
+                  this.response.corrected_description !=
+                  this.response.normalized_description
+                "
+                class="overline"
+              >
+                Input
+              </div>
+              <ViewVariantsCore
+                v-if="
+                  this.response.corrected_description !=
+                  this.response.normalized_description
+                "
+                :view="this.response.view_corrected"
+                :influence="this.response.influence"
+                :d_id="'name_check_corrected'"
+                class="mt-5 mb-5"
+              />
+              <div
+                              v-if="
+                  this.response.corrected_description !=
+                  this.response.normalized_description
+                "
+
+              class="overline">Output</div>
+              <ViewVariantsCore
+                v-if="this.response.normalized_description"
+                :view="this.response.view_normalized"
+                :influence="this.response.influence"
+                :d_id="'name_check_normalized'"
               />
             </v-expansion-panel-content>
           </v-expansion-panel>
@@ -344,14 +371,14 @@
 import MutalyzerService from "../services/MutalyzerService.js";
 import JsonPretty from "../components/JsonPretty.vue";
 import SyntaxError from "../components/SyntaxError.vue";
-import ViewVariants from "../components/ViewVariants.vue";
+import ViewVariantsCore from "../components/ViewVariantsCore.vue";
 import Description from "../components/Description.vue";
 
 export default {
   components: {
     JsonPretty,
     SyntaxError,
-    ViewVariants,
+    ViewVariantsCore,
     Description,
   },
   props: ["descriptionRouter"],
@@ -361,8 +388,9 @@ export default {
     rules: [(value) => !!value || "Required."],
     inputDescriptionTextBoxLabel: "HGVS Description",
     descriptionExamples: [
-      "NG_012337.1(NM_003002.2):c.274G>T",
-      "LRG_24:g.5525_5532del",
+      "LRG_24:g.5526_5527del",
+      "LRG_24:g.5526_5527dup",
+      "LRG_24:g.[5519dup;5526_5527del]",
     ],
     loadingOverlay: false,
     inputDescription: null, // The description for which the most recent call was sent.

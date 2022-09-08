@@ -123,7 +123,8 @@ li {
 .ok-description {
   color: var(--green);
   padding: 5px 10px;
-  display: inline;
+  display: inline-block;
+  word-break: break-all;
   font-family: monospace;
 }
 

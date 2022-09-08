@@ -5,7 +5,7 @@
     <ViewVariantsCore
       v-if="view && !progress"
       :view="view"
-      :d_id="'name_check'"
+      :d_id="'name_check_' + d_type"
     />
   </div>
 </template>
@@ -23,6 +23,7 @@ export default {
     description: null,
     only_variants: null,
     sequence: null,
+    d_type: null,
   },
   data() {
     return {

@@ -137,7 +137,11 @@
           "
         >
           <div
-            v-if="(v.deleted || v.inserted) && v.description && !v.description.includes('=')"
+            v-if="
+              (v.deleted || v.inserted) &&
+              v.description &&
+              !v.description.includes('=')
+            "
           >
             <!-- deleted sequence -->
             <div class="seqdel" v-if="v.deleted && v.deleted.sequence">
@@ -397,6 +401,7 @@ export default {
       var elmnt = document.getElementById(this.d_id + "_variant_" + v_i);
       elmnt.scrollIntoView({
         behavior: "smooth",
+        inline: "center",
       });
     },
     get_seq_class: function (v, s_i, key) {
@@ -510,7 +515,7 @@ export default {
   display: inline-block;
   text-align: center;
   font-family: monospace;
-  color: #004D40;
+  color: #004d40;
 }
 
 .seqins {
