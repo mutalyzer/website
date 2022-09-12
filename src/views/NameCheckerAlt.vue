@@ -374,6 +374,34 @@
           </v-expansion-panel>
         </v-expansion-panels>
 
+        <v-expansion-panels
+          focusable
+          hover
+          class="mt-5 mb-5"
+          tile
+          v-if="response && response.minimal_descriptions"
+        >
+          <v-expansion-panel>
+            <v-expansion-panel-header class="overline"
+              >Minimal Descriptions</v-expansion-panel-header
+            >
+
+            <v-expansion-panel-content class="pt-5">
+              <div
+                v-for="(
+                  minimal_description, index
+                ) in response.minimal_descriptions"
+                :key="index"
+              >
+                <Description
+                  :description="minimal_description"
+                  :css_class="'ok-description'"
+                />
+              </div>
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+        </v-expansion-panels>
+
         <v-expansion-panels focusable hover class="mt-10 mb-10" v-if="response">
           <v-expansion-panel>
             <v-expansion-panel-header>Raw Response</v-expansion-panel-header>
@@ -410,6 +438,7 @@ export default {
     rules: [(value) => !!value || "Required."],
     inputDescriptionTextBoxLabel: "HGVS Description",
     descriptionExamples: [
+      "LRG_24:g.5526_5529del",
       "LRG_24:g.5526_5527del",
       "LRG_24:g.5526_5527dup",
       "LRG_24:g.[5519dup;5526_5527del]",
