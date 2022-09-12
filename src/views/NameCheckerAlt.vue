@@ -338,18 +338,38 @@
                 class="mt-5 mb-5"
               />
               <div
-                              v-if="
+                v-if="
                   this.response.corrected_description !=
                   this.response.normalized_description
                 "
-
-              class="overline">Output</div>
+                class="overline"
+              >
+                Output
+              </div>
               <ViewVariantsCore
                 v-if="this.response.normalized_description"
                 :view="this.response.view_normalized"
                 :influence="this.response.influence"
                 :d_id="'name_check_normalized'"
               />
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+        </v-expansion-panels>
+
+        <v-expansion-panels
+          focusable
+          hover
+          class="mt-5 mb-5"
+          tile
+          v-if="response && response.dot"
+        >
+          <v-expansion-panel>
+            <v-expansion-panel-header class="overline"
+              >Graph</v-expansion-panel-header
+            >
+
+            <v-expansion-panel-content>
+              <DotGraph :data="response.dot" />
             </v-expansion-panel-content>
           </v-expansion-panel>
         </v-expansion-panels>
@@ -373,6 +393,7 @@ import JsonPretty from "../components/JsonPretty.vue";
 import SyntaxError from "../components/SyntaxError.vue";
 import ViewVariantsCore from "../components/ViewVariantsCore.vue";
 import Description from "../components/Description.vue";
+import DotGraph from "../components/DotGraph.vue";
 
 export default {
   components: {
@@ -380,6 +401,7 @@ export default {
     SyntaxError,
     ViewVariantsCore,
     Description,
+    DotGraph,
   },
   props: ["descriptionRouter"],
   data: () => ({
