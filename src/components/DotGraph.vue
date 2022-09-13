@@ -1,6 +1,14 @@
 <template>
   <div>
-    <div id="dot-graph" style="text-align: center; display: inline-block"></div>
+    <div
+      id="dot-graph"
+      style="
+        width: 100%;
+        margin: auto;
+        text-align: center;
+        display: inline-block;
+      "
+    ></div>
   </div>
 </template>
 
@@ -10,10 +18,23 @@ import { graphviz } from "d3-graphviz";
 export default {
   name: "DotGraph",
   props: {
-    data: null,
+    dottext: null,
   },
+  data: () => ({
+    width: document.getElementById("dot-graph-container").offsetWidth - 40,
+  }),
   mounted() {
-    graphviz("#dot-graph").dot(this.data).render();
+    this.drawGraph();
+  },
+  methods: {
+    drawGraph() {
+      graphviz("#dot-graph")
+        .fit(true)
+        .width(this.width)
+        .height(this.width / 3)
+        .dot(this.dottext)
+        .render();
+    },
   },
 };
 </script>

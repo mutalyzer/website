@@ -366,13 +366,13 @@
           tile
           v-if="response && response.dot"
         >
-          <v-expansion-panel>
+          <v-expansion-panel id="dot-graph-container">
             <v-expansion-panel-header class="overline"
               >Graph</v-expansion-panel-header
             >
 
-            <v-expansion-panel-content>
-              <DotGraph :data="response.dot" />
+            <v-expansion-panel-content class="mt-5">
+              <DotGraph :dottext="response.dot" />
             </v-expansion-panel-content>
           </v-expansion-panel>
         </v-expansion-panels>
