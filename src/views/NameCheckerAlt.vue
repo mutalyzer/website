@@ -294,6 +294,7 @@
                 :css_class="'ok-description-link'"
                 :to_name="'NameCheckerAlt'"
                 :to_params="{ descriptionRouter: response.supremal.hgvs }"
+                :to_query="getParams()"
               />
               <div class="overline">SPDI</div>
               <Description
@@ -397,7 +398,10 @@
               >
                 <Description
                   :description="minimal_description"
-                  :css_class="'ok-description'"
+                  :css_class="'ok-description-link'"
+                  :to_name="'NameCheckerAlt'"
+                  :to_params="{ descriptionRouter: minimal_description }"
+                  :to_query="getParams()"
                 />
               </div>
             </v-expansion-panel-content>
@@ -440,10 +444,8 @@ export default {
     rules: [(value) => !!value || "Required."],
     inputDescriptionTextBoxLabel: "HGVS Description",
     descriptionExamples: [
-      "LRG_24:g.5526_5529del",
-      "LRG_24:g.5526_5527del",
-      "LRG_24:g.5526_5527dup",
-      "LRG_24:g.[5519dup;5526_5527del]",
+      "NC_000007.13:g.117144419T>G",
+      "NC_000007.14:g.117530938del",
     ],
     loadingOverlay: false,
     inputDescription: null, // The description for which the most recent call was sent.
