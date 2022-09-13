@@ -444,8 +444,9 @@ export default {
     rules: [(value) => !!value || "Required."],
     inputDescriptionTextBoxLabel: "HGVS Description",
     descriptionExamples: [
-      "NC_000007.13:g.117144419T>G",
       "NC_000007.14:g.117530938del",
+      "NC_000007.14:g.117548635dup",
+      "NC_000007.14:g.117518409_117518410insTA",
     ],
     loadingOverlay: false,
     inputDescription: null, // The description for which the most recent call was sent.
