@@ -288,12 +288,14 @@
               >Supremal Variant
             </v-expansion-panel-header>
             <v-expansion-panel-content class="pt-5">
+              <div class="overline">HGVS</div>
               <Description
                 :description="response.supremal.hgvs"
                 :css_class="'ok-description-link'"
                 :to_name="'NameCheckerAlt'"
                 :to_params="{ descriptionRouter: response.supremal.hgvs }"
               />
+              <div class="overline">SPDI</div>
               <Description
                 :description="response.supremal.spdi"
                 :css_class="'ok-description'"
