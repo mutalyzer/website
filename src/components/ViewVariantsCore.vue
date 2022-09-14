@@ -40,7 +40,7 @@
                         v-on="{ ...onMenu, ...onTooltip }"
                         >{{ s }}</span
                       ></template
-                    ><span>{{ get_position(v, s_i, "sequence") }}</span>
+                    ><span>{{ get_position(v, s_i, "sequence") + 1 }}</span>
                   </v-tooltip>
                 </template>
                 <v-list>
@@ -68,7 +68,7 @@
                         v-on="{ ...onMenu, ...onTooltip }"
                         >{{ s }}</span
                       ></template
-                    ><span>{{ get_position(v, s_i, "left") }}</span>
+                    ><span>{{ get_position(v, s_i, "left") + 1 }}</span>
                   </v-tooltip>
                 </template>
                 <v-list>
@@ -103,7 +103,7 @@
                         v-on="{ ...onMenu, ...onTooltip }"
                         >{{ s }}</span
                       ></template
-                    ><span>{{ get_position(v, s_i, "right") }}</span>
+                    ><span>{{ get_position(v, s_i, "right") + 1 }}</span>
                   </v-tooltip>
                 </template>
                 <v-list>
@@ -156,7 +156,7 @@
                       <span>{{ s }}</span></span
                     ></template
                   >
-                  <span>{{ get_position(v, s_i, "sequence") }}</span>
+                  <span>{{ get_position(v, s_i, "sequence") + 1 }}</span>
                 </v-tooltip>
               </span>
             </div>
@@ -173,7 +173,7 @@
                       <span>{{ s }}</span></span
                     ></template
                   >
-                  <span>{{ get_position(v, s_i, "left") }}</span>
+                  <span>{{ get_position(v, s_i, "left") + 1 }}</span>
                 </v-tooltip>
               </span>
             </div>
@@ -204,7 +204,7 @@
                       <span>{{ s }}</span></span
                     ></template
                   >
-                  <span>{{ get_position(v, s_i, "right-deleted") }}</span>
+                  <span>{{ get_position(v, s_i, "right-deleted") + 1 }}</span>
                 </v-tooltip>
               </span>
             </div>
@@ -273,7 +273,7 @@
                       <span>{{ s }}</span></span
                     ></template
                   >
-                  <span>{{ get_position(v, s_i, "sequence") }}</span>
+                  <span>{{ get_position(v, s_i, "sequence") + 1 }}</span>
                 </v-tooltip>
               </span>
             </div>
@@ -290,7 +290,7 @@
                       <span>{{ s }}</span></span
                     ></template
                   >
-                  <span>{{ get_position(v, s_i, "left") }}</span>
+                  <span>{{ get_position(v, s_i, "left") + 1 }}</span>
                 </v-tooltip>
               </span>
             </div>
@@ -321,7 +321,7 @@
                       <span>{{ s }}</span></span
                     ></template
                   >
-                  <span>{{ get_position(v, s_i, "right-deleted") }}</span>
+                  <span>{{ get_position(v, s_i, "right-deleted") + 1 }}</span>
                 </v-tooltip>
               </span>
             </div>
