@@ -285,7 +285,7 @@
         >
           <v-expansion-panel>
             <v-expansion-panel-header class="overline"
-              >Supremal Variant
+              >Supremal Representation
             </v-expansion-panel-header>
             <v-expansion-panel-content class="pt-5">
               <div class="overline">HGVS</div>
@@ -368,7 +368,7 @@
         >
           <v-expansion-panel id="dot-graph-container">
             <v-expansion-panel-header class="overline"
-              >Graph</v-expansion-panel-header
+              >Minimal Representations Graph</v-expansion-panel-header
             >
 
             <v-expansion-panel-content class="mt-5">
@@ -386,7 +386,7 @@
         >
           <v-expansion-panel>
             <v-expansion-panel-header class="overline"
-              >Minimal Descriptions</v-expansion-panel-header
+              >Minimal Representations</v-expansion-panel-header
             >
 
             <v-expansion-panel-content class="pt-5">
