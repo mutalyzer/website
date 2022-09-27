@@ -385,9 +385,9 @@
           v-if="response && response.minimal_descriptions"
         >
           <v-expansion-panel>
-            <v-expansion-panel-header class="overline"
-              >Minimal Representations</v-expansion-panel-header
-            >
+            <v-expansion-panel-header class="overline">{{
+              minimalTitle()
+            }}</v-expansion-panel-header>
 
             <v-expansion-panel-content class="pt-5">
               <div
@@ -403,6 +403,56 @@
                   :to_params="{ descriptionRouter: minimal_description }"
                   :to_query="getParams()"
                 />
+              </div>
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+        </v-expansion-panels>
+
+        <v-expansion-panels
+          focusable
+          hover
+          class="mt-5 mb-5"
+          tile
+          v-if="response && response.equivalent_descriptions"
+        >
+          <v-expansion-panel>
+            <v-expansion-panel-header class="overline"
+              >Equivalent Descriptions</v-expansion-panel-header
+            >
+            <v-expansion-panel-content class="pt-5">
+              <div
+                class="ml-4"
+                v-for="(values, c_s) in response.equivalent_descriptions"
+                :key="c_s"
+              >
+                <span v-if="c_s == 'c'">Coding</span>
+                <span v-else-if="c_s == 'n'">Noncoding</span>
+                <span v-else-if="c_s == 'g'">Genomic</span>
+                <span v-else-if="c_s == 'p'"></span>
+                <span v-else> {{ c_s }} </span>
+                <div
+                  v-for="(equivalentDescription, index) in values"
+                  :key="index"
+                >
+                  <template v-if="c_s === 'c'">
+                    <Description
+                      :description="equivalentDescription[0]"
+                      :css_class="'ok-description-link'"
+                      :to_name="'NameChecker'"
+                      :to_params="{
+                        descriptionRouter: equivalentDescription[0],
+                      }"
+                    />
+                  </template>
+                  <template v-else>
+                    <Description
+                      :description="equivalentDescription"
+                      :css_class="'ok-description-link'"
+                      :to_name="'NameChecker'"
+                      :to_params="{ descriptionRouter: equivalentDescription }"
+                    />
+                  </template>
+                </div>
               </div>
             </v-expansion-panel-content>
           </v-expansion-panel>
@@ -770,6 +820,13 @@ export default {
     selectDescriptionExample: function (i) {
       this.inputDescriptionTextBox = this.descriptionExamples[i];
       this.$refs.refInputDescriptionTextBox.focus();
+    },
+    minimalTitle: function () {
+      if (this.response.first_minimal) {
+        return "First " + this.response.first_minimal + " Minimal Descriptions";
+      } else {
+        return "Minimal Descriptions";
+      }
     },
   },
 };
