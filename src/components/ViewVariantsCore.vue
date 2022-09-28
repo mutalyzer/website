@@ -350,6 +350,7 @@ export default {
   },
   created: function () {
     this.hover_init();
+    console.log(this.view.views);
   },
   methods: {
     get_position: function (view, s_i, key) {

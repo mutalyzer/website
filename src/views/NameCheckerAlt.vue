@@ -458,6 +458,76 @@
           </v-expansion-panel>
         </v-expansion-panels>
 
+        <v-expansion-panels
+          focusable
+          hover
+          class="mt-5 mb-5"
+          tile
+          v-if="response && response.rna"
+        >
+          <v-expansion-panel>
+            <v-expansion-panel-header class="overline"
+              >RNA Prediction</v-expansion-panel-header
+            >
+            <v-expansion-panel-content class="pt-5">
+              <v-sheet v-if="response.rna.errors">
+                <v-alert
+                  color="red lighten-1"
+                  tile
+                  border="left"
+                  dark
+                  v-for="(error, index) in response.rna.errors"
+                  :key="index"
+                >
+                  <div>
+                    {{ getMessage(error) }}
+                  </div>
+                </v-alert>
+              </v-sheet>
+
+              <div class="mt-4 mb-4" v-if="response.rna.description">
+                <Description
+                  :description="response.rna.description"
+                  :css_class="'ok-description-link'"
+                  :to_name="'NameChecker'"
+                  :to_params="{ descriptionRouter: response.rna.description }"
+                />
+              </div>
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+        </v-expansion-panels>
+
+        <v-expansion-panels
+          focusable
+          hover
+          class="mt-5 mb-5"
+          tile
+          v-if="response && response.protein"
+        >
+          <v-expansion-panel>
+            <v-expansion-panel-header class="overline"
+              >Protein Prediction</v-expansion-panel-header
+            >
+            <v-expansion-panel-content class="pt-5">
+              <v-sheet v-if="response.protein.errors">
+                <v-alert
+                  color="red lighten-1"
+                  tile
+                  border="left"
+                  dark
+                  v-for="(error, index) in response.rna.errors"
+                  :key="index"
+                >
+                  <div>
+                    {{ getMessage(error) }}
+                  </div>
+                </v-alert>
+              </v-sheet>
+              <AffectedProtein v-else :protein="this.response.protein" />
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+        </v-expansion-panels>
+
         <v-expansion-panels focusable hover class="mt-10 mb-10" v-if="response">
           <v-expansion-panel>
             <v-expansion-panel-header>Raw Response</v-expansion-panel-header>
@@ -478,6 +548,7 @@ import SyntaxError from "../components/SyntaxError.vue";
 import ViewVariantsCore from "../components/ViewVariantsCore.vue";
 import Description from "../components/Description.vue";
 import DotGraph from "../components/DotGraph.vue";
+import AffectedProtein from "../components/AffectedProtein.vue";
 
 export default {
   components: {
@@ -486,6 +557,7 @@ export default {
     ViewVariantsCore,
     Description,
     DotGraph,
+    AffectedProtein,
   },
   props: ["descriptionRouter"],
   data: () => ({
