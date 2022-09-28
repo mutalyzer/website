@@ -401,6 +401,7 @@ export default {
       var elmnt = document.getElementById(this.d_id + "_variant_" + v_i);
       elmnt.scrollIntoView({
         behavior: "smooth",
+        block: "nearest",
         inline: "center",
       });
     },
