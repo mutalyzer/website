@@ -308,7 +308,7 @@
         <v-expansion-panels
           focusable
           hover
-          class="mb-5"
+          class="mt-5 mb-5"
           tile
           v-if="
             response &&
@@ -316,7 +316,9 @@
             response.normalized_model
           "
         >
-          <v-expansion-panel>
+          <v-expansion-panel
+            v-if="this.response.view_corrected || this.response.view_normalized"
+          >
             <v-expansion-panel-header class="overline"
               >View Variants Sequence Overview</v-expansion-panel-header
             >
@@ -326,20 +328,15 @@
                   this.response.corrected_description !=
                   this.response.normalized_description
                 "
-                class="overline"
               >
-                Input
+                <div class="overline">Input</div>
+                <ViewVariantsCore
+                  :view="this.response.view_corrected"
+                  :influence="this.response.influence"
+                  :d_id="'name_check_corrected'"
+                  class="mt-5 mb-5"
+                />
               </div>
-              <ViewVariantsCore
-                v-if="
-                  this.response.corrected_description !=
-                  this.response.normalized_description
-                "
-                :view="this.response.view_corrected"
-                :influence="this.response.influence"
-                :d_id="'name_check_corrected'"
-                class="mt-5 mb-5"
-              />
               <div
                 v-if="
                   this.response.corrected_description !=
@@ -438,7 +435,7 @@
                     <Description
                       :description="equivalentDescription[0]"
                       :css_class="'ok-description-link'"
-                      :to_name="'NameChecker'"
+                      :to_name="'NameCheckerAlt'"
                       :to_params="{
                         descriptionRouter: equivalentDescription[0],
                       }"
@@ -448,11 +445,42 @@
                     <Description
                       :description="equivalentDescription"
                       :css_class="'ok-description-link'"
-                      :to_name="'NameChecker'"
+                      :to_name="'NameCheckerAlt'"
                       :to_params="{ descriptionRouter: equivalentDescription }"
                     />
                   </template>
                 </div>
+              </div>
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+        </v-expansion-panels>
+
+        <v-expansion-panels
+          focusable
+          hover
+          class="mt-5 mb-5"
+          tile
+          v-if="response && response.back_translated_descriptions"
+        >
+          <v-expansion-panel>
+            <v-expansion-panel-header class="overline"
+              >Back Translated Descriptions</v-expansion-panel-header
+            >
+            <v-expansion-panel-content class="pt-5">
+              <div
+                v-for="(
+                  equivalentDescription, index
+                ) in response.back_translated_descriptions"
+                :key="index"
+              >
+                <router-link
+                  class="ok-description-link"
+                  :to="{
+                    name: 'NameCheckerAlt',
+                    params: { descriptionRouter: equivalentDescription },
+                  }"
+                  >{{ equivalentDescription }}</router-link
+                >
               </div>
             </v-expansion-panel-content>
           </v-expansion-panel>
@@ -489,7 +517,7 @@
                 <Description
                   :description="response.rna.description"
                   :css_class="'ok-description-link'"
-                  :to_name="'NameChecker'"
+                  :to_name="'NameCheckerAlt'"
                   :to_params="{ descriptionRouter: response.rna.description }"
                 />
               </div>
