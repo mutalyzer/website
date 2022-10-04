@@ -12,6 +12,31 @@
           <a href="mailto: info@mutalyzer.nl">info@mutalyzer.nl</a>.
         </p>
 
+        <h1 class="display-1">Cite us</h1>
+        <p class="mt-5">
+          Please mention
+          <a href="https://pubmed.ncbi.nlm.nih.gov/33538839/"
+            >"Lefter M et al. (2021). Mutalyzer 2: Next Generation HGVS
+            Nomenclature Checker. Bioinformatics, 2021 Sep 15; 37(28):2811-7"</a
+          >
+          (<a href="https://doi.org/10.1093/bioinformatics/btab051"
+            >direct link</a
+          >) when referring to these pages.
+        </p>
+
+        <p class="mt-5">
+          The Description Extractor is described separately in
+          <a href="https://www.ncbi.nlm.nih.gov/pubmed/26231427"
+            >"Vis JK et al. (2015). An efficient algorithm for the extraction of
+            HGVS variant descriptions from sequences. Bioinformatics, 2015 Dec
+            1; 31(23):3751-7"</a
+          >
+          (<a
+            href="http://bioinformatics.oxfordjournals.org/content/31/23/3751.long"
+            >direct link</a
+          >).
+        </p>
+
         <h1 class="display-1">Funding</h1>
         <p class="mt-5">
           This project was supported by the Fair Genomes project as financed in
@@ -23,6 +48,7 @@
             >846003201</a
           >.
         </p>
+
         <h1 class="display-1">Recommended by</h1>
         <v-row class="mt-5">
           <v-col>
