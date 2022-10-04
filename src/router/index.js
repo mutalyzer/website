@@ -3,7 +3,7 @@ import VueRouter from "vue-router";
 import Home from "../views/Home.vue";
 import About from "../views/About.vue";
 import NameChecker from "../views/NameChecker.vue";
-import NameCheckerAlt from "../views/NameCheckerAlt.vue";
+import NormalizerAlt from "../views/NormalizerAlt.vue";
 import PositionConverter from "../views/PositionConverter.vue";
 import DescriptionExtractor from "../views/DescriptionExtractor.vue";
 import Mapper from "../views/Mapper.vue";
@@ -30,10 +30,10 @@ const routes = [
     component: NameChecker,
   },
   {
-    path: "/namecheckeralt/:descriptionRouter?",
+    path: "/normalizeralt/:descriptionRouter?",
     props: true,
-    name: "NameCheckerAlt",
-    component: NameCheckerAlt,
+    name: "NormalizerAlt",
+    component: NormalizerAlt,
   },
   {
     path: "/positionconverter",

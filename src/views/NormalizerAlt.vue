@@ -2,7 +2,7 @@
   <v-container>
     <v-layout>
       <v-flex xs12>
-        <h1 class="display-1 mt-10">Experimental Name Checker</h1>
+        <h1 class="display-1 mt-10">Experimental Normalizer</h1>
         <p>Using the algebra based extractor.</p>
         <v-sheet elevation="2" class="pa-5 mt-10">
           <v-row class="pt-1 pr-0">
@@ -32,7 +32,7 @@
               :label="inputDescriptionTextBoxLabel"
               v-on:keydown.enter="
                 $router.push({
-                  name: 'NameCheckerAlt',
+                  name: 'NormalizerAlt',
                   params: { descriptionRouter: inputDescriptionTextBox },
                 })
               "
@@ -85,12 +85,12 @@
 
           <v-row class="pl-5 pb-5">
             <v-btn
-              ref="nameCheck"
+              ref="normalize"
               class="mt-5"
               color="primary"
               :disabled="!valid"
               :to="{
-                name: 'NameCheckerAlt',
+                name: 'NormalizerAlt',
                 params: { descriptionRouter: inputDescriptionTextBox },
                 query: getParams(),
               }"
@@ -133,7 +133,7 @@
                     ? 'corrected-description-link-reverse'
                     : 'ok-description-link-reverse'
                 "
-                :to_name="'NameCheckerAlt'"
+                :to_name="'NormalizerAlt'"
                 :to_params="{
                   descriptionRouter: response.normalized_description,
                 }"
@@ -292,7 +292,7 @@
               <Description
                 :description="response.supremal.hgvs"
                 :css_class="'ok-description-link'"
-                :to_name="'NameCheckerAlt'"
+                :to_name="'NormalizerAlt'"
                 :to_params="{ descriptionRouter: response.supremal.hgvs }"
                 :to_query="getParams()"
               />
@@ -333,7 +333,7 @@
                 <ViewVariantsCore
                   :view="this.response.view_corrected"
                   :influence="this.response.influence"
-                  :d_id="'name_check_corrected'"
+                  :d_id="'normalize_corrected'"
                   class="mt-5 mb-5"
                 />
               </div>
@@ -350,7 +350,7 @@
                 v-if="this.response.normalized_description"
                 :view="this.response.view_normalized"
                 :influence="this.response.influence"
-                :d_id="'name_check_normalized'"
+                :d_id="'normalize_normalized'"
               />
             </v-expansion-panel-content>
           </v-expansion-panel>
@@ -396,7 +396,7 @@
                 <Description
                   :description="minimal_description"
                   :css_class="'ok-description-link'"
-                  :to_name="'NameCheckerAlt'"
+                  :to_name="'NormalizerAlt'"
                   :to_params="{ descriptionRouter: minimal_description }"
                   :to_query="getParams()"
                 />
@@ -435,7 +435,7 @@
                     <Description
                       :description="equivalentDescription[0]"
                       :css_class="'ok-description-link'"
-                      :to_name="'NameCheckerAlt'"
+                      :to_name="'NormalizerAlt'"
                       :to_params="{
                         descriptionRouter: equivalentDescription[0],
                       }"
@@ -445,7 +445,7 @@
                     <Description
                       :description="equivalentDescription"
                       :css_class="'ok-description-link'"
-                      :to_name="'NameCheckerAlt'"
+                      :to_name="'NormalizerAlt'"
                       :to_params="{ descriptionRouter: equivalentDescription }"
                     />
                   </template>
@@ -476,7 +476,7 @@
                 <router-link
                   class="ok-description-link"
                   :to="{
-                    name: 'NameCheckerAlt',
+                    name: 'NormalizerAlt',
                     params: { descriptionRouter: equivalentDescription },
                   }"
                   >{{ equivalentDescription }}</router-link
@@ -517,7 +517,7 @@
                 <Description
                   :description="response.rna.description"
                   :css_class="'ok-description-link'"
-                  :to_name="'NameCheckerAlt'"
+                  :to_name="'NormalizerAlt'"
                   :to_params="{ descriptionRouter: response.rna.description }"
                 />
               </div>
@@ -618,7 +618,7 @@ export default {
   methods: {
     run: function () {
       this.setRouterParams();
-      this.nameCheck();
+      this.normalize();
     },
     setRouterParams: function () {
       if (
@@ -648,18 +648,18 @@ export default {
         this.mode = "hgvs";
       } else {
         this.$router.push({
-          name: "NameCheckerAlt",
+          name: "NormalizerAlt",
         });
       }
     },
-    nameCheck: function () {
+    normalize: function () {
       if (this.mode == "hgvs") {
-        this.nameCheckHgvs();
+        this.normalizeHgvs();
       } else if (this.mode == "sequence") {
-        this.nameCheckSequence();
+        this.normalizeSequence();
       }
     },
-    nameCheckHgvs: function () {
+    normalizeHgvs: function () {
       if (this.inputDescriptionTextBox !== null) {
         this.loadingOverlay = true;
         this.inputDescription = null;
@@ -668,7 +668,7 @@ export default {
         this.showCorrections = false;
         this.inputDescriptionTextBox = this.inputDescriptionTextBox.trim();
 
-        MutalyzerService.nameCheckAltHgvs(this.inputDescriptionTextBox)
+        MutalyzerService.normalizeAltHgvs(this.inputDescriptionTextBox)
           .then((response) => {
             if (response.data) {
               this.loadingOverlay = false;
@@ -705,7 +705,7 @@ export default {
           });
       }
     },
-    nameCheckSequence: function () {
+    normalizeSequence: function () {
       if (this.inputDescriptionTextBox !== null) {
         this.loadingOverlay = true;
         this.inputDescription = null;
@@ -714,7 +714,7 @@ export default {
         this.showCorrections = false;
         this.inputDescriptionTextBox = this.inputDescriptionTextBox.trim();
 
-        MutalyzerService.nameCheckAltSequence(
+        MutalyzerService.normalizeAltSequence(
           this.inputDescriptionTextBox,
           this.getParams()
         )
@@ -888,7 +888,7 @@ export default {
         this.reset();
         if (this.$route.query.descriptionRouter) {
           this.$router.push({
-            name: "NameCheckerAlt",
+            name: "NormalizerAlt",
           });
         }
       } else if (this.mode == "hgvs") {
