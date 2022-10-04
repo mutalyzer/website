@@ -5,7 +5,7 @@
       <Description
         :description="protein.description"
         :css_class="'ok-description-link'"
-        :to_name="'NameChecker'"
+        :to_name="'Normalizer'"
         :to_params="{ descriptionRouter: protein.description }"
       />
     </div>

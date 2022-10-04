@@ -2,10 +2,10 @@
   <v-container>
     <v-layout>
       <v-flex xs12>
-        <h1 class="display-1 mt-10">Batch Checker</h1>
+        <h1 class="display-1 mt-10">Batch Processor</h1>
         <p>
-          The Batch Checker can be used to process up to 50 descriptions with
-          the Name Checker.
+          The Batch Processor can be used to process up to 50 descriptions with
+          the Normalizer.
         </p>
         <v-sheet elevation="2" class="pa-10 mt-10">
           <v-file-input
@@ -15,13 +15,13 @@
           ></v-file-input>
 
           <v-btn
-            ref="nameCheck"
+            ref="normalize"
             class="mt-5"
             color="primary"
             @click="loadFile"
             :disabled="!filePath"
           >
-            Batch Check
+            Batch Process
           </v-btn>
         </v-sheet>
 
@@ -237,7 +237,7 @@ export default {
       let i = 0;
 
       for (let variant of this.variants) {
-        MutalyzerService.nameCheckHgvs(variant.input)
+        MutalyzerService.normalizeHgvs(variant.input)
           .then((response) => {
             if (response.data) {
               i += 1;

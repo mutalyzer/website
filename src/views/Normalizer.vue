@@ -2,10 +2,10 @@
   <v-container>
     <v-layout>
       <v-flex xs12>
-        <h1 class="display-1 mt-10">Name Checker</h1>
+        <h1 class="display-1 mt-10">Normalizer</h1>
         <p>
-          The Name Checker takes the variant description as input and checks
-          whether it is correct.
+          The Normalizer takes a variant description as input and checks whether
+          it is correct.
         </p>
         <v-sheet elevation="2" class="pa-5 mt-10">
           <v-row class="pt-1 pr-0">
@@ -35,7 +35,7 @@
               :label="inputDescriptionTextBoxLabel"
               v-on:keydown.enter="
                 $router.push({
-                  name: 'NameChecker',
+                  name: 'Normalizer',
                   params: { descriptionRouter: inputDescriptionTextBox },
                 })
               "
@@ -88,12 +88,12 @@
 
           <v-row class="pl-5 pb-5">
             <v-btn
-              ref="nameCheck"
+              ref="normalize"
               class="mt-5"
               color="primary"
               :disabled="!valid"
               :to="{
-                name: 'NameChecker',
+                name: 'Normalizer',
                 params: { descriptionRouter: inputDescriptionTextBox },
                 query: getParams(),
               }"
@@ -136,7 +136,7 @@
                     ? 'corrected-description-link-reverse'
                     : 'ok-description-link-reverse'
                 "
-                :to_name="'NameChecker'"
+                :to_name="'Normalizer'"
                 :to_params="{
                   descriptionRouter: response.normalized_description,
                 }"
@@ -309,7 +309,7 @@
                     <Description
                       :description="equivalentDescription[0]"
                       :css_class="'ok-description-link'"
-                      :to_name="'NameChecker'"
+                      :to_name="'Normalizer'"
                       :to_params="{
                         descriptionRouter: equivalentDescription[0],
                       }"
@@ -319,7 +319,7 @@
                     <Description
                       :description="equivalentDescription"
                       :css_class="'ok-description-link'"
-                      :to_name="'NameChecker'"
+                      :to_name="'Normalizer'"
                       :to_params="{ descriptionRouter: equivalentDescription }"
                     />
                   </template>
@@ -350,7 +350,7 @@
                 <router-link
                   class="ok-description-link"
                   :to="{
-                    name: 'NameChecker',
+                    name: 'Normalizer',
                     params: { descriptionRouter: equivalentDescription },
                   }"
                   >{{ equivalentDescription }}</router-link
@@ -391,7 +391,7 @@
                 <Description
                   :description="response.rna.description"
                   :css_class="'ok-description-link'"
-                  :to_name="'NameChecker'"
+                  :to_name="'Normalizer'"
                   :to_params="{ descriptionRouter: response.rna.description }"
                 />
               </div>
@@ -567,7 +567,7 @@ export default {
   methods: {
     run: function () {
       this.setRouterParams();
-      this.nameCheck();
+      this.normalize();
     },
     setRouterParams: function () {
       if (
@@ -597,18 +597,18 @@ export default {
         this.mode = "hgvs";
       } else {
         this.$router.push({
-          name: "NameChecker",
+          name: "Normalizer",
         });
       }
     },
-    nameCheck: function () {
+    normalize: function () {
       if (this.mode == "hgvs") {
-        this.nameCheckHgvs();
+        this.normalizeHgvs();
       } else if (this.mode == "sequence") {
-        this.nameCheckSequence();
+        this.normalizeSequence();
       }
     },
-    nameCheckHgvs: function () {
+    normalizeHgvs: function () {
       if (this.inputDescriptionTextBox !== null) {
         this.loadingOverlay = true;
         this.inputDescription = null;
@@ -617,7 +617,7 @@ export default {
         this.showCorrections = false;
         this.inputDescriptionTextBox = this.inputDescriptionTextBox.trim();
 
-        MutalyzerService.nameCheckHgvs(this.inputDescriptionTextBox)
+        MutalyzerService.normalizeHgvs(this.inputDescriptionTextBox)
           .then((response) => {
             if (response.data) {
               this.loadingOverlay = false;
@@ -654,7 +654,7 @@ export default {
           });
       }
     },
-    nameCheckSequence: function () {
+    normalizeSequence: function () {
       if (this.inputDescriptionTextBox !== null) {
         this.loadingOverlay = true;
         this.inputDescription = null;
@@ -663,7 +663,7 @@ export default {
         this.showCorrections = false;
         this.inputDescriptionTextBox = this.inputDescriptionTextBox.trim();
 
-        MutalyzerService.nameCheckSequence(
+        MutalyzerService.normalizeSequence(
           this.inputDescriptionTextBox,
           this.getParams()
         )
@@ -837,7 +837,7 @@ export default {
         this.reset();
         if (this.$route.query.descriptionRouter) {
           this.$router.push({
-            name: "NameChecker",
+            name: "Normalizer",
           });
         }
       } else if (this.mode == "hgvs") {

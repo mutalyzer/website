@@ -43,11 +43,11 @@
               <v-list-item-title>Home</v-list-item-title>
             </v-list-item>
 
-            <v-list-item to="/namechecker">
+            <v-list-item to="/normalizer">
               <v-list-item-icon>
                 <v-icon>mdi-description</v-icon>
               </v-list-item-icon>
-              <v-list-item-title>Name Checker</v-list-item-title>
+              <v-list-item-title>Normalizer</v-list-item-title>
             </v-list-item>
 
             <v-list-item to="/positionconverter">
@@ -71,11 +71,11 @@
               <v-list-item-title>Mapper</v-list-item-title>
             </v-list-item>
 
-            <v-list-item to="/batchchecker">
+            <v-list-item to="/batchprocessor">
               <v-list-item-icon>
                 <v-icon>mdi-description</v-icon>
               </v-list-item-icon>
-              <v-list-item-title>Batch Checker</v-list-item-title>
+              <v-list-item-title>Batch Processor</v-list-item-title>
             </v-list-item>
 
             <v-list-item to="/algebra">

@@ -15,11 +15,11 @@ export default {
   compare(params) {
     return apiClient.get("/compare/", { params });
   },
-  nameCheckHgvs(description) {
-    return apiClient.get("/name_check/" + encodeURIComponent(description));
+  normalizeHgvs(description) {
+    return apiClient.get("/normalize/" + encodeURIComponent(description));
   },
-  nameCheckSequence(description, params) {
-    return apiClient.get("/name_check/" + encodeURIComponent(description), {
+  normalizerSequence(description, params) {
+    return apiClient.get("/normalize/" + encodeURIComponent(description), {
       params,
     });
   },

@@ -2,12 +2,12 @@ import Vue from "vue";
 import VueRouter from "vue-router";
 import Home from "../views/Home.vue";
 import About from "../views/About.vue";
-import NameChecker from "../views/NameChecker.vue";
+import Normalizer from "../views/Normalizer.vue";
 import NormalizerAlt from "../views/NormalizerAlt.vue";
 import PositionConverter from "../views/PositionConverter.vue";
 import DescriptionExtractor from "../views/DescriptionExtractor.vue";
 import Mapper from "../views/Mapper.vue";
-import BatchChecker from "../views/BatchChecker.vue";
+import BatchProcessor from "../views/BatchProcessor.vue";
 import Algebra from "../views/Algebra.vue";
 
 Vue.use(VueRouter);
@@ -24,10 +24,10 @@ const routes = [
     component: About,
   },
   {
-    path: "/namechecker/:descriptionRouter?",
+    path: "/normalizer/:descriptionRouter?",
     props: true,
-    name: "NameChecker",
-    component: NameChecker,
+    name: "Normalizer",
+    component: Normalizer,
   },
   {
     path: "/normalizeralt/:descriptionRouter?",
@@ -53,10 +53,10 @@ const routes = [
     component: Mapper,
   },
   {
-    path: "/batchchecker",
+    path: "/batchprocessor",
     props: true,
-    name: "BatchChecker",
-    component: BatchChecker,
+    name: "BatchProcessor",
+    component: BatchProcessor,
   },
   {
     path: "/algebra",

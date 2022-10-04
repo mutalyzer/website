@@ -22,10 +22,10 @@
                 <v-card-text
                   class="pt-6 mb-0 pb-0 pointer"
                   style="position: relative"
-                  @click="$router.push({ name: 'NameChecker' })"
+                  @click="$router.push({ name: 'Normalizer' })"
                 >
                   <h3 class="display-1 font-weight-light blue--text mb-2">
-                    Name Checker
+                    Normalizer
                   </h3>
                   <div class="font-weight-light title mb-2">
                     Takes a variant description as input and checks whether it
@@ -54,7 +54,7 @@
                       ref="refInputDescriptionTextBox"
                       v-on:keydown.enter="
                         $router.push({
-                          name: 'NameChecker',
+                          name: 'Normalizer',
                           params: {
                             descriptionRouter: inputDescriptionTextBox,
                           },
@@ -65,12 +65,12 @@
                       :clearable="true"
                     ></v-text-field>
                     <v-btn
-                      ref="nameCheck"
+                      ref="normalize"
                       class="mt-4"
                       tile
                       color="primary"
                       :to="{
-                        name: 'NameChecker',
+                        name: 'Normalizer',
                         params: {
                           descriptionRouter: inputDescriptionTextBox,
                         },
@@ -153,13 +153,6 @@ export default {
 </script>
 
 <style scoped>
-.cardNameChecker {
-  background-color: #1565c0;
-}
-.cardNameChecker:hover {
-  background-color: #1565c0;
-}
-
 .v-application {
   background-color: #ffffff;
 }

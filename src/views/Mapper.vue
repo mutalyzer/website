@@ -121,7 +121,7 @@
               <Description
                 :description="response.mapped_description"
                 css_class="ok-description-link-reverse"
-                :to_name="'NameChecker'"
+                :to_name="'Normalizer'"
                 :to_params="{
                   descriptionRouter: response.mapped_description,
                 }"
