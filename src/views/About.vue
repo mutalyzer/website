@@ -3,7 +3,8 @@
     <v-layout>
       <v-flex xs12>
         <h1 class="display-1 mt-10">About Mutalyzer</h1>
-        <p class="mt-5">Website version: {{ version }}</p>
+        <!-- <p class="mt-5">Website version: {{ version }}</p> -->
+        <p class="mt-5">Version: {{ mutalyzer_version }}</p>
 
         <h1 class="display-1">Contact</h1>
         <p class="mt-5">
@@ -84,10 +85,29 @@
 </template>
 
 <script>
+import MutalyzerService from "../services/MutalyzerService.js";
 export default {
+  data: () => ({
+    mutalyzer_version: "N/A",
+    api_version: "N/A",
+  }),
+  created: function () {
+    this.mutalyzerVersion();
+  },
   computed: {
     version() {
       return process.env.VUE_APP_VERSION;
+    },
+  },
+  methods: {
+    mutalyzerVersion: function () {
+      MutalyzerService.version().then((response) => {
+        if (response.data) {
+          console.log();
+          this.mutalyzer_version = response.data.mutalyzer;
+          this.api_version = response.data.api;
+        }
+      });
     },
   },
 };

@@ -56,4 +56,7 @@ export default {
       "/related_references/" + encodeURIComponent(reference_id)
     );
   },
+  version() {
+    return apiClient.get("/version");
+  },
 };
