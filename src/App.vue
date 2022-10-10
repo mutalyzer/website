@@ -6,8 +6,7 @@
 
         <v-toolbar-title>
           <router-link to="/" class="title-link">LUMC Mutalyzer 3</router-link>
-          <span class="alpha">Alpha</span></v-toolbar-title
-        >
+        </v-toolbar-title>
         <v-spacer></v-spacer>
         <v-tooltip bottom>
           <template v-slot:activator="{ on, attrs }">

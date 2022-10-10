@@ -6,8 +6,10 @@
           <v-col cols="12">
             <h1 class="display-1 mt-10 ml-10 mb-5">Welcome!</h1>
             <p class="ml-10">
-              The following tools are still to be tested/extended/etc. Use them
-              with care. Feedback is greatly appreciated.
+              The Mutalyzer tool suite is designed to be of help when working
+              with <a href="https://www.hgvs.org/">HGVS</a> sequence variant
+              <a href="https://varnomen.hgvs.org/">nomenclature</a>
+              descriptions. Feedback is appreciated.
             </p>
           </v-col>
         </v-row>
