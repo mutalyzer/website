@@ -29,6 +29,7 @@
                 description: description,
                 reference_id: reference.id,
                 selector_id: reference.selector.id,
+                slice_to: 'transcript',
                 not_run: true,
               },
             }"
