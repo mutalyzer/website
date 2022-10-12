@@ -18,7 +18,7 @@ export default {
   normalizeHgvs(description) {
     return apiClient.get("/normalize/" + encodeURIComponent(description));
   },
-  normalizerSequence(description, params) {
+  normalizeSequence(description, params) {
     return apiClient.get("/normalize/" + encodeURIComponent(description), {
       params,
     });
