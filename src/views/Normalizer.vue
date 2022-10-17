@@ -132,7 +132,8 @@
                     : 'Same as the input description'
                 "
                 :css_class="
-                  response.normalized_description != inputDescription
+                  response.normalized_description != inputDescription ||
+                  response.infos
                     ? 'corrected-description-link-reverse'
                     : 'ok-description-link-reverse'
                 "
@@ -278,6 +279,29 @@
             </v-sheet>
           </v-sheet>
         </v-expand-transition>
+
+        <v-expansion-panels
+          focusable
+          hover
+          class="mt-5 mb-5"
+          tile
+          v-if="response && response.genomic_description"
+          :value="genomic_open"
+        >
+          <v-expansion-panel>
+            <v-expansion-panel-header class="overline"
+              >Genomic Description</v-expansion-panel-header
+            >
+            <v-expansion-panel-content class="pt-5">
+              <Description
+                :description="response.genomic_description"
+                :css_class="'ok-description-link'"
+                :to_name="'Normalizer'"
+                :to_params="{ descriptionRouter: response.genomic_description }"
+              />
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+        </v-expansion-panels>
 
         <v-expansion-panels
           focusable
@@ -555,6 +579,7 @@ export default {
     sequence: null,
     only_variants: false,
     mode: "hgvs",
+    genomic_open: 0,
   }),
   created: function () {
     this.run();
@@ -712,7 +737,10 @@ export default {
     },
     getNormalizedColor: function () {
       if (this.isNormalized()) {
-        if (this.response.normalized_description == this.inputDescription) {
+        if (
+          this.response.normalized_description == this.inputDescription &&
+          !this.response.infos
+        ) {
           return "green";
         } else {
           return "blue";
