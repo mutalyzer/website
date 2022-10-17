@@ -94,15 +94,14 @@
                 class="mx-auto transition-swing"
                 color="grey lighten-4"
                 :elevation="hover ? 4 : 2"
-                :to="{ name: 'PositionConverter' }"
+                :to="{ name: 'Mapper' }"
               >
                 <v-card-text class="pt-6" style="position: relative">
                   <h3 class="display-1 font-weight-light blue--text mb-2">
-                    Position Converter
+                    Mapper
                   </h3>
                   <div class="font-weight-light title mb-2">
-                    Converts reference positions to selector orientated
-                    positions and vice versa.
+                    Maps an HGVS description to another reference sequence.
                   </div>
                 </v-card-text>
               </v-card>
