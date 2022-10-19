@@ -285,20 +285,27 @@
           hover
           class="mt-5 mb-5"
           tile
-          v-if="response && response.genomic_description"
+          v-if="response && response.genomic_descriptions"
           :value="genomic_open"
         >
           <v-expansion-panel>
             <v-expansion-panel-header class="overline"
-              >Genomic Description</v-expansion-panel-header
+              >Genomic Descriptions</v-expansion-panel-header
             >
             <v-expansion-panel-content class="pt-5">
-              <Description
-                :description="response.genomic_description"
-                :css_class="'ok-description-link'"
-                :to_name="'Normalizer'"
-                :to_params="{ descriptionRouter: response.genomic_description }"
-              />
+              <div
+                class="ml-4"
+                v-for="(pair, index) in response.genomic_descriptions"
+                :key="index"
+              >
+                <span>{{ pair[0] }}:</span>
+                <Description
+                  :description="pair[1]"
+                  :css_class="'ok-description-link'"
+                  :to_name="'Normalizer'"
+                  :to_params="{ descriptionRouter: pair[1] }"
+                />
+              </div>
             </v-expansion-panel-content>
           </v-expansion-panel>
         </v-expansion-panels>
