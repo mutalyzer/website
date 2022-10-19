@@ -791,7 +791,7 @@ export default {
     },
     getMessage: function (message) {
       if (message.details) {
-        return message.details + " (" + message.code + ")";
+        return message.details;
       }
       return message;
     },
