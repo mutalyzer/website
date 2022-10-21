@@ -285,25 +285,25 @@
           hover
           class="mt-5 mb-5"
           tile
-          v-if="response && response.genomic_descriptions"
+          v-if="response && response.chromosomal_descriptions"
           :value="genomic_open"
         >
           <v-expansion-panel>
             <v-expansion-panel-header class="overline"
-              >Genomic Descriptions</v-expansion-panel-header
+              >Chromosomal Descriptions</v-expansion-panel-header
             >
             <v-expansion-panel-content class="pt-5">
               <div
                 class="ml-4"
-                v-for="(pair, index) in response.genomic_descriptions"
+                v-for="(pair, index) in response.chromosomal_descriptions"
                 :key="index"
               >
-                <span>{{ pair[0] }}:</span>
+                <span>{{ pair.assembly }}</span>
                 <Description
-                  :description="pair[1]"
+                  :description="pair.description"
                   :css_class="'ok-description-link'"
                   :to_name="'Normalizer'"
-                  :to_params="{ descriptionRouter: pair[1] }"
+                  :to_params="{ descriptionRouter: pair.description }"
                 />
               </div>
             </v-expansion-panel-content>
