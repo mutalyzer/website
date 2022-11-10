@@ -245,6 +245,23 @@
                     :key="index"
                   >
                     {{ getMessage(info) }}
+                    <span v-if="info.code == 'IMRNAGENOMICDIFFERENCE'"
+                      ><router-link
+                        class="text-decoration-none"
+                        target="_blank"
+                        :to="{
+                          name: 'Mapper',
+                          query: {
+                            description: response.normalized_description,
+                            reference_id: info.reference_id,
+                            selector_id: info.selector_id,
+                            slice_to: 'transcript',
+                            not_run: false,
+                          },
+                        }"
+                        >Check it using the Mapper tool.</router-link
+                      ></span
+                    >
                   </v-alert>
                 </div>
                 <div v-if="correctionsPerformed() && showCorrections">
