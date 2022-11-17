@@ -46,7 +46,7 @@ export default {
   },
   methods: {
     reverseString(s) {
-      return s === "" ? "" : this.reverseString(s.substr(1)) + s.charAt(0);
+      return s.split("").reverse().join("");
     },
     getPrefix(s1, s2) {
       var i;
