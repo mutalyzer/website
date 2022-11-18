@@ -594,6 +594,7 @@ export default {
     descriptionExamples: [
       "NG_012337.3(NM_003002.4):c.274G>T",
       "NC_000011.10:g.112088970del",
+      "GRCh38(chr11):g.112088970del",
     ],
     loadingOverlay: false,
     inputDescription: null, // The description for which the most recent call was sent.
