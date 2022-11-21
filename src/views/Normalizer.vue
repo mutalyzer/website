@@ -333,6 +333,7 @@
           class="mt-5 mb-5"
           tile
           v-if="response && response.equivalent_descriptions"
+          :value="equivalent_open"
         >
           <v-expansion-panel>
             <v-expansion-panel-header class="overline"
@@ -414,6 +415,7 @@
           class="mt-5 mb-5"
           tile
           v-if="response && response.rna"
+          :value="rna_open"
         >
           <v-expansion-panel>
             <v-expansion-panel-header class="overline"
@@ -453,6 +455,7 @@
           class="mt-5 mb-5"
           tile
           v-if="response && response.protein"
+          :value="protein_open"
         >
           <v-expansion-panel>
             <v-expansion-panel-header class="overline"
@@ -605,6 +608,9 @@ export default {
     only_variants: false,
     mode: "hgvs",
     genomic_open: 0,
+    equivalent_open: 0,
+    rna_open: 1,
+    protein_open: 1,
   }),
   created: function () {
     this.run();
@@ -677,6 +683,7 @@ export default {
                 this.$nextTick(() => {
                   this.$vuetify.goTo(this.$refs.successAlert, this.options);
                 });
+                this.open_rna_protein();
               }
             }
           })
@@ -922,6 +929,16 @@ export default {
     selectDescriptionExample: function (i) {
       this.inputDescriptionTextBox = this.descriptionExamples[i];
       this.$refs.refInputDescriptionTextBox.focus();
+    },
+    open_rna_protein: function () {
+      if (
+        this.response &&
+        this.response.normalized_model &&
+        this.response.normalized_model.coordinate_system == "c"
+      ) {
+        this.rna_open = 0;
+        this.protein_open = 0;
+      }
     },
   },
 };
