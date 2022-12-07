@@ -317,10 +317,18 @@
               >
                 <span>{{ pair.assembly }}</span>
                 <Description
-                  :description="pair.description"
+                  :description="pair.c"
                   :css_class="'ok-description-link'"
                   :to_name="'Normalizer'"
-                  :to_params="{ descriptionRouter: pair.description }"
+                  :to_params="{
+                    descriptionRouter: pair.c,
+                  }"
+                />
+                <Description
+                  :description="pair.g"
+                  :css_class="'ok-description-link'"
+                  :to_name="'Normalizer'"
+                  :to_params="{ descriptionRouter: pair.g }"
                 />
               </div>
             </v-expansion-panel-content>
