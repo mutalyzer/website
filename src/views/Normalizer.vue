@@ -392,6 +392,7 @@
           class="mt-5 mb-5"
           tile
           v-if="response && response.back_translated_descriptions"
+          :value="back_translated_open"
         >
           <v-expansion-panel>
             <v-expansion-panel-header class="overline"
@@ -619,6 +620,7 @@ export default {
     equivalent_open: 0,
     rna_open: 1,
     protein_open: 1,
+    back_translated_open: 1,
   }),
   created: function () {
     this.run();
@@ -691,7 +693,7 @@ export default {
                 this.$nextTick(() => {
                   this.$vuetify.goTo(this.$refs.successAlert, this.options);
                 });
-                this.open_rna_protein();
+                this.open_panels();
               }
             }
           })
@@ -824,6 +826,14 @@ export default {
     },
     getMessage: function (message) {
       if (message.details) {
+        if (message.options) {
+          return (
+            message.details +
+            " Choose from: " +
+            message.options.join(", ") +
+            "."
+          );
+        }
         return message.details;
       }
       return message;
@@ -938,7 +948,7 @@ export default {
       this.inputDescriptionTextBox = this.descriptionExamples[i];
       this.$refs.refInputDescriptionTextBox.focus();
     },
-    open_rna_protein: function () {
+    open_panels: function () {
       if (
         this.response &&
         this.response.normalized_model &&
@@ -946,6 +956,14 @@ export default {
       ) {
         this.rna_open = 0;
         this.protein_open = 0;
+      }
+      if (
+        this.response &&
+        this.response.normalized_model &&
+        this.response.normalized_model.coordinate_system == "p" &&
+        this.response.back_translated_descriptions
+      ) {
+        this.back_translated_open = 0;
       }
     },
   },
