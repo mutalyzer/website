@@ -317,6 +317,7 @@
               >
                 <span>{{ pair.assembly }}</span>
                 <Description
+                  v-if="pair.c"
                   :description="pair.c"
                   :css_class="'ok-description-link'"
                   :to_name="'Normalizer'"
@@ -325,11 +326,43 @@
                   }"
                 />
                 <Description
+                  v-if="pair.g"
                   :description="pair.g"
                   :css_class="'ok-description-link'"
                   :to_name="'Normalizer'"
                   :to_params="{ descriptionRouter: pair.g }"
                 />
+                <v-expansion-panels
+                  multiple
+                  flat
+                  tile
+                  v-if="pair.errors"
+                  v-model="panel"
+                >
+                  <v-expansion-panel>
+                    <v-expansion-panel-header class="overline red--text text"
+                      >Unsuccessful mapping
+                      <template v-slot:actions>
+                        <v-icon color="error"> mdi-alert-circle </v-icon>
+                      </template>
+                    </v-expansion-panel-header>
+                    <v-expansion-panel-content>
+                      <v-alert
+                        color="red lighten-1"
+                        tile
+                        border="left"
+                        dark
+                        class="mt-5"
+                        v-for="(error, index) in pair.errors"
+                        :key="index"
+                      >
+                        <div>
+                          {{ getMessage(error) }}
+                        </div>
+                      </v-alert>
+                    </v-expansion-panel-content>
+                  </v-expansion-panel>
+                </v-expansion-panels>
               </div>
             </v-expansion-panel-content>
           </v-expansion-panel>

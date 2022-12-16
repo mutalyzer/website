@@ -173,9 +173,14 @@
           v-if="response && response.errors"
         >
           <v-row align="center">
-            <v-col class="grow overline"
-              >Description could not be interpreted</v-col
+            <v-col
+              class="grow overline"
+              v-if="response.source && response.source == 'output'"
+              >Unsuccessful mapping</v-col
             >
+            <v-col class="grow overline" v-else
+              >Description could not be interpreted
+            </v-col>
             <v-col class="shrink" v-if="infoMessages()">
               <v-tooltip bottom>
                 <template v-slot:activator="{ on, attrs }">
