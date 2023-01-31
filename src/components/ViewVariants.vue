@@ -5,7 +5,7 @@
     <ViewVariantsCore
       v-if="view && !progress"
       :view="view"
-      :d_id="'name_check_' + d_type"
+      :d_id="'normalize_' + d_type"
     />
   </div>
 </template>

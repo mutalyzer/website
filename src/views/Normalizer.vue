@@ -142,6 +142,7 @@
                   descriptionRouter: response.normalized_description,
                 }"
                 :to_query="getParams()"
+                :tag="this.response.tag"
               />
             </v-col>
             <v-col class="shrink" v-if="infoMessages()">
@@ -324,6 +325,7 @@
                   :to_params="{
                     descriptionRouter: pair.c,
                   }"
+                  :tag="pair.tag"
                 />
                 <Description
                   v-if="pair.g"
@@ -391,26 +393,24 @@
                 <span v-else-if="c_s == 'g'">Genomic</span>
                 <span v-else-if="c_s == 'p'"></span>
                 <span v-else> {{ c_s }} </span>
-                <div
-                  v-for="(equivalentDescription, index) in values"
-                  :key="index"
-                >
+                <div v-for="(e_d, index) in values" :key="index">
                   <template v-if="c_s === 'c'">
                     <Description
-                      :description="equivalentDescription[0]"
+                      :description="e_d.description"
                       :css_class="'ok-description-link'"
                       :to_name="'Normalizer'"
                       :to_params="{
-                        descriptionRouter: equivalentDescription[0],
+                        descriptionRouter: e_d.description,
                       }"
+                      :tag="e_d.tag"
                     />
                   </template>
                   <template v-else>
                     <Description
-                      :description="equivalentDescription"
+                      :description="e_d.description"
                       :css_class="'ok-description-link'"
                       :to_name="'Normalizer'"
-                      :to_params="{ descriptionRouter: equivalentDescription }"
+                      :to_params="{ descriptionRouter: e_d.description }"
                     />
                   </template>
                 </div>

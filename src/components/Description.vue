@@ -38,6 +38,44 @@
         {{ description }}
       </div>
     </v-col>
+    <v-col v-if="tag" class="shrink">
+      <v-tooltip bottom v-if="this.css_class == 'ok-description-link'">
+        <template v-slot:activator="{ on, attrs }">
+          <v-chip
+            v-bind="attrs"
+            v-on="on"
+            color="green darken-4"
+            text-color="green darken-4"
+            outlined
+            label
+          >
+            {{ tag.details.toUpperCase() }}
+          </v-chip>
+        </template>
+        <span
+          >{{ this.tag.id }} is the representative transcript as part of the
+          MANE project.</span
+        >
+      </v-tooltip>
+      <v-tooltip v-else bottom>
+        <template v-slot:activator="{ on, attrs }">
+          <v-chip
+            v-bind="attrs"
+            v-on="on"
+            color="white"
+            text-color="white"
+            outlined
+            label
+          >
+            MANE SELECT
+          </v-chip>
+        </template>
+        <span
+          >{{ this.tag.id }} is the representative transcript as part of the
+          MANE project.</span
+        >
+      </v-tooltip>
+    </v-col>
     <v-col class="shrink">
       <v-tooltip bottom>
         <template v-slot:activator="{ on, attrs }">
@@ -61,6 +99,7 @@ export default {
     to_name: null,
     to_params: null,
     to_query: null,
+    tag: null,
   },
 };
 </script>

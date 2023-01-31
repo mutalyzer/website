@@ -43,6 +43,9 @@ export default {
   },
   created: function () {
     this.getReference();
+    // console.log(this.predicted[0]);
+    // console.log(this.predicted[1]);
+    // console.log(this.predicted[2]);
   },
   methods: {
     reverseString(s) {
@@ -95,6 +98,27 @@ export default {
       var r_middle = r.split(prefix)[1].split(suffix)[0];
       var p_middle = p.split(prefix)[1].split(suffix)[0];
 
+      // console.log(prefix.length);
+      // console.log(suffix.length);
+      // console.log(r.length);
+      // console.log(r_middle.length);
+      // console.log(p_middle.length);
+
+      let middle_length = prefix.length + suffix.length - r.length;
+      if (middle_length > 0) {
+        let suffix_common = r.slice(
+          r.length - suffix.length,
+          r.length - suffix.length + middle_length
+        );
+        let prefix_common = r.slice(
+          r.length - suffix.length,
+          r.length - suffix.length + middle_length
+        );
+        if (suffix_common == prefix_common) {
+          p_middle += suffix_common;
+          suffix = suffix.slice(middle_length, suffix.length);
+        }
+      }
       this.reference.push({ seq: prefix, type: "equal" });
       this.reference.push({ seq: r_middle, type: "diff" });
       this.reference.push({ seq: suffix, type: "equal" });

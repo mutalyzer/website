@@ -29,7 +29,11 @@
       <div v-for="(v, v_i) in view.views" :key="'v' + v_i" class="seq">
         <!-- outside sequence -->
         <div v-if="v.type == 'outside' && v.sequence">
-          <span v-for="(s, s_i) in v.sequence" :key="'s' + s_i">
+          <span
+            v-for="(s, s_i) in v.sequence"
+            :key="'s' + s_i"
+            :id="get_position(v, s_i, 'sequence') + 1"
+          >
             <v-list-item-action class="ma-0 pa-0" style="min-width: unset">
               <v-menu>
                 <template #activator="{ on: onMenu }">
@@ -57,7 +61,11 @@
         <!-- outside non sequence-->
         <div v-if="v.type == 'outside' && v.left">
           <!-- left -->
-          <span v-for="(s, s_i) in v.left" :key="'l' + s_i">
+          <span
+            v-for="(s, s_i) in v.left"
+            :key="'l' + s_i"
+            :id="'seq-' + (get_position(v, s_i, 'sequence') + 1)"
+          >
             <v-list-item-action class="ma-0 pa-0" style="min-width: unset">
               <v-menu>
                 <template #activator="{ on: onMenu }">
@@ -341,6 +349,7 @@ export default {
     view: null,
     influence: null,
     d_id: null,
+    selector: null,
   },
   data: function () {
     return {
@@ -473,6 +482,7 @@ export default {
   margin: 0 auto;
   font-family: monospace;
 }
+/* .blk{} */
 
 .seq {
   display: inline-block;
@@ -525,5 +535,13 @@ export default {
   text-align: center;
   font-family: monospace;
   color: #1c1fb7;
+}
+.sel {
+  display: inline-block;
+  vertical-align: middle;
+  text-align: center;
+  margin: 0 auto;
+  font-family: monospace;
+  color: #000000;
 }
 </style>
