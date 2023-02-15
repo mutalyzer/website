@@ -136,7 +136,6 @@ li {
   display: inline-block;
   word-break: break-all;
   color: var(--green);
-  background-color: #ffffff;
 }
 
 .ok-description-link:hover {
