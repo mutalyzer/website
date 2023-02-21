@@ -24,6 +24,8 @@
       </span>
     </div>
     <div class="wrapper">
+      <!-- <div>{{ get_element_details("seq-1") }}</div> -->
+
       <v-icon v-if="!view.inverted" class="mr-2">mdi-arrow-right-bold</v-icon>
       <v-icon v-if="view.inverted" class="mr-2">mdi-arrow-left-bold</v-icon>
       <div v-for="(v, v_i) in view.views" :key="'v' + v_i" class="seq">
@@ -32,7 +34,7 @@
           <span
             v-for="(s, s_i) in v.sequence"
             :key="'s' + s_i"
-            :id="get_position(v, s_i, 'sequence') + 1"
+            :id="get_position(v, s_i, 'sequence')"
           >
             <v-list-item-action class="ma-0 pa-0" style="min-width: unset">
               <v-menu>
@@ -44,7 +46,7 @@
                         v-on="{ ...onMenu, ...onTooltip }"
                         >{{ s }}</span
                       ></template
-                    ><span>{{ get_position(v, s_i, "sequence") + 1 }}</span>
+                    ><span>{{ get_position(v, s_i, "sequence") }}</span>
                   </v-tooltip>
                 </template>
                 <v-list>
@@ -64,7 +66,7 @@
           <span
             v-for="(s, s_i) in v.left"
             :key="'l' + s_i"
-            :id="'seq-' + (get_position(v, s_i, 'sequence') + 1)"
+            :id="'seq-' + get_position(v, s_i, 'sequence')"
           >
             <v-list-item-action class="ma-0 pa-0" style="min-width: unset">
               <v-menu>
@@ -76,7 +78,7 @@
                         v-on="{ ...onMenu, ...onTooltip }"
                         >{{ s }}</span
                       ></template
-                    ><span>{{ get_position(v, s_i, "left") + 1 }}</span>
+                    ><span>{{ get_position(v, s_i, "left") }}</span>
                   </v-tooltip>
                 </template>
                 <v-list>
@@ -89,14 +91,21 @@
               </v-menu>
             </v-list-item-action>
           </span>
+          <!-- middle dots -->
           <div class="seq">
             <v-tooltip bottom>
               <template v-slot:activator="{ on, attrs }">
-                <span class="seq-elem" v-bind="attrs" v-on="on"
+                <span
+                  :id="'seq-' + get_position_other(v, null, 'other')"
+                  class="seq-elem"
+                  v-bind="attrs"
+                  v-on="on"
                   >...</span
                 ></template
               >
-              <span>other {{ get_position(v, null, "other") }} bases</span>
+              <span
+                >other {{ get_position_other(v, null, "other") }} bases</span
+              >
             </v-tooltip>
           </div>
           <!-- right -->
@@ -111,7 +120,7 @@
                         v-on="{ ...onMenu, ...onTooltip }"
                         >{{ s }}</span
                       ></template
-                    ><span>{{ get_position(v, s_i, "right") + 1 }}</span>
+                    ><span>{{ get_position(v, s_i, "right") }}</span>
                   </v-tooltip>
                 </template>
                 <v-list>
@@ -164,10 +173,11 @@
                       <span>{{ s }}</span></span
                     ></template
                   >
-                  <span>{{ get_position(v, s_i, "sequence") + 1 }}</span>
+                  <span>{{ get_position(v, s_i, "sequence") }}</span>
                 </v-tooltip>
               </span>
             </div>
+
             <!-- deleted left-->
             <div class="seqdel" v-if="v.deleted && v.deleted.left">
               <span
@@ -181,7 +191,7 @@
                       <span>{{ s }}</span></span
                     ></template
                   >
-                  <span>{{ get_position(v, s_i, "left") + 1 }}</span>
+                  <span>{{ get_position(v, s_i, "left") }}</span>
                 </v-tooltip>
               </span>
             </div>
@@ -195,7 +205,7 @@
                 >
                 <span
                   >other
-                  {{ get_position(v, null, "other-deleted") }} bases</span
+                  {{ get_position_other(v, null, "other-deleted") }} bases</span
                 >
               </v-tooltip>
             </div>
@@ -212,7 +222,7 @@
                       <span>{{ s }}</span></span
                     ></template
                   >
-                  <span>{{ get_position(v, s_i, "right-deleted") + 1 }}</span>
+                  <span>{{ get_position(v, s_i, "right-deleted") }}</span>
                 </v-tooltip>
               </span>
             </div>
@@ -249,7 +259,8 @@
                 >
                 <span
                   >other
-                  {{ get_position(v, null, "other-inserted") }} bases</span
+                  {{ get_position_other(v, null, "other-inserted") }}
+                  bases</span
                 >
               </v-tooltip>
             </div>
@@ -281,7 +292,7 @@
                       <span>{{ s }}</span></span
                     ></template
                   >
-                  <span>{{ get_position(v, s_i, "sequence") + 1 }}</span>
+                  <span>{{ get_position(v, s_i, "sequence") }}</span>
                 </v-tooltip>
               </span>
             </div>
@@ -298,7 +309,7 @@
                       <span>{{ s }}</span></span
                     ></template
                   >
-                  <span>{{ get_position(v, s_i, "left") + 1 }}</span>
+                  <span>{{ get_position(v, s_i, "left") }}</span>
                 </v-tooltip>
               </span>
             </div>
@@ -312,7 +323,7 @@
                 >
                 <span
                   >other
-                  {{ get_position(v, null, "other-deleted") }} bases</span
+                  {{ get_position_other(v, null, "other-deleted") }} bases</span
                 >
               </v-tooltip>
             </div>
@@ -329,7 +340,7 @@
                       <span>{{ s }}</span></span
                     ></template
                   >
-                  <span>{{ get_position(v, s_i, "right-deleted") + 1 }}</span>
+                  <span>{{ get_position(v, s_i, "right-deleted") }}</span>
                 </v-tooltip>
               </span>
             </div>
@@ -355,24 +366,20 @@ export default {
     return {
       hover_variants: null,
       hover_sequence: null,
+      seqs: {},
+      seqs_other: {},
     };
   },
   created: function () {
     this.hover_init();
+    this.get_exons();
     console.log(this.view.views);
+    console.log(this.selector);
   },
   methods: {
-    get_position: function (view, s_i, key) {
+    get_position_other: function (view, s_i, key) {
       let position = null;
-      if (key == "sequence") {
-        position = s_i + view.start;
-      } else if (key == "left") {
-        position = s_i + view.start;
-      } else if (key == "right") {
-        position = view.end - view.right.length + s_i;
-      } else if (key == "right-deleted") {
-        position = view.end - view.deleted.right.length + s_i;
-      } else if (key == "other") {
+      if (key == "other") {
         position =
           view.end - view.start - (view.left.length + view.right.length);
       } else if (key == "other-deleted") {
@@ -384,14 +391,34 @@ export default {
         position =
           view.inserted.length -
           (view.inserted.left.length + view.inserted.right.length);
+      }
+      if (this.view.inverted) {
+        position = this.view.seq_length - position - 1;
+      }
+      this.seqs_other[position] = "seq-other-" + position;
+
+      return position;
+    },
+    get_position: function (view, s_i, key) {
+      let position = null;
+      if (key == "sequence") {
+        position = s_i + view.start;
+      } else if (key == "left") {
+        position = s_i + view.start;
+      } else if (key == "right") {
+        position = view.end - view.right.length + s_i;
+      } else if (key == "right-deleted") {
+        position = view.end - view.deleted.right.length + s_i;
       } else {
         position = s_i;
       }
       if (this.view.inverted) {
-        return this.view.seq_length - position - 1;
-      } else {
-        return position;
+        return this.view.seq_length - position;
       }
+
+      position += 1;
+      this.seqs[position] = "seq-" + position;
+      return position;
     },
     hover_init: function () {
       let h_v = {};
@@ -407,6 +434,91 @@ export default {
       this.hover_variants = h_v;
       this.hover_sequence = h_s;
     },
+    get_exons_seq: function (views, exon) {
+      for (const view of views) {
+        if (view.start + 1 <= exon.start && view.end <= exon.start) {
+          this.get_seq_id(view, exon.start);
+        }
+        if (view.start + 1 <= exon.end && view.end <= exon.end) {
+          this.get_seq_id(view, exon.end);
+        }
+      }
+    },
+    get_seq_id: function (view, location) {
+      console.log(view);
+      if (view.left) {
+        if (
+          Number(view.start) + 1 <=
+            Number(location) <=
+            Number(view.start) + 1 + Number(view.left.length) ||
+          Number(view.end) - Number(view.right.length) <=
+            Number(location) <=
+            Number(view.right.length)
+        ) {
+          return "seq-" + location;
+        }
+      } else if (view.deleted && view.deleted.left) {
+        console.log("maybe in the middle of a deleted sequence");
+      } else {
+        return "seq-" + location;
+      }
+      if (
+        view.left &&
+        Number(view.start) + 1 <=
+          Number(location) <=
+          Number(view.start) + 1 + Number(view.left.length)
+      ) {
+        return "seq-" + location;
+      } else if (
+        view.left &&
+        view.right &&
+        Number(view.start) + 1 + Number(view.left.length) <=
+          location <=
+          Number(view.end) - Number(view.right.length)
+      ) {
+        return (
+          "seq-other-" +
+          view.start +
+          1 +
+          view.left.length +
+          "_" +
+          view.end -
+          view.right.length
+        );
+      }
+    },
+    get_exons: function () {
+      let exons = {};
+      console.log("-----");
+      if (
+        this.view &&
+        this.view.views &&
+        this.selector &&
+        this.selector.exon &&
+        this.selector.exon.g
+      ) {
+        for (const [i, exon] of this.selector.exon.g.entries()) {
+          const exon_start = Number(exon[0]);
+          const exon_end = Number(exon[1]);
+          exons[i] = { start: exon[0], end: exon[1] };
+          for (const view of this.view.views) {
+            if (
+              Number(view.start) + 1 <= exon_start &&
+              exon_start <= Number(view.end)
+            ) {
+              exons[i].start_seq = this.get_seq_id(view, exon_start);
+            }
+            if (
+              Number(view.start) + 1 <= exon_end &&
+              exon_end <= Number(view.end)
+            ) {
+              exons[i].end_seq = this.get_seq_id(view, exon_end);
+            }
+          }
+        }
+      }
+      console.log(exons);
+    },
     scroll_to_variant: function (v_i) {
       var elmnt = document.getElementById(this.d_id + "_variant_" + v_i);
       elmnt.scrollIntoView({
@@ -414,6 +526,25 @@ export default {
         block: "nearest",
         inline: "center",
       });
+    },
+    get_element_details: function (v_i) {
+      var elmnt = document.getElementById(v_i);
+      console.log(this.seqs);
+      console.log(this.seqs_other);
+      console.log(v_i);
+      console.log(elmnt);
+      if (elmnt) {
+        console.log(elmnt.offsetWidth);
+        const rect = elmnt.getBoundingClientRect();
+        console.log(rect.top);
+        console.log(rect.left);
+        console.log(rect.bottom);
+        console.log(rect.right);
+
+        return elmnt.offsetWidth;
+      } else {
+        return "None";
+      }
     },
     get_seq_class: function (v, s_i, key) {
       if (

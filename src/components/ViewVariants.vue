@@ -6,6 +6,7 @@
       v-if="view && !progress"
       :view="view"
       :d_id="'normalize_' + d_type"
+      :selector="selector"
     />
   </div>
 </template>
@@ -24,6 +25,7 @@ export default {
     only_variants: null,
     sequence: null,
     d_type: null,
+    selector: null,
   },
   data() {
     return {
