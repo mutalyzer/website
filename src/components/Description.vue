@@ -109,33 +109,36 @@
       </v-col>
     </v-row>
     <v-row v-if="this.mapped_description">
-      <v-sheet></v-sheet>
       <v-col>
-        <div class="grey--text ml-2">
-          Mapped description to {{ this.selector.id }}
-        </div>
-      </v-col>
-    </v-row>
-    <v-row v-if="this.mapped_description">
-      <v-col>
-        <div :class="css_class">
-          {{ this.mapped_description }}
-        </div>
-      </v-col>
-      <v-col class="shrink">
-        <v-tooltip bottom>
-          <template v-slot:activator="{ on, attrs }">
-            <v-btn
-              v-bind="attrs"
-              v-on="on"
-              icon
-              v-clipboard="mapped_description"
+        <v-card tile elevation="0" color="grey lighten-5">
+          <v-card-subtitle class="grey--text ml-2"
+            >Mapped description to {{ this.selector.id }}</v-card-subtitle
+          >
+          <v-card-text
+            ><v-row
+              ><v-col>
+                <div :class="css_class">
+                  {{ this.mapped_description }}
+                </div></v-col
+              >
+              <v-col class="shrink">
+                <v-tooltip bottom>
+                  <template v-slot:activator="{ on, attrs }">
+                    <v-btn
+                      v-bind="attrs"
+                      v-on="on"
+                      icon
+                      v-clipboard="mapped_description"
+                    >
+                      <v-icon>mdi-content-copy</v-icon>
+                    </v-btn>
+                  </template>
+                  <span>Copy</span>
+                </v-tooltip>
+              </v-col></v-row
             >
-              <v-icon>mdi-content-copy</v-icon>
-            </v-btn>
-          </template>
-          <span>Copy</span>
-        </v-tooltip>
+          </v-card-text>
+        </v-card>
       </v-col>
     </v-row>
     <v-row v-if="mapping_errors">
