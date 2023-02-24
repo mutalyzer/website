@@ -334,6 +334,7 @@
                   :view="this.response.view_corrected"
                   :influence="this.response.influence"
                   :d_id="'normalize_corrected'"
+                  :selector="this.response.selector_short"
                   class="mt-5 mb-5"
                 />
               </div>

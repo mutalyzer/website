@@ -24,7 +24,17 @@
       </span>
     </div>
     <div class="wrapper">
-      <!-- <div>{{ get_element_details("seq-1") }}</div> -->
+      <div v-if="exons && draw_exons">
+        <span
+          v-for="(e, e_i) in exons"
+          :key="e_i"
+          style="display: inline-block; width: 400px; background-color: var(--blue-grey-lighten-4)"
+        >
+          {{ e.start }} _ {{ e.end }}; {{ e.start_seq }} _ {{ e.end_seq }};
+          {{ get_element_details(e.start_seq) }};
+          {{ get_element_details(e.end_seq) }}
+        </span>
+      </div>
 
       <v-icon v-if="!view.inverted" class="mr-2">mdi-arrow-right-bold</v-icon>
       <v-icon v-if="view.inverted" class="mr-2">mdi-arrow-left-bold</v-icon>
@@ -34,7 +44,7 @@
           <span
             v-for="(s, s_i) in v.sequence"
             :key="'s' + s_i"
-            :id="get_position(v, s_i, 'sequence')"
+            :id="'seq-' + get_position(v, s_i, 'sequence')"
           >
             <v-list-item-action class="ma-0 pa-0" style="min-width: unset">
               <v-menu>
@@ -166,6 +176,7 @@
                 class="seq-elem"
                 v-for="(s, s_i) in v.deleted.sequence"
                 :key="'ds' + s_i"
+                :id="'seq-' + get_position(v, s_i, 'sequence')"
               >
                 <v-tooltip bottom>
                   <template v-slot:activator="{ on, attrs }">
@@ -184,6 +195,7 @@
                 class="seq-elem"
                 v-for="(s, s_i) in v.deleted.left"
                 :key="s_i"
+                :id="'seq-' + get_position(v, s_i, 'left')"
               >
                 <v-tooltip bottom>
                   <template v-slot:activator="{ on, attrs }">
@@ -199,7 +211,12 @@
             <div class="seqdel" v-if="v.deleted && v.deleted.right">
               <v-tooltip bottom>
                 <template v-slot:activator="{ on, attrs }">
-                  <span class="seq-elem" v-bind="attrs" v-on="on">
+                  <span
+                    :id="'seq-' + get_position_other(v, null, 'other-deleted')"
+                    class="seq-elem"
+                    v-bind="attrs"
+                    v-on="on"
+                  >
                     <span>...</span></span
                   ></template
                 >
@@ -215,6 +232,7 @@
                 class="seq-elem"
                 v-for="(s, s_i) in v.deleted.right"
                 :key="s_i"
+                :id="'seq-' + get_position(v, s_i, 'right-deleted')"
               >
                 <v-tooltip bottom>
                   <template v-slot:activator="{ on, attrs }">
@@ -368,25 +386,45 @@ export default {
       hover_sequence: null,
       seqs: {},
       seqs_other: {},
+      last_seq_id: null,
+      draw_exons: false,
+      exons: null,
     };
   },
   created: function () {
     this.hover_init();
-    this.get_exons();
-    console.log(this.view.views);
-    console.log(this.selector);
+    this.last_seq_id = this.get_last_seq_id();
+    this.exons = this.get_exons();
+    // console.log(this.view.views);
+    // console.log(this.selector);
   },
   methods: {
+    get_last_seq_id: function () {
+      if (this.view && this.view.views) {
+        if (this.view.inverted) {
+          return this.view.views[0].start;
+        } else {
+          return this.view.views[this.view.views.length - 1].end;
+        }
+      }
+    },
+
     get_position_other: function (view, s_i, key) {
       let position = null;
       if (key == "other") {
         position =
-          view.end - view.start - (view.left.length + view.right.length);
+          view.start +
+          1 +
+          view.left.length +
+          "-" +
+          (view.end - view.right.length);
       } else if (key == "other-deleted") {
         position =
-          view.end -
-          view.start -
-          (view.deleted.left.length + view.deleted.right.length);
+          view.start +
+          1 +
+          view.deleted.left.length +
+          "-" +
+          (view.end - view.deleted.right.length);
       } else if (key == "other-inserted") {
         position =
           view.inserted.length -
@@ -395,7 +433,7 @@ export default {
       if (this.view.inverted) {
         position = this.view.seq_length - position - 1;
       }
-      this.seqs_other[position] = "seq-other-" + position;
+      this.seqs_other[position] = "seq-" + position;
 
       return position;
     },
@@ -418,6 +456,9 @@ export default {
 
       position += 1;
       this.seqs[position] = "seq-" + position;
+      if (position == this.last_seq_id) {
+        this.draw_exons = true;
+      }
       return position;
     },
     hover_init: function () {
@@ -445,51 +486,38 @@ export default {
       }
     },
     get_seq_id: function (view, location) {
-      console.log(view);
       if (view.left) {
+        const start = view.start + 1;
+        const start_left = view.start + 1 + view.left.length;
+        let end_right = view.end - view.right.length;
+        let end = view.end;
         if (
-          Number(view.start) + 1 <=
-            Number(location) <=
-            Number(view.start) + 1 + Number(view.left.length) ||
-          Number(view.end) - Number(view.right.length) <=
-            Number(location) <=
-            Number(view.right.length)
+          (start <= location && location <= start_left) ||
+          (end_right <= location && location <= end)
         ) {
           return "seq-" + location;
+        } else {
+          return "seq-" + start_left + "-" + end_right;
         }
       } else if (view.deleted && view.deleted.left) {
-        console.log("maybe in the middle of a deleted sequence");
+        const start = view.start + 1;
+        const start_left = view.start + 1 + view.deleted.left.length;
+        let end_right = view.end - view.deleted.right.length;
+        let end = view.end;
+        if (
+          (start <= location && location <= start_left) ||
+          (end_right <= location && location <= end)
+        ) {
+          return "seq-" + location;
+        } else {
+          return "seq-" + start_left + "-" + end_right;
+        }
       } else {
         return "seq-" + location;
-      }
-      if (
-        view.left &&
-        Number(view.start) + 1 <=
-          Number(location) <=
-          Number(view.start) + 1 + Number(view.left.length)
-      ) {
-        return "seq-" + location;
-      } else if (
-        view.left &&
-        view.right &&
-        Number(view.start) + 1 + Number(view.left.length) <=
-          location <=
-          Number(view.end) - Number(view.right.length)
-      ) {
-        return (
-          "seq-other-" +
-          view.start +
-          1 +
-          view.left.length +
-          "_" +
-          view.end -
-          view.right.length
-        );
       }
     },
     get_exons: function () {
       let exons = {};
-      console.log("-----");
       if (
         this.view &&
         this.view.views &&
@@ -517,7 +545,8 @@ export default {
           }
         }
       }
-      console.log(exons);
+      // console.log(exons);
+      return exons;
     },
     scroll_to_variant: function (v_i) {
       var elmnt = document.getElementById(this.d_id + "_variant_" + v_i);
@@ -529,8 +558,6 @@ export default {
     },
     get_element_details: function (v_i) {
       var elmnt = document.getElementById(v_i);
-      console.log(this.seqs);
-      console.log(this.seqs_other);
       console.log(v_i);
       console.log(elmnt);
       if (elmnt) {
@@ -541,7 +568,7 @@ export default {
         console.log(rect.bottom);
         console.log(rect.right);
 
-        return elmnt.offsetWidth;
+        return rect.right - rect.left;
       } else {
         return "None";
       }
@@ -557,6 +584,13 @@ export default {
         return "seq-elem-influence";
       }
       return "seq-elem";
+    },
+  },
+  watch: {
+    isLogged(value) {
+      if (value) {
+        this.checkDiv();
+      }
     },
   },
 };
