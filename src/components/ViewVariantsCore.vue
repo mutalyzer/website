@@ -23,19 +23,7 @@
         <span v-if="v.type == 'variant' && v_i < view.views.length - 2">;</span>
       </span>
     </div>
-    <div class="wrapper">
-      <div v-if="exons && draw_exons">
-        <span
-          v-for="(e, e_i) in exons"
-          :key="e_i"
-          style="display: inline-block; width: 400px; background-color: var(--blue-grey-lighten-4)"
-        >
-          {{ e.start }} _ {{ e.end }}; {{ e.start_seq }} _ {{ e.end_seq }};
-          {{ get_element_details(e.start_seq) }};
-          {{ get_element_details(e.end_seq) }}
-        </span>
-      </div>
-
+    <div class="wrapper" id="parent-div">
       <v-icon v-if="!view.inverted" class="mr-2">mdi-arrow-right-bold</v-icon>
       <v-icon v-if="view.inverted" class="mr-2">mdi-arrow-left-bold</v-icon>
       <div v-for="(v, v_i) in view.views" :key="'v' + v_i" class="seq">
@@ -45,6 +33,7 @@
             v-for="(s, s_i) in v.sequence"
             :key="'s' + s_i"
             :id="'seq-' + get_position(v, s_i, 'sequence')"
+            :ref="'seq-' + get_position(v, s_i, 'sequence')"
           >
             <v-list-item-action class="ma-0 pa-0" style="min-width: unset">
               <v-menu>
@@ -77,6 +66,7 @@
             v-for="(s, s_i) in v.left"
             :key="'l' + s_i"
             :id="'seq-' + get_position(v, s_i, 'sequence')"
+            :ref="'seq-' + get_position(v, s_i, 'sequence')"
           >
             <v-list-item-action class="ma-0 pa-0" style="min-width: unset">
               <v-menu>
@@ -107,6 +97,7 @@
               <template v-slot:activator="{ on, attrs }">
                 <span
                   :id="'seq-' + get_position_other(v, null, 'other')"
+                  :ref="'seq-' + get_position_other(v, null, 'other')"
                   class="seq-elem"
                   v-bind="attrs"
                   v-on="on"
@@ -148,6 +139,7 @@
         <div
           class="seq"
           :id="d_id + '_variant_' + v_i"
+          :ref="d_id + '_variant_' + v_i"
           v-if="v.type == 'variant'"
           @mouseover="
             hover_variants[v_i] = true;
@@ -177,6 +169,7 @@
                 v-for="(s, s_i) in v.deleted.sequence"
                 :key="'ds' + s_i"
                 :id="'seq-' + get_position(v, s_i, 'sequence')"
+                :ref="'seq-' + get_position(v, s_i, 'sequence')"
               >
                 <v-tooltip bottom>
                   <template v-slot:activator="{ on, attrs }">
@@ -196,6 +189,7 @@
                 v-for="(s, s_i) in v.deleted.left"
                 :key="s_i"
                 :id="'seq-' + get_position(v, s_i, 'left')"
+                :ref="'seq-' + get_position(v, s_i, 'left')"
               >
                 <v-tooltip bottom>
                   <template v-slot:activator="{ on, attrs }">
@@ -213,6 +207,7 @@
                 <template v-slot:activator="{ on, attrs }">
                   <span
                     :id="'seq-' + get_position_other(v, null, 'other-deleted')"
+                    :ref="'seq-' + get_position_other(v, null, 'other-deleted')"
                     class="seq-elem"
                     v-bind="attrs"
                     v-on="on"
@@ -233,6 +228,7 @@
                 v-for="(s, s_i) in v.deleted.right"
                 :key="s_i"
                 :id="'seq-' + get_position(v, s_i, 'right-deleted')"
+                :ref="'seq-' + get_position(v, s_i, 'right-deleted')"
               >
                 <v-tooltip bottom>
                   <template v-slot:activator="{ on, attrs }">
@@ -367,6 +363,17 @@
       </div>
       <v-icon v-if="!view.inverted" class="ml-2">mdi-arrow-right-bold</v-icon>
       <v-icon v-if="view.inverted" class="ml-2">mdi-arrow-left-bold</v-icon>
+      <div v-if="exons && draw_exons" style="position: relative">
+        <span
+          v-for="(e, e_i) in exons"
+          :key="e_i"
+          :id="'exon-' + e_i"
+          :style="get_style(e)"
+        >
+          {{ e.start }} _ {{ e.end }} <br />
+          {{ e.start_seq }} _ {{ e.end_seq }}
+        </span>
+      </div>
     </div>
   </div>
 </template>
@@ -457,7 +464,9 @@ export default {
       position += 1;
       this.seqs[position] = "seq-" + position;
       if (position == this.last_seq_id) {
-        this.draw_exons = true;
+        this.$nextTick(() => {
+          this.draw_exons = true;
+        });
       }
       return position;
     },
@@ -556,19 +565,47 @@ export default {
         inline: "center",
       });
     },
-    get_element_details: function (v_i) {
-      var elmnt = document.getElementById(v_i);
-      console.log(v_i);
-      console.log(elmnt);
-      if (elmnt) {
-        console.log(elmnt.offsetWidth);
-        const rect = elmnt.getBoundingClientRect();
-        console.log(rect.top);
-        console.log(rect.left);
-        console.log(rect.bottom);
-        console.log(rect.right);
+    get_style: function (exon) {
+      // console.log(start_seq);
+      // console.log(end_seq);
 
-        return rect.right - rect.left;
+      return (
+        "position: relative; display: inline-block; width: " +
+        this.get_width(exon) +
+        "px; background-color: green; left:" +
+        this.get_left(exon) +
+        "px"
+      );
+    },
+    get_left: function (exon) {
+      var seq_el = document.getElementById(exon.start_seq);
+      var pre_el = document.getElementById("parent-div");
+      console.log("- left");
+      console.log(pre_el);
+      if (seq_el) {
+        // console.log(seq_el.offsetWidth);
+        const seq_rect = seq_el.getBoundingClientRect();
+        const pre_rect = pre_el.getBoundingClientRect();
+        console.log(seq_rect.left - pre_rect.left);
+
+        return seq_rect.left - pre_rect.left;
+      } else {
+        return "None";
+      }
+    },
+    get_width: function (exon) {
+      var start_el = document.getElementById(exon.start_seq);
+      var end_el = document.getElementById(exon.end_seq);
+      console.log(" - width");
+      console.log(exon.start_seq);
+      // console.log(seq_el);
+      if (start_el) {
+        // console.log(seq_el.offsetWidth);
+        const start_rect = start_el.getBoundingClientRect();
+        const end_rect = end_el.getBoundingClientRect();
+        console.log(end_rect.right - start_rect.left);
+
+        return end_rect.right - start_rect.right;
       } else {
         return "None";
       }
