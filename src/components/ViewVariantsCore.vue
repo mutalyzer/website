@@ -24,8 +24,12 @@
       </span>
     </div>
     <div class="wrapper" id="parent-div">
-      <v-icon v-if="!view.inverted" class="mr-2">mdi-arrow-right-bold</v-icon>
-      <v-icon v-if="view.inverted" class="mr-2">mdi-arrow-left-bold</v-icon>
+      <v-icon v-if="!view.inverted" class="mr-2" id="sense-arrow"
+        >mdi-arrow-right-bold</v-icon
+      >
+      <v-icon v-if="view.inverted" class="mr-2" id="sense-arrow"
+        >mdi-arrow-left-bold</v-icon
+      >
       <div v-for="(v, v_i) in view.views" :key="'v' + v_i" class="seq">
         <!-- outside sequence -->
         <div v-if="v.type == 'outside' && v.sequence">
@@ -45,7 +49,7 @@
                         v-on="{ ...onMenu, ...onTooltip }"
                         >{{ s }}</span
                       ></template
-                    ><span>{{ get_position(v, s_i, "sequence") }}</span>
+                    ><span>{{ get_position(v, s_i, "sequence") }} </span>
                   </v-tooltip>
                 </template>
                 <v-list>
@@ -110,7 +114,11 @@
             </v-tooltip>
           </div>
           <!-- right -->
-          <span v-for="(s, s_i) in v.right" :key="'r' + s_i">
+          <span
+            :id="'seq-' + get_position(v, s_i, 'right')"
+            v-for="(s, s_i) in v.right"
+            :key="'r' + s_i"
+          >
             <v-list-item-action class="ma-0 pa-0" style="min-width: unset">
               <v-menu>
                 <template #activator="{ on: onMenu }">
@@ -297,6 +305,7 @@
             <div class="seqdelequal" v-if="v.deleted && v.deleted.sequence">
               <span
                 class="seq-elem"
+                :id="'seq-' + get_position(v, s_i, 'sequence')"
                 v-for="(s, s_i) in v.deleted.sequence"
                 :key="'ds' + s_i"
               >
@@ -314,6 +323,7 @@
             <div class="seqdelequal" v-if="v.deleted && v.deleted.left">
               <span
                 class="seq-elem"
+                :id="'seq-' + get_position(v, s_i, 'left')"
                 v-for="(s, s_i) in v.deleted.left"
                 :key="s_i"
               >
@@ -331,7 +341,12 @@
             <div class="seqdelequal" v-if="v.deleted && v.deleted.right">
               <v-tooltip bottom>
                 <template v-slot:activator="{ on, attrs }">
-                  <span class="seq-elem" v-bind="attrs" v-on="on">
+                  <span
+                    :id="'seq-' + get_position_other(v, null, 'other-deleted')"
+                    class="seq-elem"
+                    v-bind="attrs"
+                    v-on="on"
+                  >
                     <span>...</span></span
                   ></template
                 >
@@ -345,6 +360,7 @@
             <div class="seqdelequal" v-if="v.deleted && v.deleted.right">
               <span
                 class="seq-elem"
+                :id="'seq-' + get_position(v, s_i, 'right-deleted')"
                 v-for="(s, s_i) in v.deleted.right"
                 :key="s_i"
               >
@@ -363,17 +379,7 @@
       </div>
       <v-icon v-if="!view.inverted" class="ml-2">mdi-arrow-right-bold</v-icon>
       <v-icon v-if="view.inverted" class="ml-2">mdi-arrow-left-bold</v-icon>
-      <div v-if="exons && draw_exons" style="position: relative">
-        <span
-          v-for="(e, e_i) in exons"
-          :key="e_i"
-          :id="'exon-' + e_i"
-          :style="get_style(e)"
-        >
-          {{ e.start }} _ {{ e.end }} <br />
-          {{ e.start_seq }} _ {{ e.end_seq }}
-        </span>
-      </div>
+      <div id="features-div" class="mt-2 mb-2"></div>
     </div>
   </div>
 </template>
@@ -395,17 +401,31 @@ export default {
       seqs_other: {},
       last_seq_id: null,
       draw_exons: false,
-      exons: null,
     };
   },
   created: function () {
     this.hover_init();
-    this.last_seq_id = this.get_last_seq_id();
-    this.exons = this.get_exons();
-    // console.log(this.view.views);
-    // console.log(this.selector);
+  },
+  mounted: function () {
+    this.$nextTick(function () {
+      const features = this.get_features();
+      console.log(features);
+      this.add_features(features);
+    });
   },
   methods: {
+    add_features: function (features) {
+      let div = document.getElementById("features-div");
+      for (const f of Object.values(features)) {
+        const node = document.createElement("span");
+        if (f.type == "exon") {
+          const textnode = document.createTextNode("exon " + (f.number + 1));
+          node.appendChild(textnode);
+        }
+        node.style = f.style;
+        div.appendChild(node);
+      }
+    },
     get_last_seq_id: function () {
       if (this.view && this.view.views) {
         if (this.view.inverted) {
@@ -463,11 +483,7 @@ export default {
 
       position += 1;
       this.seqs[position] = "seq-" + position;
-      if (position == this.last_seq_id) {
-        this.$nextTick(() => {
-          this.draw_exons = true;
-        });
-      }
+
       return position;
     },
     hover_init: function () {
@@ -525,7 +541,7 @@ export default {
         return "seq-" + location;
       }
     },
-    get_exons: function () {
+    get_features: function () {
       let exons = {};
       if (
         this.view &&
@@ -554,8 +570,46 @@ export default {
           }
         }
       }
-      // console.log(exons);
-      return exons;
+      const features = [];
+      for (const [i, exon] of Object.entries(exons)) {
+        console.log(exons[i].start_seq);
+        console.log(exon.start_seq, exon.end_seq);
+        let features_exon = {
+          type: "exon",
+          start_seq: exon.start_seq,
+          end_seq: exon.end_seq,
+          start: exon.start,
+          end: exon.end,
+          number: Number(i),
+          style: this.get_style("exon", exon.start_seq, exon.end_seq),
+        };
+
+        if (i == 0) {
+          var par_el = document.getElementById("parent-div");
+          const par_rect = par_el.getBoundingClientRect();
+          var start_el = document.getElementById(exon.start_seq);
+          const start_rect = start_el.getBoundingClientRect();
+          let margin = start_rect.right - par_rect.left;
+          console.log("something", margin);
+          features_exon.style += "margin-left: " + margin + "px;";
+        }
+
+        if (i > 0) {
+          let features_intron = {
+            type: "intron",
+            start_seq: exons[i - 1].end_seq,
+            end_seq: exons[i].start_seq,
+            style: this.get_style(
+              "intron",
+              exons[i - 1].end_seq,
+              exons[i].start_seq
+            ),
+          };
+          features.push(features_intron);
+        }
+        features.push(features_exon);
+      }
+      return features;
     },
     scroll_to_variant: function (v_i) {
       var elmnt = document.getElementById(this.d_id + "_variant_" + v_i);
@@ -565,47 +619,36 @@ export default {
         inline: "center",
       });
     },
-    get_style: function (exon) {
-      // console.log(start_seq);
-      // console.log(end_seq);
+    get_div_style: function () {
+      var par_el = document.getElementById("parent-div");
+      var arr_el = document.getElementById("sense-arrow");
 
+      const par_rect = par_el.getBoundingClientRect();
+      const arr_rect = arr_el.getBoundingClientRect();
+      let margin = arr_rect.right - par_rect.left;
+      return "margin-left: " + margin + "px";
+    },
+    get_style: function (feature_type, start_seq, end_seq) {
+      let color = "gray";
+      if (feature_type == "exon") {
+        color = "green";
+      }
       return (
         "position: relative; display: inline-block; width: " +
-        this.get_width(exon) +
-        "px; background-color: green; left:" +
-        this.get_left(exon) +
-        "px"
+        this.get_width(start_seq, end_seq) +
+        "px; background-color: " +
+        color +
+        "; padding: 5px; text-align: center;"
       );
     },
-    get_left: function (exon) {
-      var seq_el = document.getElementById(exon.start_seq);
-      var pre_el = document.getElementById("parent-div");
-      console.log("- left");
-      console.log(pre_el);
-      if (seq_el) {
-        // console.log(seq_el.offsetWidth);
-        const seq_rect = seq_el.getBoundingClientRect();
-        const pre_rect = pre_el.getBoundingClientRect();
-        console.log(seq_rect.left - pre_rect.left);
-
-        return seq_rect.left - pre_rect.left;
-      } else {
-        return "None";
-      }
-    },
-    get_width: function (exon) {
-      var start_el = document.getElementById(exon.start_seq);
-      var end_el = document.getElementById(exon.end_seq);
-      console.log(" - width");
-      console.log(exon.start_seq);
-      // console.log(seq_el);
+    get_width: function (start_seq, end_seq) {
+      var start_el = document.getElementById(start_seq);
+      var end_el = document.getElementById(end_seq);
       if (start_el) {
-        // console.log(seq_el.offsetWidth);
         const start_rect = start_el.getBoundingClientRect();
         const end_rect = end_el.getBoundingClientRect();
-        console.log(end_rect.right - start_rect.left);
-
-        return end_rect.right - start_rect.right;
+        let output = end_rect.right - start_rect.right;
+        return output;
       } else {
         return "None";
       }
@@ -621,13 +664,6 @@ export default {
         return "seq-elem-influence";
       }
       return "seq-elem";
-    },
-  },
-  watch: {
-    isLogged(value) {
-      if (value) {
-        this.checkDiv();
-      }
     },
   },
 };
