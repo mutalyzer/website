@@ -42,7 +42,7 @@
             <v-list-item-action class="ma-0 pa-0" style="min-width: unset">
               <v-menu>
                 <template #activator="{ on: onMenu }">
-                  <v-tooltip bottom>
+                  <v-tooltip top>
                     <template #activator="{ on: onTooltip }">
                       <span
                         :class="get_seq_class(v, s_i, 'sequence')"
@@ -75,7 +75,7 @@
             <v-list-item-action class="ma-0 pa-0" style="min-width: unset">
               <v-menu>
                 <template #activator="{ on: onMenu }">
-                  <v-tooltip bottom>
+                  <v-tooltip top>
                     <template #activator="{ on: onTooltip }">
                       <span
                         :class="get_seq_class(v, s_i, 'left')"
@@ -97,7 +97,7 @@
           </span>
           <!-- middle dots -->
           <div class="seq">
-            <v-tooltip bottom>
+            <v-tooltip top>
               <template v-slot:activator="{ on, attrs }">
                 <span
                   :id="'seq-' + get_position_other(v, null, 'other')"
@@ -122,7 +122,7 @@
             <v-list-item-action class="ma-0 pa-0" style="min-width: unset">
               <v-menu>
                 <template #activator="{ on: onMenu }">
-                  <v-tooltip bottom>
+                  <v-tooltip top>
                     <template #activator="{ on: onTooltip }">
                       <span
                         :class="get_seq_class(v, s_i, 'right')"
@@ -179,7 +179,7 @@
                 :id="'seq-' + get_position(v, s_i, 'sequence')"
                 :ref="'seq-' + get_position(v, s_i, 'sequence')"
               >
-                <v-tooltip bottom>
+                <v-tooltip top>
                   <template v-slot:activator="{ on, attrs }">
                     <span v-bind="attrs" v-on="on">
                       <span>{{ s }}</span></span
@@ -199,7 +199,7 @@
                 :id="'seq-' + get_position(v, s_i, 'left')"
                 :ref="'seq-' + get_position(v, s_i, 'left')"
               >
-                <v-tooltip bottom>
+                <v-tooltip top>
                   <template v-slot:activator="{ on, attrs }">
                     <span v-bind="attrs" v-on="on">
                       <span>{{ s }}</span></span
@@ -211,7 +211,7 @@
             </div>
             <!-- deleted middle dots-->
             <div class="seqdel" v-if="v.deleted && v.deleted.right">
-              <v-tooltip bottom>
+              <v-tooltip top>
                 <template v-slot:activator="{ on, attrs }">
                   <span
                     :id="'seq-' + get_position_other(v, null, 'other-deleted')"
@@ -238,7 +238,7 @@
                 :id="'seq-' + get_position(v, s_i, 'right-deleted')"
                 :ref="'seq-' + get_position(v, s_i, 'right-deleted')"
               >
-                <v-tooltip bottom>
+                <v-tooltip top>
                   <template v-slot:activator="{ on, attrs }">
                     <span v-bind="attrs" v-on="on">
                       <span>{{ s }}</span></span
@@ -273,7 +273,7 @@
             </div>
             <!-- inserted middle dots-->
             <div class="seqins" v-if="v.inserted && v.inserted.right">
-              <v-tooltip bottom>
+              <v-tooltip top>
                 <template v-slot:activator="{ on, attrs }">
                   <span class="seq-elem" v-bind="attrs" v-on="on">
                     <span>...</span></span
@@ -309,7 +309,7 @@
                 v-for="(s, s_i) in v.deleted.sequence"
                 :key="'ds' + s_i"
               >
-                <v-tooltip bottom>
+                <v-tooltip top>
                   <template v-slot:activator="{ on, attrs }">
                     <span v-bind="attrs" v-on="on">
                       <span>{{ s }}</span></span
@@ -327,7 +327,7 @@
                 v-for="(s, s_i) in v.deleted.left"
                 :key="s_i"
               >
-                <v-tooltip bottom>
+                <v-tooltip top>
                   <template v-slot:activator="{ on, attrs }">
                     <span v-bind="attrs" v-on="on">
                       <span>{{ s }}</span></span
@@ -339,7 +339,7 @@
             </div>
             <!-- equal middle dots-->
             <div class="seqdelequal" v-if="v.deleted && v.deleted.right">
-              <v-tooltip bottom>
+              <v-tooltip top>
                 <template v-slot:activator="{ on, attrs }">
                   <span
                     :id="'seq-' + get_position_other(v, null, 'other-deleted')"
@@ -408,6 +408,11 @@ export default {
   },
   mounted: function () {
     this.$nextTick(function () {
+      var elmnt = document.getElementById("sense-arrow");
+      elmnt.scrollIntoView({
+        block: "nearest",
+        inline: "center",
+      });
       const features = this.get_features();
       console.log(features);
       this.add_features(features);
@@ -417,25 +422,17 @@ export default {
     add_features: function (features) {
       let div = document.getElementById("features-div");
       for (const f of Object.values(features)) {
-        const node = document.createElement("span");
+        const node = document.createElement("div");
         if (f.type == "exon") {
-          const textnode = document.createTextNode("exon " + (f.number + 1));
+          const textnode = document.createTextNode(
+            "exon " + (f.number + 1) + " (" + f.start + ", " + f.end + ")"
+          );
           node.appendChild(textnode);
         }
         node.style = f.style;
         div.appendChild(node);
       }
     },
-    get_last_seq_id: function () {
-      if (this.view && this.view.views) {
-        if (this.view.inverted) {
-          return this.view.views[0].start;
-        } else {
-          return this.view.views[this.view.views.length - 1].end;
-        }
-      }
-    },
-
     get_position_other: function (view, s_i, key) {
       let position = null;
       if (key == "other") {
@@ -500,16 +497,6 @@ export default {
       this.hover_variants = h_v;
       this.hover_sequence = h_s;
     },
-    get_exons_seq: function (views, exon) {
-      for (const view of views) {
-        if (view.start + 1 <= exon.start && view.end <= exon.start) {
-          this.get_seq_id(view, exon.start);
-        }
-        if (view.start + 1 <= exon.end && view.end <= exon.end) {
-          this.get_seq_id(view, exon.end);
-        }
-      }
-    },
     get_seq_id: function (view, location) {
       if (view.left) {
         const start = view.start + 1;
@@ -530,7 +517,7 @@ export default {
         let end_right = view.end - view.deleted.right.length;
         let end = view.end;
         if (
-          (start <= location && location <= start_left) ||
+          (start <= location && location <= start_left - 1) ||
           (end_right <= location && location <= end)
         ) {
           return "seq-" + location;
@@ -540,6 +527,30 @@ export default {
       } else {
         return "seq-" + location;
       }
+    },
+    is_dotted: function (seq) {
+      return (seq.match(/-/g) || []).length > 1;
+    },
+    get_seq_width: function (seq) {
+      var seq_el = document.getElementById(seq);
+      const seq_rect = seq_el.getBoundingClientRect();
+      return seq_rect.right - seq_rect.left;
+    },
+    get_dotted_extra: function (seq) {
+      return this.get_seq_width(seq) / 3;
+    },
+    get_margin: function (seq) {
+      var par_el = document.getElementById("parent-div");
+      const par_rect = par_el.getBoundingClientRect();
+      var start_el = document.getElementById(seq);
+      const start_rect = start_el.getBoundingClientRect();
+      let margin = -5;
+      if (this.is_dotted(seq)) {
+        margin += start_rect.right - par_rect.left - this.get_dotted_extra(seq);
+      } else {
+        margin += start_rect.left - par_rect.left;
+      }
+      return margin;
     },
     get_features: function () {
       let exons = {};
@@ -571,9 +582,52 @@ export default {
         }
       }
       const features = [];
+      let multiple_exons = null;
       for (const [i, exon] of Object.entries(exons)) {
-        console.log(exons[i].start_seq);
+        console.log("----------");
         console.log(exon.start_seq, exon.end_seq);
+
+        if (exon.start_seq == exon.end_seq && this.is_dotted(exon.start_seq)) {
+          console.log("yes");
+          if (!multiple_exons) {
+            multiple_exons = {
+              type: "multiple_exons",
+              start_seq: exon.start_seq,
+              end_seq: exon.end_seq,
+              start: exon.start,
+              end: exon.end,
+              number: 1,
+            };
+            if (i == 0) {
+              multiple_exons.start = true;
+            } else {
+              multiple_exons.start = false;
+            }
+            continue;
+          } else {
+            multiple_exons.number += 1;
+            continue;
+          }
+        } else if (
+          this.is_dotted(exon.start_seq) &&
+          multiple_exons &&
+          multiple_exons.start_seq == exon.start_seq
+        ) {
+          multiple_exons.style = this.get_style(
+            "multiple_exons",
+            multiple_exons.start_seq,
+            multiple_exons.end_seq
+          );
+          if (multiple_exons.start) {
+            multiple_exons.style +=
+              "margin-left: " +
+              (this.get_margin(multiple_exons.start_seq) -
+                this.get_dotted_extra(multiple_exons.start_seq)) +
+              "px;";
+          }
+          features.push(multiple_exons);
+          multiple_exons = null;
+        }
         let features_exon = {
           type: "exon",
           start_seq: exon.start_seq,
@@ -585,13 +639,8 @@ export default {
         };
 
         if (i == 0) {
-          var par_el = document.getElementById("parent-div");
-          const par_rect = par_el.getBoundingClientRect();
-          var start_el = document.getElementById(exon.start_seq);
-          const start_rect = start_el.getBoundingClientRect();
-          let margin = start_rect.right - par_rect.left;
-          console.log("something", margin);
-          features_exon.style += "margin-left: " + margin + "px;";
+          features_exon.style +=
+            "margin-left: " + this.get_margin(exon.start_seq) + "px;";
         }
 
         if (i > 0) {
@@ -609,6 +658,9 @@ export default {
         }
         features.push(features_exon);
       }
+      // for (let f of features) {
+      //   console.log(f);
+      // }
       return features;
     },
     scroll_to_variant: function (v_i) {
@@ -619,40 +671,83 @@ export default {
         inline: "center",
       });
     },
-    get_div_style: function () {
-      var par_el = document.getElementById("parent-div");
-      var arr_el = document.getElementById("sense-arrow");
-
-      const par_rect = par_el.getBoundingClientRect();
-      const arr_rect = arr_el.getBoundingClientRect();
-      let margin = arr_rect.right - par_rect.left;
-      return "margin-left: " + margin + "px";
-    },
     get_style: function (feature_type, start_seq, end_seq) {
-      let color = "gray";
       if (feature_type == "exon") {
-        color = "green";
+        return (
+          "position: relative; display: inline-block; width: " +
+          this.get_width_exon(start_seq, end_seq) +
+          "px; background-color: green; padding: 5px; text-align: center; border: 1px solid black;"
+        );
+      } else if (feature_type == "intron") {
+        return (
+          "position: relative; display: inline-block; height: 5px; width: " +
+          this.get_width_intron(start_seq, end_seq) +
+          "px; background-color: gray; text-align: center;"
+        );
+      } else if (feature_type == "multiple_exons") {
+        console.log("fsdgfssgfr");
+        return (
+          "position: relative; display: inline-block; height: 5px; width: " +
+          this.get_seq_width(start_seq) / 3 +
+          "px; background-color: green; padding: 5px; text-align: center; border: 1px solid black;"
+        );
       }
-      return (
-        "position: relative; display: inline-block; width: " +
-        this.get_width(start_seq, end_seq) +
-        "px; background-color: " +
-        color +
-        "; padding: 5px; text-align: center;"
-      );
     },
-    get_width: function (start_seq, end_seq) {
+    get_width_exon: function (start_seq, end_seq) {
+      console.log("get_width exon");
       var start_el = document.getElementById(start_seq);
       var end_el = document.getElementById(end_seq);
       if (start_el) {
         const start_rect = start_el.getBoundingClientRect();
         const end_rect = end_el.getBoundingClientRect();
-        let output = end_rect.right - start_rect.right;
-        return output;
+        if (this.is_dotted(start_seq) && this.is_dotted(end_seq)) {
+          return (
+            end_rect.left -
+            start_rect.right +
+            this.get_dotted_extra(start_seq) +
+            this.get_dotted_extra(end_seq)
+          );
+        } else if (this.is_dotted(start_seq)) {
+          return (
+            end_rect.right - start_rect.right + this.get_dotted_extra(start_seq)
+          );
+        } else {
+          return end_rect.right - start_rect.left;
+        }
       } else {
         return "None";
       }
     },
+    get_width_intron: function (start_seq, end_seq) {
+      console.log("get_width intron");
+      var start_el = document.getElementById(start_seq);
+      var end_el = document.getElementById(end_seq);
+      if (start_el) {
+        const start_rect = start_el.getBoundingClientRect();
+        const end_rect = end_el.getBoundingClientRect();
+        if (this.is_dotted(start_seq) && this.is_dotted(end_seq)) {
+          return (
+            end_rect.left - start_rect.right + this.get_dotted_extra(start_seq)
+          );
+        } else if (this.is_dotted(start_seq)) {
+          return (
+            end_rect.right -
+            start_rect.right +
+            this.get_dotted_extra(start_seq) +
+            this.get_dotted_extra(end_seq)
+          );
+        } else if (this.is_dotted(end_seq)) {
+          return (
+            end_rect.left - start_rect.right + this.get_dotted_extra(end_seq)
+          );
+        } else {
+          return end_rect.left - start_rect.right;
+        }
+      } else {
+        return "None";
+      }
+    },
+
     get_seq_class: function (v, s_i, key) {
       if (
         this.influence &&
