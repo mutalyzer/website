@@ -109,7 +109,8 @@
                 ></template
               >
               <span
-                >other {{ get_position_other(v, null, "other") }} bases</span
+                >other
+                {{ get_position_other_tooltip(v, null, "other") }} bases</span
               >
             </v-tooltip>
           </div>
@@ -225,7 +226,8 @@
                 >
                 <span
                   >other
-                  {{ get_position_other(v, null, "other-deleted") }} bases</span
+                  {{ get_position_other_tooltip(v, null, "other-deleted") }}
+                  bases</span
                 >
               </v-tooltip>
             </div>
@@ -281,7 +283,7 @@
                 >
                 <span
                   >other
-                  {{ get_position_other(v, null, "other-inserted") }}
+                  {{ get_position_other_tooltip(v, null, "other-inserted") }}
                   bases</span
                 >
               </v-tooltip>
@@ -352,7 +354,8 @@
                 >
                 <span
                   >other
-                  {{ get_position_other(v, null, "other-deleted") }} bases</span
+                  {{ get_position_other_tooltip(v, null, "other-deleted") }}
+                  bases</span
                 >
               </v-tooltip>
             </div>
@@ -416,6 +419,13 @@ export default {
       const features = this.get_features();
       console.log(features);
       this.add_features(features);
+      this.$nextTick(function () {
+        var elmnt = document.getElementById(this.d_id + "_variant_1");
+        elmnt.scrollIntoView({
+          block: "nearest",
+          inline: "center",
+        });
+      });
     });
   },
   methods: {
@@ -435,33 +445,57 @@ export default {
     },
     get_position_other: function (view, s_i, key) {
       let position = null;
+      let left = null;
+      let right = null;
+      let start = view.start;
+      let end = view.end;
+
       if (key == "other") {
-        position =
-          view.start +
-          1 +
-          view.left.length +
-          "-" +
-          (view.end - view.right.length);
+        if (this.view.inverted) {
+          left = this.view.seq_length - start - view.left.length;
+          right = this.view.seq_length - end + view.right.length + 1;
+        } else {
+          left = start + 1 + view.left.length;
+          right = end - view.right.length;
+        }
+        position = left + "-" + right;
       } else if (key == "other-deleted") {
-        position =
-          view.start +
-          1 +
-          view.deleted.left.length +
-          "-" +
-          (view.end - view.deleted.right.length);
+        if (this.view.inverted) {
+          left = this.view.seq_length - start - view.deleted.left.length;
+          right = this.view.seq_length - end + view.deleted.right.length + 1;
+        } else {
+          left = start + 1 + view.deleted.left.length;
+          right = end - view.deleted.right.length;
+        }
+        position = left + "-" + right;
       } else if (key == "other-inserted") {
         position =
           view.inserted.length -
           (view.inserted.left.length + view.inserted.right.length);
       }
-      if (this.view.inverted) {
-        position = this.view.seq_length - position - 1;
-      }
       this.seqs_other[position] = "seq-" + position;
-
       return position;
     },
-    get_position: function (view, s_i, key) {
+    get_position_other_tooltip: function (view, s_i, key) {
+      let position = null;
+      let start = view.start;
+      let end = view.end;
+
+      if (key == "other") {
+        position = end - start - (view.left.length + view.right.length);
+      } else if (key == "other-deleted") {
+        position =
+          end - start - (view.deleted.left.length + view.deleted.right.length);
+      } else if (key == "other-inserted") {
+        position =
+          view.inserted.length -
+          (view.inserted.left.length + view.inserted.right.length);
+      } else {
+        position = s_i;
+      }
+      return position;
+    },
+    _get_position: function (view, s_i, key) {
       let position = null;
       if (key == "sequence") {
         position = s_i + view.start;
@@ -479,8 +513,11 @@ export default {
       }
 
       position += 1;
+      return position;
+    },
+    get_position: function (view, s_i, key) {
+      let position = this._get_position(view, s_i, key);
       this.seqs[position] = "seq-" + position;
-
       return position;
     },
     hover_init: function () {
@@ -497,10 +534,46 @@ export default {
       this.hover_variants = h_v;
       this.hover_sequence = h_s;
     },
-    get_seq_id: function (view, location) {
+    get_seq_id_inverted: function (view, location) {
       if (view.left) {
+        console.log(view, location);
+        let start = this.view.seq_length - view.start;
+        let start_left = this.view.seq_length - view.start - view.left.length;
+        let end_right = this.view.seq_length - view.end + view.right.length + 1;
+        let end = this.view.seq_length - view.end + 1;
+        console.log(start, start_left, end_right, end);
+        if (
+          (start <= location && location <= start_left) ||
+          (end_right <= location && location <= end)
+        ) {
+          return "seq-" + location;
+        } else {
+          return "seq-" + start_left + "-" + end_right;
+        }
+      } else if (view.deleted && view.deleted.left) {
         const start = view.start + 1;
-        const start_left = view.start + 1 + view.left.length;
+        const start_left = view.start + 1 + view.deleted.left.length;
+        let end_right = view.end - view.deleted.right.length;
+        let end = view.end;
+        if (
+          (start <= location && location <= start_left - 1) ||
+          (end_right <= location && location <= end)
+        ) {
+          return "seq-" + location;
+        } else {
+          return "seq-" + start_left + "-" + end_right;
+        }
+      } else {
+        return "seq-" + location;
+      }
+    },
+    get_seq_id: function (view, location) {
+      if (this.view.inverted) {
+        return this.get_seq_id_inverted(view, location);
+      }
+      if (view.left) {
+        let start = view.start + 1;
+        let start_left = view.start + 1 + view.left.length;
         let end_right = view.end - view.right.length;
         let end = view.end;
         if (
@@ -562,20 +635,14 @@ export default {
         this.selector.exon.g
       ) {
         for (const [i, exon] of this.selector.exon.g.entries()) {
-          const exon_start = Number(exon[0]);
-          const exon_end = Number(exon[1]);
+          const exon_start = exon[0];
+          const exon_end = exon[1];
           exons[i] = { start: exon[0], end: exon[1] };
           for (const view of this.view.views) {
-            if (
-              Number(view.start) + 1 <= exon_start &&
-              exon_start <= Number(view.end)
-            ) {
+            if (view.start + 1 <= exon_start && exon_start <= view.end) {
               exons[i].start_seq = this.get_seq_id(view, exon_start);
             }
-            if (
-              Number(view.start) + 1 <= exon_end &&
-              exon_end <= Number(view.end)
-            ) {
+            if (view.start + 1 <= exon_end && exon_end <= view.end) {
               exons[i].end_seq = this.get_seq_id(view, exon_end);
             }
           }
@@ -608,11 +675,7 @@ export default {
             multiple_exons.number += 1;
             continue;
           }
-        } else if (
-          this.is_dotted(exon.start_seq) &&
-          multiple_exons &&
-          multiple_exons.start_seq == exon.start_seq
-        ) {
+        } else if (multiple_exons) {
           multiple_exons.style = this.get_style(
             "multiple_exons",
             multiple_exons.start_seq,
@@ -641,26 +704,21 @@ export default {
         if (i == 0) {
           features_exon.style +=
             "margin-left: " + this.get_margin(exon.start_seq) + "px;";
-        }
-
-        if (i > 0) {
+        } else {
           let features_intron = {
             type: "intron",
             start_seq: exons[i - 1].end_seq,
             end_seq: exons[i].start_seq,
-            style: this.get_style(
-              "intron",
+            style: this.get_intron_style(
               exons[i - 1].end_seq,
-              exons[i].start_seq
+              exons[i].start_seq,
+              features_exon
             ),
           };
           features.push(features_intron);
         }
         features.push(features_exon);
       }
-      // for (let f of features) {
-      //   console.log(f);
-      // }
       return features;
     },
     scroll_to_variant: function (v_i) {
@@ -678,12 +736,6 @@ export default {
           this.get_width_exon(start_seq, end_seq) +
           "px; background-color: green; padding: 5px; text-align: center; border: 1px solid black;"
         );
-      } else if (feature_type == "intron") {
-        return (
-          "position: relative; display: inline-block; height: 5px; width: " +
-          this.get_width_intron(start_seq, end_seq) +
-          "px; background-color: gray; text-align: center;"
-        );
       } else if (feature_type == "multiple_exons") {
         console.log("fsdgfssgfr");
         return (
@@ -692,6 +744,17 @@ export default {
           "px; background-color: green; padding: 5px; text-align: center; border: 1px solid black;"
         );
       }
+    },
+    get_intron_style: function (start_seq, end_seq, exon) {
+      let width = this.get_width_intron(start_seq, end_seq);
+      if (this.is_dotted(exon.start_seq)) {
+        width += this.get_dotted_extra(end_seq);
+      }
+      return (
+        "position: relative; display: inline-block; height: 5px; width: " +
+        width +
+        "px; background-color: gray; text-align: center;"
+      );
     },
     get_width_exon: function (start_seq, end_seq) {
       console.log("get_width exon");
@@ -731,7 +794,7 @@ export default {
           );
         } else if (this.is_dotted(start_seq)) {
           return (
-            end_rect.right -
+            end_rect.left -
             start_rect.right +
             this.get_dotted_extra(start_seq) +
             this.get_dotted_extra(end_seq)
