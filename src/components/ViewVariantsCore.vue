@@ -96,11 +96,10 @@
             </v-list-item-action>
           </span>
           <!-- middle dots -->
-          <div class="seq">
+          <div class="seq" :id="'seq-' + get_position_other(v, null, 'other')">
             <v-tooltip top>
               <template v-slot:activator="{ on, attrs }">
                 <span
-                  :id="'seq-' + get_position_other(v, null, 'other')"
                   :ref="'seq-' + get_position_other(v, null, 'other')"
                   class="seq-elem"
                   v-bind="attrs"
@@ -211,11 +210,14 @@
               </span>
             </div>
             <!-- deleted middle dots-->
-            <div class="seqdel" v-if="v.deleted && v.deleted.right">
+            <div
+              class="seqdel"
+              v-if="v.deleted && v.deleted.right"
+              :id="'seq-' + get_position_other(v, null, 'other-deleted')"
+            >
               <v-tooltip top>
                 <template v-slot:activator="{ on, attrs }">
                   <span
-                    :id="'seq-' + get_position_other(v, null, 'other-deleted')"
                     :ref="'seq-' + get_position_other(v, null, 'other-deleted')"
                     class="seq-elem"
                     v-bind="attrs"
@@ -340,15 +342,14 @@
               </span>
             </div>
             <!-- equal middle dots-->
-            <div class="seqdelequal" v-if="v.deleted && v.deleted.right">
+            <div
+              class="seqdelequal"
+              v-if="v.deleted && v.deleted.right"
+              :id="'seq-' + get_position_other(v, null, 'other-deleted')"
+            >
               <v-tooltip top>
                 <template v-slot:activator="{ on, attrs }">
-                  <span
-                    :id="'seq-' + get_position_other(v, null, 'other-deleted')"
-                    class="seq-elem"
-                    v-bind="attrs"
-                    v-on="on"
-                  >
+                  <span class="seq-elem" v-bind="attrs" v-on="on">
                     <span>...</span></span
                   ></template
                 >
@@ -383,6 +384,20 @@
       <v-icon v-if="!view.inverted" class="ml-2">mdi-arrow-right-bold</v-icon>
       <v-icon v-if="view.inverted" class="ml-2">mdi-arrow-left-bold</v-icon>
       <div id="features-div" class="mt-2 mb-2"></div>
+      <div v-if="features_boundaries">
+        <div
+          style="display: inline"
+          v-for="(f, f_i) in features_boundaries"
+          :key="f_i"
+        >
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on, attrs }">
+              <div v-bind="attrs" v-on="on" :style="f.style"></div
+            ></template>
+            <span> {{ get_feature_tooltip(f) }}</span>
+          </v-tooltip>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -404,6 +419,7 @@ export default {
       seqs_other: {},
       last_seq_id: null,
       draw_exons: false,
+      features_boundaries: null,
     };
   },
   created: function () {
@@ -417,6 +433,7 @@ export default {
         inline: "center",
       });
       const features = this.get_features();
+      this.features_boundaries = features;
       console.log(features);
       this.add_features(features);
       this.$nextTick(function () {
@@ -441,6 +458,13 @@ export default {
         }
         node.style = f.style;
         div.appendChild(node);
+      }
+    },
+    get_feature_tooltip: function (f) {
+      if (f.type == "exon") {
+        return "exon " + (f.number + 1) + " (" + f.start + ", " + f.end + ")";
+      } else {
+        return f.type;
       }
     },
     get_position_other: function (view, s_i, key) {
