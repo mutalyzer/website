@@ -383,8 +383,7 @@
       </div>
       <v-icon v-if="!view.inverted" class="ml-2">mdi-arrow-right-bold</v-icon>
       <v-icon v-if="view.inverted" class="ml-2">mdi-arrow-left-bold</v-icon>
-      <div id="features-div" class="mt-2 mb-2"></div>
-      <div v-if="features_boundaries">
+      <div class="mt-3 mb-3" v-if="features_boundaries">
         <div
           style="display: inline"
           v-for="(f, f_i) in features_boundaries"
@@ -434,8 +433,6 @@ export default {
       });
       const features = this.get_features();
       this.features_boundaries = features;
-      console.log(features);
-      this.add_features(features);
       this.$nextTick(function () {
         var elmnt = document.getElementById(this.d_id + "_variant_1");
         elmnt.scrollIntoView({
@@ -446,23 +443,11 @@ export default {
     });
   },
   methods: {
-    add_features: function (features) {
-      let div = document.getElementById("features-div");
-      for (const f of Object.values(features)) {
-        const node = document.createElement("div");
-        if (f.type == "exon") {
-          const textnode = document.createTextNode(
-            "exon " + (f.number + 1) + " (" + f.start + ", " + f.end + ")"
-          );
-          node.appendChild(textnode);
-        }
-        node.style = f.style;
-        div.appendChild(node);
-      }
-    },
     get_feature_tooltip: function (f) {
       if (f.type == "exon") {
         return "exon " + (f.number + 1) + " (" + f.start + ", " + f.end + ")";
+      } else if (f.type == "multiple_exons") {
+        return f.number + " exons";
       } else {
         return f.type;
       }
@@ -560,12 +545,10 @@ export default {
     },
     get_seq_id_inverted: function (view, location) {
       if (view.left) {
-        console.log(view, location);
         let start = this.view.seq_length - view.start;
         let start_left = this.view.seq_length - view.start - view.left.length;
         let end_right = this.view.seq_length - view.end + view.right.length + 1;
         let end = this.view.seq_length - view.end + 1;
-        console.log(start, start_left, end_right, end);
         if (
           (start <= location && location <= start_left) ||
           (end_right <= location && location <= end)
@@ -640,12 +623,12 @@ export default {
       var par_el = document.getElementById("parent-div");
       const par_rect = par_el.getBoundingClientRect();
       var start_el = document.getElementById(seq);
-      const start_rect = start_el.getBoundingClientRect();
+      const seq_rect = start_el.getBoundingClientRect();
       let margin = -5;
       if (this.is_dotted(seq)) {
-        margin += start_rect.right - par_rect.left - this.get_dotted_extra(seq);
+        margin += seq_rect.right - par_rect.left - this.get_dotted_extra(seq);
       } else {
-        margin += start_rect.left - par_rect.left;
+        margin += seq_rect.left - par_rect.left;
       }
       return margin;
     },
@@ -673,77 +656,90 @@ export default {
         }
       }
       const features = [];
-      let multiple_exons = null;
       for (const [i, exon] of Object.entries(exons)) {
-        console.log("----------");
+        console.log("\n\n----------");
         console.log(exon.start_seq, exon.end_seq);
 
-        if (exon.start_seq == exon.end_seq && this.is_dotted(exon.start_seq)) {
-          console.log("yes");
-          if (!multiple_exons) {
-            multiple_exons = {
-              type: "multiple_exons",
-              start_seq: exon.start_seq,
-              end_seq: exon.end_seq,
-              start: exon.start,
-              end: exon.end,
-              number: 1,
-            };
-            if (i == 0) {
-              multiple_exons.start = true;
-            } else {
-              multiple_exons.start = false;
-            }
-            continue;
-          } else {
-            multiple_exons.number += 1;
-            continue;
-          }
-        } else if (multiple_exons) {
-          multiple_exons.style = this.get_style(
-            "multiple_exons",
-            multiple_exons.start_seq,
-            multiple_exons.end_seq
-          );
-          if (multiple_exons.start) {
-            multiple_exons.style +=
-              "margin-left: " +
-              (this.get_margin(multiple_exons.start_seq) -
-                this.get_dotted_extra(multiple_exons.start_seq)) +
-              "px;";
-          }
-          features.push(multiple_exons);
-          multiple_exons = null;
-        }
-        let features_exon = {
-          type: "exon",
-          start_seq: exon.start_seq,
-          end_seq: exon.end_seq,
-          start: exon.start,
-          end: exon.end,
-          number: Number(i),
-          style: this.get_style("exon", exon.start_seq, exon.end_seq),
-        };
-
         if (i == 0) {
-          features_exon.style +=
+          let f_exon = this._exon(exon, i);
+          f_exon.style +=
             "margin-left: " + this.get_margin(exon.start_seq) + "px;";
+          features.push(f_exon);
         } else {
-          let features_intron = {
-            type: "intron",
-            start_seq: exons[i - 1].end_seq,
-            end_seq: exons[i].start_seq,
-            style: this.get_intron_style(
-              exons[i - 1].end_seq,
-              exons[i].start_seq,
-              features_exon
-            ),
-          };
-          features.push(features_intron);
+          let previous_exon = features.slice(-1)[0];
+
+          if (previous_exon.type == "multiple_exons") {
+            console.log(" - multiple exons");
+            if (
+              previous_exon.end_seq == exon.start_seq &&
+              exon.start_seq == exon.end_seq
+            ) {
+              previous_exon.number += 1;
+            } else if (
+              previous_exon.end_seq != exon.start_seq &&
+              exon.start_seq != exon.end_seq
+            ) {
+              console.log("other");
+              let f_intron = this._intron(exons[i - 1], exons[i]);
+              f_intron.style +=
+                "width: " +
+                this.get_width_intron(f_intron.start_seq, f_intron.end_seq) +
+                "px;";
+              features.push(f_intron);
+            } else if (
+              previous_exon.end_seq == exon.start_seq &&
+              exon.start_seq != exon.end_seq
+            ) {
+              features.push(this._exon(exon, i));
+            }
+          } else {
+            if (
+              previous_exon.end_seq == exon.start_seq &&
+              exon.start_seq != exon.end_seq
+            ) {
+              let f_intron = this._intron(exons[i - 1], exons[i]);
+              f_intron.style +=
+                "width: " + this.get_dotted_extra(exon.start_seq) + "px;";
+              features.push(f_intron);
+              features.push(this._exon(exon, i));
+            } else if (
+              previous_exon.end_seq == exon.start_seq &&
+              exon.start_seq == exon.end_seq
+            ) {
+              previous_exon.type = "multiple_exons";
+              previous_exon.style = this.get_multiple_exon_style(previous_exon);
+            } else {
+              let f_intron = this._intron(exons[i - 1], exons[i]);
+              f_intron.style +=
+                "width: " +
+                this.get_width_intron(f_intron.start_seq, f_intron.end_seq) +
+                "px;";
+              features.push(f_intron);
+              features.push(this._exon(exon, i));
+            }
+          }
         }
-        features.push(features_exon);
       }
       return features;
+    },
+    _intron: function (exon_before, exon_after) {
+      return {
+        type: "intron",
+        start_seq: exon_before.end_seq,
+        end_seq: exon_after.start_seq,
+        style: this.get_intron_style(),
+      };
+    },
+    _exon: function (exon, i) {
+      return {
+        type: "exon",
+        start_seq: exon.start_seq,
+        end_seq: exon.end_seq,
+        start: exon.start,
+        end: exon.end,
+        number: Number(i),
+        style: this.get_exon_style(exon),
+      };
     },
     scroll_to_variant: function (v_i) {
       var elmnt = document.getElementById(this.d_id + "_variant_" + v_i);
@@ -753,35 +749,46 @@ export default {
         inline: "center",
       });
     },
-    get_style: function (feature_type, start_seq, end_seq) {
-      if (feature_type == "exon") {
-        return (
-          "position: relative; display: inline-block; width: " +
-          this.get_width_exon(start_seq, end_seq) +
-          "px; background-color: green; padding: 5px; text-align: center; border: 1px solid black;"
-        );
-      } else if (feature_type == "multiple_exons") {
-        console.log("fsdgfssgfr");
-        return (
-          "position: relative; display: inline-block; height: 5px; width: " +
-          this.get_seq_width(start_seq) / 3 +
-          "px; background-color: green; padding: 5px; text-align: center; border: 1px solid black;"
-        );
-      }
-    },
-    get_intron_style: function (start_seq, end_seq, exon) {
-      let width = this.get_width_intron(start_seq, end_seq);
-      if (this.is_dotted(exon.start_seq)) {
-        width += this.get_dotted_extra(end_seq);
-      }
+    get_exon_style: function (exon) {
       return (
-        "position: relative; display: inline-block; height: 5px; width: " +
-        width +
-        "px; background-color: gray; text-align: center;"
+        "position: relative;" +
+        "display: inline-block;" +
+        "background-color: #009688;" +
+        "height: 20px;" +
+        "text-align: center;" +
+        "border-left: 2px solid black;" +
+        "border-right: 2px solid black;" +
+        "vertical-align:middle;" +
+        "width: " +
+        this.get_width_exon(exon.start_seq, exon.end_seq) +
+        "px;"
+      );
+    },
+    get_multiple_exon_style: function (exon) {
+      return (
+        "position: relative;" +
+        "display: inline-block;" +
+        "height: 20px;" +
+        "background-color: #212121;" +
+        "text-align: center;" +
+        "border: 1px solid black;" +
+        "vertical-align:middle;" +
+        "width: " +
+        this.get_seq_width(exon.start_seq) / 3 +
+        "px; "
+      );
+    },
+    get_intron_style: function () {
+      return (
+        "position: relative;" +
+        "display: inline-block;" +
+        "height: 10px;" +
+        "background-color: #9E9E9E;" +
+        "text-align: center;" +
+        "vertical-align:middle;"
       );
     },
     get_width_exon: function (start_seq, end_seq) {
-      console.log("get_width exon");
       var start_el = document.getElementById(start_seq);
       var end_el = document.getElementById(end_seq);
       if (start_el) {
@@ -798,6 +805,10 @@ export default {
           return (
             end_rect.right - start_rect.right + this.get_dotted_extra(start_seq)
           );
+        } else if (this.is_dotted(end_seq)) {
+          return (
+            end_rect.left - start_rect.left + this.get_dotted_extra(end_seq)
+          );
         } else {
           return end_rect.right - start_rect.left;
         }
@@ -806,7 +817,6 @@ export default {
       }
     },
     get_width_intron: function (start_seq, end_seq) {
-      console.log("get_width intron");
       var start_el = document.getElementById(start_seq);
       var end_el = document.getElementById(end_seq);
       if (start_el) {
