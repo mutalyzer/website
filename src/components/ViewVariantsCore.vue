@@ -660,15 +660,30 @@ export default {
         this.selector.exon.g
       ) {
         for (const [i, exon] of this.selector.exon.g.entries()) {
-          const exon_start = exon[0];
-          const exon_end = exon[1];
-          exons[i] = { start: exon[0], end: exon[1] };
+          const exon_start = Number(exon[0]);
+          const exon_end = Number(exon[1]);
+          exons[i] = { start: exon_start, end: exon_end };
+          // console.log("==");
           for (const view of this.view.views) {
-            if (view.start + 1 <= exon_start && exon_start <= view.end) {
-              exons[i].start_seq = this.get_seq_id(view, exon_start);
-            }
-            if (view.start + 1 <= exon_end && exon_end <= view.end) {
-              exons[i].end_seq = this.get_seq_id(view, exon_end);
+            if (this.view.inverted) {
+              console.log("inverted");
+              console.log(view.start, view.end, exon_start, exon_end);
+              let view_start = this.view.seq_length - view.start;
+              let view_end = this.view.seq_length - view.end + 1;
+              // console.log(view_start, view_end);
+              if (view_start >= exon_start && exon_start >= view_end) {
+                exons[i].start_seq = this.get_seq_id(view, exon_start);
+              }
+              if (view_start >= exon_end && exon_end > view_end) {
+                exons[i].end_seq = this.get_seq_id(view, exon_end);
+              }
+            } else {
+              if (view.start + 1 <= exon_start && exon_start <= view.end) {
+                exons[i].start_seq = this.get_seq_id(view, exon_start);
+              }
+              if (view.start + 1 <= exon_end && exon_end <= view.end) {
+                exons[i].end_seq = this.get_seq_id(view, exon_end);
+              }
             }
           }
         }
@@ -748,24 +763,29 @@ export default {
               previous_exon.number = 2;
               previous_exon.style += "background-color: #212121;";
             } else {
-              console.log("here");
-              let f_intron = this._intron(exons[i - 1], exons[i]);
-              let width_intron = this.get_width_intron(
-                f_intron.start_seq,
-                f_intron.end_seq
-              );
-              if (this.is_dotted(exon.start_seq)) {
-                width_intron += this.get_dotted_extra(exon.start_seq);
+              console.log("gdfgdfgf", previous_exon.end + 1, exon.start);
+              if (Number(previous_exon.end) + 1 != exon.start) {
+                let f_intron = this._intron(exons[i - 1], exons[i]);
+                let width_intron = this.get_width_intron(
+                  f_intron.start_seq,
+                  f_intron.end_seq
+                );
+                if (this.is_dotted(exon.start_seq)) {
+                  width_intron += this.get_dotted_extra(exon.start_seq);
+                }
+                if (
+                  this.is_dotted(previous_exon.end_seq) &&
+                  previous_exon.start_seq != previous_exon.end_seq
+                ) {
+                  width_intron += this.get_dotted_extra(exon.start_seq);
+                }
+                f_intron.style += "width: " + width_intron + "px;";
+                features.push(f_intron);
+                features.push(this._exon(exon, i));
+              } else {
+                let f_exon = this._exon(exon, i);
+                features.push(f_exon);
               }
-              if (
-                this.is_dotted(previous_exon.end_seq) &&
-                previous_exon.start_seq != previous_exon.end_seq
-              ) {
-                width_intron += this.get_dotted_extra(exon.start_seq);
-              }
-              f_intron.style += "width: " + width_intron + "px;";
-              features.push(f_intron);
-              features.push(this._exon(exon, i));
             }
           }
           // ------------------------------

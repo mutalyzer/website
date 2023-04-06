@@ -418,41 +418,53 @@
             <v-expansion-panel-header class="overline"
               >Equivalent Descriptions</v-expansion-panel-header
             >
-            <v-expansion-panel-content class="pt-5">
-              <div
-                class="ml-4"
+            <v-expansion-panel-content>
+              <v-sheet
                 v-for="(values, c_s) in response.equivalent_descriptions"
                 :key="c_s"
               >
-                <span v-if="c_s == 'c'">Coding</span>
-                <span v-else-if="c_s == 'n'">Noncoding</span>
-                <span v-else-if="c_s == 'g'">Genomic</span>
-                <span v-else-if="c_s == 'p'"></span>
-                <span v-else> {{ c_s }} </span>
-                <div
-                  v-for="(equivalentDescription, index) in values"
-                  :key="index"
+                <v-subheader class="overline" v-if="c_s == 'c'"
+                  >Coding</v-subheader
                 >
-                  <template v-if="c_s === 'c'">
-                    <Description
-                      :description="equivalentDescription[0]"
-                      :css_class="'ok-description-link'"
-                      :to_name="'NormalizerAlt'"
-                      :to_params="{
-                        descriptionRouter: equivalentDescription[0],
-                      }"
-                    />
-                  </template>
-                  <template v-else>
-                    <Description
-                      :description="equivalentDescription"
-                      :css_class="'ok-description-link'"
-                      :to_name="'NormalizerAlt'"
-                      :to_params="{ descriptionRouter: equivalentDescription }"
-                    />
-                  </template>
-                </div>
-              </div>
+                <v-subheader class="overline" v-else-if="c_s == 'n'"
+                  >Noncoding</v-subheader
+                >
+                <v-subheader class="overline" v-else-if="c_s == 'g'"
+                  >Genomic</v-subheader
+                >
+                <v-subheader v-else-if="c_s == 'p'"></v-subheader>
+                <v-subheader v-else> {{ c_s }} </v-subheader>
+                <v-sheet v-for="(e_d, index) in values" :key="index">
+                  <v-hover v-slot="{ hover }">
+                    <v-sheet
+                      :color="hover ? 'grey lighten-3' : ''"
+                      class="pa-2 ma-1"
+                    >
+                      <template v-if="c_s === 'c'">
+                        <Description
+                          :description="e_d.description"
+                          :css_class="'ok-description-link'"
+                          :to_name="'NormalizerAlt'"
+                          :to_params="{
+                            descriptionRouter: e_d.description,
+                          }"
+                          :tag="e_d.tag"
+                          :selector="e_d.selector"
+                        />
+                      </template>
+                      <template v-else>
+                        <Description
+                          :description="e_d.description"
+                          :css_class="'ok-description-link'"
+                          :to_name="'NormalizerAlt'"
+                          :to_params="{ descriptionRouter: e_d.description }"
+                        />
+                      </template>
+                    </v-sheet>
+                  </v-hover>
+                  <v-divider v-if="index != values.length - 1"></v-divider>
+                </v-sheet>
+              </v-sheet>
             </v-expansion-panel-content>
           </v-expansion-panel>
         </v-expansion-panels>
