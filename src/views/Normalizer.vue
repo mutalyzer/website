@@ -604,6 +604,7 @@
                 :description="this.response.normalized_description"
                 :only_variants="this.response.only_variants"
                 :sequence="this.response.sequence"
+                :d_type="'normalized'"
                 :selector="this.response.selector_short"
               />
             </v-expansion-panel-content>

@@ -36,8 +36,8 @@
           <span
             v-for="(s, s_i) in v.sequence"
             :key="'s' + s_i"
-            :id="'seq-' + get_position(v, s_i, 'sequence')"
-            :ref="'seq-' + get_position(v, s_i, 'sequence')"
+            :id="get_html_id(get_position(v, s_i, 'sequence'))"
+            :ref="get_html_id(get_position(v, s_i, 'sequence'))"
           >
             <v-list-item-action class="ma-0 pa-0" style="min-width: unset">
               <v-menu>
@@ -69,8 +69,8 @@
           <span
             v-for="(s, s_i) in v.left"
             :key="'l' + s_i"
-            :id="'seq-' + get_position(v, s_i, 'sequence')"
-            :ref="'seq-' + get_position(v, s_i, 'sequence')"
+            :id="get_html_id(get_position(v, s_i, 'sequence'))"
+            :ref="get_html_id(get_position(v, s_i, 'sequence'))"
           >
             <v-list-item-action class="ma-0 pa-0" style="min-width: unset">
               <v-menu>
@@ -96,11 +96,14 @@
             </v-list-item-action>
           </span>
           <!-- middle dots -->
-          <div class="seq" :id="'seq-' + get_position_other(v, null, 'other')">
+          <div
+            class="seq"
+            :id="get_html_id(get_position_other(v, null, 'other'))"
+          >
             <v-tooltip top>
               <template v-slot:activator="{ on, attrs }">
                 <span
-                  :ref="'seq-' + get_position_other(v, null, 'other')"
+                  :ref="get_html_id(get_position_other(v, null, 'other'))"
                   class="seq-elem"
                   v-bind="attrs"
                   v-on="on"
@@ -115,7 +118,7 @@
           </div>
           <!-- right -->
           <span
-            :id="'seq-' + get_position(v, s_i, 'right')"
+            :id="get_html_id(get_position(v, s_i, 'right'))"
             v-for="(s, s_i) in v.right"
             :key="'r' + s_i"
           >
@@ -176,8 +179,8 @@
                 class="seq-elem"
                 v-for="(s, s_i) in v.deleted.sequence"
                 :key="'ds' + s_i"
-                :id="'seq-' + get_position(v, s_i, 'sequence')"
-                :ref="'seq-' + get_position(v, s_i, 'sequence')"
+                :id="get_html_id(get_position(v, s_i, 'sequence'))"
+                :ref="get_html_id(get_position(v, s_i, 'sequence'))"
               >
                 <v-tooltip top>
                   <template v-slot:activator="{ on, attrs }">
@@ -196,8 +199,8 @@
                 class="seq-elem"
                 v-for="(s, s_i) in v.deleted.left"
                 :key="s_i"
-                :id="'seq-' + get_position(v, s_i, 'left')"
-                :ref="'seq-' + get_position(v, s_i, 'left')"
+                :id="get_html_id(get_position(v, s_i, 'left'))"
+                :ref="get_html_id(get_position(v, s_i, 'left'))"
               >
                 <v-tooltip top>
                   <template v-slot:activator="{ on, attrs }">
@@ -213,7 +216,7 @@
             <div
               class="seqdel"
               v-if="v.deleted && v.deleted.right"
-              :id="'seq-' + get_position_other(v, null, 'other-deleted')"
+              :id="get_html_id(get_position_other(v, null, 'other-deleted'))"
             >
               <v-tooltip top>
                 <template v-slot:activator="{ on, attrs }">
@@ -239,8 +242,8 @@
                 class="seq-elem"
                 v-for="(s, s_i) in v.deleted.right"
                 :key="s_i"
-                :id="'seq-' + get_position(v, s_i, 'right-deleted')"
-                :ref="'seq-' + get_position(v, s_i, 'right-deleted')"
+                :id="get_html_id(get_position(v, s_i, 'right-deleted'))"
+                :ref="get_html_id(get_position(v, s_i, 'right-deleted'))"
               >
                 <v-tooltip top>
                   <template v-slot:activator="{ on, attrs }">
@@ -309,7 +312,7 @@
             <div class="seqdelequal" v-if="v.deleted && v.deleted.sequence">
               <span
                 class="seq-elem"
-                :id="'seq-' + get_position(v, s_i, 'sequence')"
+                :id="get_html_id(get_position(v, s_i, 'sequence'))"
                 v-for="(s, s_i) in v.deleted.sequence"
                 :key="'ds' + s_i"
               >
@@ -327,7 +330,7 @@
             <div class="seqdelequal" v-if="v.deleted && v.deleted.left">
               <span
                 class="seq-elem"
-                :id="'seq-' + get_position(v, s_i, 'left')"
+                :id="get_html_id(get_position(v, s_i, 'left'))"
                 v-for="(s, s_i) in v.deleted.left"
                 :key="s_i"
               >
@@ -345,7 +348,7 @@
             <div
               class="seqdelequal"
               v-if="v.deleted && v.deleted.right"
-              :id="'seq-' + get_position_other(v, null, 'other-deleted')"
+              :id="get_html_id(get_position_other(v, null, 'other-deleted'))"
             >
               <v-tooltip top>
                 <template v-slot:activator="{ on, attrs }">
@@ -364,7 +367,7 @@
             <div class="seqdelequal" v-if="v.deleted && v.deleted.right">
               <span
                 class="seq-elem"
-                :id="'seq-' + get_position(v, s_i, 'right-deleted')"
+                :id="get_html_id(get_position(v, s_i, 'right-deleted'))"
                 v-for="(s, s_i) in v.deleted.right"
                 :key="s_i"
               >
@@ -425,7 +428,7 @@ export default {
     this.hover_init();
   },
   mounted: function () {
-    this.$nextTick(function () {
+    this.nextTickSteroids(() => {
       var elmnt = document.getElementById("sense-arrow");
       elmnt.scrollIntoView({
         block: "nearest",
@@ -433,21 +436,36 @@ export default {
       });
       const features = this.get_features();
       this.features_boundaries = features;
-      this.$nextTick(function () {
+      this.nextTickSteroids(() => {
         var elmnt = document.getElementById(this.d_id + "_variant_1");
-        elmnt.scrollIntoView({
-          block: "nearest",
-          inline: "center",
-        });
+        if (elmnt) {
+          elmnt.scrollIntoView({
+            block: "nearest",
+            inline: "center",
+          });
+        }
       });
     });
   },
   methods: {
+    nextTickSteroids: function (callback) {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(callback);
+      });
+    },
+
+    get_html_id: function (position) {
+      return "seq_" + this.d_id + "-" + position;
+    },
     get_feature_tooltip: function (f) {
       if (f.type == "exon") {
         return "exon " + (f.number + 1) + " (" + f.start + ", " + f.end + ")";
       } else if (f.type == "multiple_exons") {
-        return f.number + " exons";
+        if (f.number > 1) {
+          return f.number + " exons";
+        } else {
+          return "1 exon";
+        }
       } else {
         return f.type;
       }
@@ -553,9 +571,9 @@ export default {
           (start <= location && location <= start_left) ||
           (end_right <= location && location <= end)
         ) {
-          return "seq-" + location;
+          return "seq_" + this.d_id + "-" + location;
         } else {
-          return "seq-" + start_left + "-" + end_right;
+          return "seq_" + this.d_id + "-" + start_left + "-" + end_right;
         }
       } else if (view.deleted && view.deleted.left) {
         const start = view.start + 1;
@@ -566,12 +584,12 @@ export default {
           (start <= location && location <= start_left - 1) ||
           (end_right <= location && location <= end)
         ) {
-          return "seq-" + location;
+          return "seq_" + this.d_id + "-" + location;
         } else {
-          return "seq-" + start_left + "-" + end_right;
+          return "seq_" + this.d_id + "-" + start_left + "-" + end_right;
         }
       } else {
-        return "seq-" + location;
+        return "seq_" + this.d_id + "-" + location;
       }
     },
     get_seq_id: function (view, location) {
@@ -587,9 +605,9 @@ export default {
           (start <= location && location <= start_left) ||
           (end_right <= location && location <= end)
         ) {
-          return "seq-" + location;
+          return "seq_" + this.d_id + "-" + location;
         } else {
-          return "seq-" + start_left + "-" + end_right;
+          return "seq_" + this.d_id + "-" + start_left + "-" + end_right;
         }
       } else if (view.deleted && view.deleted.left) {
         const start = view.start + 1;
@@ -600,12 +618,12 @@ export default {
           (start <= location && location <= start_left - 1) ||
           (end_right <= location && location <= end)
         ) {
-          return "seq-" + location;
+          return "seq_" + this.d_id + "-" + location;
         } else {
-          return "seq-" + start_left + "-" + end_right;
+          return "seq_" + this.d_id + "-" + start_left + "-" + end_right;
         }
       } else {
-        return "seq-" + location;
+        return "seq_" + this.d_id + "-" + location;
       }
     },
     is_dotted: function (seq) {
@@ -658,16 +676,23 @@ export default {
       const features = [];
       for (const [i, exon] of Object.entries(exons)) {
         console.log("\n\n----------");
-        console.log(exon.start_seq, exon.end_seq);
+        console.log(Number(i) + 1, exon.start_seq, exon.end_seq);
 
         if (i == 0) {
           let f_exon = this._exon(exon, i);
-          f_exon.style +=
-            "margin-left: " + this.get_margin(exon.start_seq) + "px;";
+          let margin = this.get_margin(exon.start_seq);
+          if (
+            exon.start_seq == exon.end_seq &&
+            this.is_dotted(exon.start_seq)
+          ) {
+            margin -= this.get_dotted_extra(exon.start_seq);
+          }
+          f_exon.style += "margin-left: " + margin + "px;";
           features.push(f_exon);
         } else {
           let previous_exon = features.slice(-1)[0];
 
+          // ------------------------------
           if (previous_exon.type == "multiple_exons") {
             console.log(" - multiple exons");
             if (
@@ -679,7 +704,6 @@ export default {
               previous_exon.end_seq != exon.start_seq &&
               exon.start_seq != exon.end_seq
             ) {
-              console.log("other");
               let f_intron = this._intron(exons[i - 1], exons[i]);
               f_intron.style +=
                 "width: " +
@@ -692,6 +716,7 @@ export default {
             ) {
               features.push(this._exon(exon, i));
             }
+            // ------------------------------
           } else {
             if (
               previous_exon.end_seq == exon.start_seq &&
@@ -703,12 +728,9 @@ export default {
               features.push(f_intron);
               features.push(this._exon(exon, i));
             } else if (
-              previous_exon.end_seq == exon.start_seq &&
+              previous_exon.start_seq != previous_exon.end_seq &&
               exon.start_seq == exon.end_seq
             ) {
-              previous_exon.type = "multiple_exons";
-              previous_exon.style = this.get_multiple_exon_style(previous_exon);
-            } else {
               let f_intron = this._intron(exons[i - 1], exons[i]);
               f_intron.style +=
                 "width: " +
@@ -716,10 +738,40 @@ export default {
                 "px;";
               features.push(f_intron);
               features.push(this._exon(exon, i));
+            } else if (
+              previous_exon.start_seq == previous_exon.end_seq &&
+              previous_exon.start_seq == exon.start_seq &&
+              exon.start_seq == exon.end_seq
+            ) {
+              console.log("converted");
+              previous_exon.type = "multiple_exons";
+              previous_exon.number = 2;
+              previous_exon.style += "background-color: #212121;";
+            } else {
+              console.log("here");
+              let f_intron = this._intron(exons[i - 1], exons[i]);
+              let width_intron = this.get_width_intron(
+                f_intron.start_seq,
+                f_intron.end_seq
+              );
+              if (this.is_dotted(exon.start_seq)) {
+                width_intron += this.get_dotted_extra(exon.start_seq);
+              }
+              if (
+                this.is_dotted(previous_exon.end_seq) &&
+                previous_exon.start_seq != previous_exon.end_seq
+              ) {
+                width_intron += this.get_dotted_extra(exon.start_seq);
+              }
+              f_intron.style += "width: " + width_intron + "px;";
+              features.push(f_intron);
+              features.push(this._exon(exon, i));
             }
           }
+          // ------------------------------
         }
       }
+      console.log(features);
       return features;
     },
     _intron: function (exon_before, exon_after) {
@@ -795,12 +847,16 @@ export default {
         const start_rect = start_el.getBoundingClientRect();
         const end_rect = end_el.getBoundingClientRect();
         if (this.is_dotted(start_seq) && this.is_dotted(end_seq)) {
-          return (
-            end_rect.left -
-            start_rect.right +
-            this.get_dotted_extra(start_seq) +
-            this.get_dotted_extra(end_seq)
-          );
+          if (start_seq == end_seq) {
+            return this.get_dotted_extra(start_seq);
+          } else {
+            return (
+              end_rect.left -
+              start_rect.right +
+              this.get_dotted_extra(start_seq) +
+              this.get_dotted_extra(end_seq)
+            );
+          }
         } else if (this.is_dotted(start_seq)) {
           return (
             end_rect.right - start_rect.right + this.get_dotted_extra(start_seq)

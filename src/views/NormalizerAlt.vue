@@ -333,7 +333,7 @@
                 <ViewVariantsCore
                   :view="this.response.view_corrected"
                   :influence="this.response.influence"
-                  :d_id="'normalize_corrected'"
+                  :d_id="'corrected'"
                   :selector="this.response.selector_short"
                   class="mt-5 mb-5"
                 />
@@ -351,7 +351,8 @@
                 v-if="this.response.normalized_description"
                 :view="this.response.view_normalized"
                 :influence="this.response.influence"
-                :d_id="'normalize_normalized'"
+                :d_id="'normalized'"
+                :selector="this.response.selector_short"
               />
             </v-expansion-panel-content>
           </v-expansion-panel>
