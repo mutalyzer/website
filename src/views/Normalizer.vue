@@ -396,7 +396,9 @@
                 <v-subheader class="overline" v-else-if="c_s == 'g'"
                   >Genomic</v-subheader
                 >
-                <v-subheader v-else-if="c_s == 'p'"></v-subheader>
+                <v-subheader class="overline" v-else-if="c_s == 'p'"
+                  >Protein</v-subheader
+                >
                 <v-subheader v-else> {{ c_s }} </v-subheader>
                 <v-sheet v-for="(e_d, index) in values" :key="index">
                   <v-hover v-slot="{ hover }">
