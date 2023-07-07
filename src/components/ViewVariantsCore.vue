@@ -651,9 +651,6 @@ export default {
       return margin;
     },
     get_features: function () {
-      
-      console.log(this.selector);
-      
       let exons = {};
       if (
         this.view &&
@@ -689,9 +686,6 @@ export default {
       }
       const features = [];
       for (const [i, exon] of Object.entries(exons)) {
-        // console.log("\n\n----------");
-        // console.log(Number(i) + 1, exon.start_seq, exon.end_seq);
-
         if (i == 0) {
           let f_exon = this._exon(exon, i);
           let margin = this.get_margin(exon.start_seq);
@@ -708,7 +702,6 @@ export default {
 
           // ------------------------------
           if (previous_exon.type == "multiple_exons") {
-            // console.log(" - multiple exons");
             if (
               previous_exon.end_seq == exon.start_seq &&
               exon.start_seq == exon.end_seq
@@ -719,11 +712,14 @@ export default {
               exon.start_seq != exon.end_seq
             ) {
               let f_intron = this._intron(exons[i - 1], exons[i]);
-              f_intron.style +=
-                "width: " +
-                this.get_width_intron(f_intron.start_seq, f_intron.end_seq) +
-                "px;";
+              let width_intron = this.get_width_intron(
+                f_intron.start_seq,
+                f_intron.end_seq
+              );
+              width_intron -= this.get_dotted_extra(f_intron.start_seq);
+              f_intron.style += "width: " + width_intron + "px;";
               features.push(f_intron);
+              features.push(this._exon(exon, i));
             } else if (
               previous_exon.end_seq == exon.start_seq &&
               exon.start_seq != exon.end_seq
@@ -737,6 +733,11 @@ export default {
               exon.start_seq != exon.end_seq
             ) {
               if (!this.is_dotted(exon.start_seq)) {
+                let f_intron = this._intron(exons[i - 1], exons[i]);
+                f_intron.style +=
+                  "width: " + this.get_dotted_extra(exon.start_seq) + "px;";
+                features.push(f_intron);
+              } else {
                 let f_intron = this._intron(exons[i - 1], exons[i]);
                 f_intron.style +=
                   "width: " + this.get_dotted_extra(exon.start_seq) + "px;";
@@ -924,8 +925,8 @@ export default {
         this.influence &&
         (this.influence.min_pos || this.influence.min_pos == 0) &&
         this.influence.max_pos &&
-        this.influence.min_pos <= this.get_position(v, s_i, key) &&
-        this.get_position(v, s_i, key) < this.influence.max_pos
+        this.influence.min_pos + 1 <= this.get_position(v, s_i, key) &&
+        this.get_position(v, s_i, key) <= this.influence.max_pos
       ) {
         return "seq-elem-influence";
       }
