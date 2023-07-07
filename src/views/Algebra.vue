@@ -225,46 +225,48 @@
                   {{ response.rhs_seq }}
                 </div>
               </div>
-              <div v-if="response.influence_lhs">
-                <div class="overline">LHS Influence Interval</div>
-                <div
-                  v-if="
-                    response.influence_lhs.hasOwnProperty('min_pos') &&
-                    response.influence_lhs.hasOwnProperty('max_pos')
-                  "
-                  class="sequence"
-                >
-                  {{ response.influence_lhs.min_pos }},
-                  {{ response.influence_lhs.max_pos }}
-                </div>
-                <div v-else class="sequence">Equal.</div>
+              <div v-if="response.supremal_lhs">
+                <div class="overline">LHS Supremal Representation</div>
+                <Description
+                  :description="response.supremal_lhs.hgvs"
+                  :css_class="'ok-description-link'"
+                  :to_name="'Normalizer'"
+                  :to_params="{ descriptionRouter: response.supremal_lhs.hgvs }"
+                  :to_query="getParams()"
+                />
+                <Description
+                  :description="response.supremal_lhs.spdi"
+                  :css_class="'ok-description'"
+                />
               </div>
-              <div v-if="response.influence_rhs">
-                <div class="overline">RHS Influence Interval</div>
-                <div
-                  v-if="
-                    response.influence_rhs.hasOwnProperty('min_pos') &&
-                    response.influence_rhs.hasOwnProperty('max_pos')
-                  "
-                  class="sequence"
-                >
-                  {{ response.influence_rhs.min_pos }},
-                  {{ response.influence_rhs.max_pos }}
-                </div>
-                <div v-else class="sequence">Equal.</div>
+              <div v-if="response.supremal_rhs">
+                <div class="overline">RHS Supremal Representation</div>
+                <Description
+                  :description="response.supremal_rhs.hgvs"
+                  :css_class="'ok-description-link'"
+                  :to_name="'Normalizer'"
+                  :to_params="{ descriptionRouter: response.supremal_rhs.hgvs }"
+                  :to_query="getParams()"
+                />
+                <Description
+                  :description="response.supremal_rhs.spdi"
+                  :css_class="'ok-description'"
+                />
               </div>
-              <div v-if="response.view_lhs">
+              <div v-if="response.view_lhs" class="mt-5">
+                <div class="overline">LHS Variants Overview</div>
                 <ViewVariantsCore
                   :view="response.view_lhs"
                   :influence="response.influence_lhs"
-                  :d_id="lhs"
+                  :d_id="'lhs'"
                 />
               </div>
-              <div v-if="response.view_rhs">
+              <div v-if="response.view_rhs" class="mt-5">
+                <div class="overline">RHS Variants Overview</div>
                 <ViewVariantsCore
                   :view="response.view_rhs"
                   :influence="response.influence_rhs"
-                  :d_id="rhs"
+                  :d_id="'rhs'"
                 />
               </div>
             </v-expansion-panel-content>
