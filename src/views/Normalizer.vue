@@ -384,7 +384,9 @@
             >
             <v-expansion-panel-content>
               <v-sheet
-                v-for="(values, c_s) in response.equivalent_descriptions"
+                v-for="c_s in get_equivalent_descriptions(
+                  response.equivalent_descriptions
+                )"
                 :key="c_s"
               >
                 <v-subheader class="overline" v-if="c_s == 'c'"
@@ -400,7 +402,12 @@
                   >Protein</v-subheader
                 >
                 <v-subheader v-else> {{ c_s }} </v-subheader>
-                <v-sheet v-for="(e_d, index) in values" :key="index">
+                <v-sheet
+                  v-for="(e_d, index) in sorted_equivalent(
+                    response.equivalent_descriptions[c_s]
+                  )"
+                  :key="index"
+                >
                   <v-hover v-slot="{ hover }">
                     <v-sheet
                       :color="hover ? 'grey lighten-3' : ''"
@@ -428,7 +435,11 @@
                       </template>
                     </v-sheet>
                   </v-hover>
-                  <v-divider v-if="index != values.length - 1"></v-divider>
+                  <v-divider
+                    v-if="
+                      index != response.equivalent_descriptions[c_s].length - 1
+                    "
+                  ></v-divider>
                 </v-sheet>
               </v-sheet>
             </v-expansion-panel-content>
@@ -990,6 +1001,30 @@ export default {
           sequence: this.sequence,
         };
       }
+    },
+    get_equivalent_descriptions: function (equivalent) {
+      var c_s_mapping = {
+        g: "Genomic",
+        c: "Coding",
+        n: "Noncoding",
+        p: "Protein",
+      };
+      var c_s_l = [];
+      for (let c_s in c_s_mapping) {
+        if (equivalent[c_s]) {
+          c_s_l.push(c_s);
+        }
+      }
+      return c_s_l;
+    },
+    sorted_equivalent: function (descriptions) {
+      const sorted = [...descriptions].sort((a, b) => {
+        if (a.tag && !b.tag) {
+          return -1;
+        }
+        return 0;
+      });
+      return sorted;
     },
     setSequenceExample: function () {
       this.inputDescriptionTextBox = "2del";
