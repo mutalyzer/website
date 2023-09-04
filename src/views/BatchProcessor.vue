@@ -301,9 +301,11 @@ export default {
         if (
           variant.response &&
           variant.response.equivalent_descriptions &&
-          variant.response.equivalent_descriptions.g
+          variant.response.equivalent_descriptions.g &&
+          variant.response.equivalent_descriptions.g.length == 1 &&
+          variant.response.equivalent_descriptions.g[0].description
         ) {
-          row.push(variant.response.equivalent_descriptions.g[0]);
+          row.push(variant.response.equivalent_descriptions.g[0].description);
         } else {
           row.push("N/A");
         }
