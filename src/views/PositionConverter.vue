@@ -321,22 +321,32 @@
                 v-for="(values, c_s) in response.overlap"
                 :key="c_s"
               >
-                <span v-if="c_s == 'c'">Coding</span>
-                <span v-else-if="c_s == 'n'">Noncoding</span>
-                <span v-else-if="c_s == 'g'">Genomic</span>
-                <span v-else> {{ c_s }} </span>
-                <div v-for="(overlap_model, index) in values" :key="index">
-                  <template v-if="c_s === 'c'">
-                    <span class="ok-description">
-                      {{ modelToDescription(overlap_model) }}
-                    </span>
-                  </template>
-                  <template v-else>
-                    <span class="ok-description">
-                      {{ modelToDescription(overlap_model) }}
-                    </span>
-                  </template>
-                </div>
+                <v-subheader class="overline" v-if="c_s == 'c'"
+                  >Coding</v-subheader
+                >
+                <v-subheader class="overline" v-else-if="c_s == 'n'"
+                  >Noncoding</v-subheader
+                >
+                <v-subheader class="overline" v-else-if="c_s == 'g'"
+                  >Genomic</v-subheader
+                >
+                <v-subheader class="overline" v-else> {{ c_s }} </v-subheader>
+                <v-sheet v-for="(overlap_model, index) in values" :key="index">
+                  <v-hover v-slot="{ hover }">
+                    <v-sheet
+                      :color="hover ? 'grey lighten-3' : ''"
+                      class="pa-2 ma-1"
+                    >
+                      <Description
+                        :description="
+                          modelToDescription(overlap_model['description'])
+                        "
+                        :css_class="'ok-description'"
+                      />
+                    </v-sheet>
+                  </v-hover>
+                  <v-divider v-if="index != values.length - 1"></v-divider>
+                </v-sheet>
               </div>
             </v-expansion-panel-content>
           </v-expansion-panel>
@@ -360,11 +370,13 @@ import DescriptionModel from "../mixins/DescriptionModel.js";
 import MutalyzerService from "../services/MutalyzerService.js";
 import JsonPretty from "../components/JsonPretty.vue";
 import SyntaxError from "../components/SyntaxError.vue";
+import Description from "../components/Description.vue";
 
 export default {
   components: {
     JsonPretty,
     SyntaxError,
+    Description,
   },
   mixins: [DescriptionModel],
   data: () => ({
