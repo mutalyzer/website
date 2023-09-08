@@ -7,7 +7,7 @@
           The Batch Processor can be used to process up to 50 descriptions with
           the Normalizer.
         </p>
-        <v-sheet elevation="2" class="pa-10 mt-10">
+        <v-sheet v-if="!(progress || done)" elevation="2" class="pa-10 mt-10">
           <v-file-input
             truncate-length="15"
             v-model="filePath"
@@ -41,8 +41,12 @@
         </v-alert>
 
         <v-sheet v-if="progress || done" elevation="2" class="pa-10 mt-10">
-          <p v-if="progress">Processing {{ variants.length }} variants ...</p>
-          <p v-if="done">Done!</p>
+          <p v-if="progress">
+            Processing {{ variants.length }} variants from file '{{
+              filePath.name
+            }}' ...
+          </p>
+          <p v-if="done">Done processing file '{{ filePath.name }}'!</p>
 
           <v-progress-linear :value="progressValue"></v-progress-linear>
 
@@ -63,7 +67,15 @@
             Hide Details
           </v-btn>
           <v-btn v-if="done" class="ml-5 mt-5" color="primary" @click="getCsv">
-            Download
+            Download Output File
+          </v-btn>
+          <v-btn
+            v-if="done"
+            class="ml-5 mt-5"
+            color="primary"
+            @click="$router.go()"
+          >
+            New Batch Check
           </v-btn>
         </v-sheet>
 
