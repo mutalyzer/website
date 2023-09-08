@@ -219,9 +219,18 @@ export default {
       reader.readAsText(this.filePath);
       reader.onload = () => {
         this.fileData = reader.result;
-        for (let variant of this.fileData.split(/\r?\n/)) {
-          if (variant) {
-            this.variants.push({ input: variant, progress: true });
+        for (let line of this.fileData.split(/\r?\n/)) {
+          if (line) {
+            var tabs = line.trim().split("\t");
+            if (tabs.length == 1) {
+              this.variants.push({ input: tabs[0], progress: true });
+            } else if (tabs.length == 2) {
+              this.variants.push({
+                input: tabs[0],
+                progress: true,
+                input_selector_id: tabs[1],
+              });
+            }
           }
         }
         if (this.variants.length > 50) {
@@ -281,13 +290,32 @@ export default {
     },
     getCsv() {
       let rows = [
-        ["Input", "Status", "Normalized", "DNA g.", "RNA", "Protein"],
+        [
+          "Input description",
+          "Input selector ID",
+          "Status",
+          "Normalized",
+          "DNA g.",
+          "DNA selector c.",
+          "RNA",
+          "Protein",
+        ],
       ];
       for (let variant of this.variants) {
+        // Input description
         let row = [variant.input];
+
+        // Input selector ID
+        if (variant.input_selector_id) {
+          row.push(variant.input_selector_id);
+        } else {
+          row.push("N/A");
+        }
+
+        // Status & Normalized
         if ((variant.response && variant.response.errors) || variant.error) {
           row.push("Failed");
-          row.push("");
+          row.push("N/A");
         } else if (
           variant.response.normalized_description &&
           variant.response.normalized_description != variant.input
@@ -298,6 +326,8 @@ export default {
           row.push("Success");
           row.push(variant.response.normalized_description);
         }
+
+        // DNA g.
         if (
           variant.response &&
           variant.response.equivalent_descriptions &&
@@ -309,6 +339,11 @@ export default {
         } else {
           row.push("N/A");
         }
+
+        // DNA selector c.
+        row.push(this.getDnaC(variant));
+
+        // DNA g.
         if (
           variant.response &&
           variant.response.rna &&
@@ -318,6 +353,8 @@ export default {
         } else {
           row.push("N/A");
         }
+
+        // Protein
         if (
           variant.response &&
           variant.response.protein &&
@@ -338,6 +375,43 @@ export default {
       download_link.setAttribute("download", "batch_output.csv");
       document.body.appendChild(download_link);
       download_link.click();
+    },
+    getDnaC: function (variant) {
+      if (variant.input_selector_id) {
+        if (
+          variant.response &&
+          variant.response.equivalent_descriptions &&
+          variant.response.equivalent_descriptions.c
+        ) {
+          for (let equivalent of variant.response.equivalent_descriptions.c) {
+            if (variant.input_selector_id === equivalent.selector.id) {
+              return equivalent.description;
+            }
+          }
+        }
+      } else if (
+        variant.response &&
+        variant.response.normalized_description &&
+        variant.response.normalized_model.coordinate_system &&
+        variant.response.normalized_model.coordinate_system == "g" &&
+        variant.response.equivalent_descriptions &&
+        variant.response.equivalent_descriptions.c
+      ) {
+        if (variant.response.equivalent_descriptions.c.length == 1) {
+          return variant.response.equivalent_descriptions.c[0].description;
+        } else {
+          for (let equivalent of variant.response.equivalent_descriptions.c) {
+            if (
+              equivalent.tag &&
+              equivalent.tag.details &&
+              equivalent.tag.details == "MANE Select"
+            ) {
+              return equivalent.description;
+            }
+          }
+        }
+      }
+      return "N/A";
     },
     getNormalizedColor: function (variant) {
       if (variant.response && variant.response.normalized_description) {
