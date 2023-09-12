@@ -3,11 +3,67 @@
     <v-layout>
       <v-flex xs12>
         <h1 class="display-1 mt-10">Batch Processor</h1>
-        <p>
-          The Batch Processor can be used to process up to 50 descriptions with
-          the Normalizer.
-        </p>
-        <v-sheet v-if="!(progress || done)" elevation="2" class="pa-10 mt-10">
+
+        <v-expansion-panels flat hover>
+          <v-expansion-panel>
+            <v-expansion-panel-header expand-icon="mdi-help" disable-icon-rotate
+              >Process up to 50 descriptions with the
+              Normalizer.</v-expansion-panel-header
+            >
+            <v-expansion-panel-content color="grey lighten-5">
+              <h4 class="mt-5">Input file format</h4>
+              <p>
+                The Batch Processor accepts a <b>tab</b> delimited text file as
+                input. Each row consists of a variant description and an
+                optional second field as a coding transcript ID. Note that empty
+                lines are removed from the batch input file and that no
+                header-row is accepted.
+              </p>
+              <v-btn class="mb-5" depressed @click="getInputFileExample">
+                Download Input File Example
+                <v-icon right dark> mdi-file-download </v-icon>
+              </v-btn>
+              <h4>Output file format</h4>
+              <p>
+                The output of a Mutalyzer Batch Processor is a
+                <b>tab</b> delimited CSV file, which has a header-row to clarify
+                the results. We recommend opening the file in a spreadsheet
+                program, such as OpenOffice Calc or Microsoft Excel.
+              </p>
+              <v-simple-table>
+                <template v-slot:default>
+                  <thead>
+                    <tr>
+                      <th
+                        v-for="item in getHeaderRow()[0]"
+                        :key="item"
+                        class="text-left"
+                      >
+                        <v-tooltip bottom>
+                          <template v-slot:activator="{ on, attrs }">
+                            <span v-bind="attrs" v-on="on">{{ item }}</span>
+                          </template>
+                          <span>{{ getHeaderTooltip(item) }}</span>
+                        </v-tooltip>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="(row, i) in getExampleRows()" :key="i">
+                      <td v-for="(item, j) in row" :key="j">{{ item }}</td>
+                    </tr>
+                  </tbody>
+                </template>
+              </v-simple-table>
+              <v-btn class="mt-5 mb-5" depressed @click="getOutputFileExample">
+                Download Output File Example
+                <v-icon right dark> mdi-file-download </v-icon>
+              </v-btn>
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+        </v-expansion-panels>
+
+        <v-sheet v-if="!(progress || done)" elevation="2" class="pa-5 mt-10">
           <v-file-input
             truncate-length="15"
             v-model="filePath"
@@ -68,6 +124,7 @@
           </v-btn>
           <v-btn v-if="done" class="ml-5 mt-5" color="primary" @click="getCsv">
             Download Output File
+            <v-icon right dark> mdi-file-download </v-icon>
           </v-btn>
           <v-btn
             v-if="done"
@@ -300,19 +357,61 @@ export default {
           });
       }
     },
-    getCsv() {
-      let rows = [
-        [
-          "Input description",
-          "Input selector ID",
-          "Status",
-          "Normalized",
-          "DNA g.",
-          "DNA selector c.",
-          "RNA",
-          "Protein",
-        ],
+    getHeaderTooltip(header) {
+      if (header == "Input description") {
+        return "The description present in the input file";
+      } else if (header == "Input selector ID") {
+        return "The selector ID present in the input file";
+      } else if (header == "Status") {
+        return "The status of the normalization procedure";
+      } else if (header == "Normalized") {
+        return "The normalized description";
+      } else if (header == "DNA g.") {
+        return "The equivalent genomic description";
+      } else if (header == "DNA selector c.") {
+        return "If an input selector ID was specified then this is the equivalent coding description for that selector";
+      } else if (header == "RNA") {
+        return "The predicted RNA description for normalized description (or the equivalent c. description)";
+      } else if (header == "Protein") {
+        return "The predicted RNA description for normalized description (or the equivalent c. description)";
+      }
+    },
+    getInputRows() {
+      return [
+        ["NG_012337.3(NM_003002.4):c.274G>T"],
+        ["NG_012337.3:g.4830del"],
+        ["NG_012337.3:g.4830del", "NM_012459.4"],
+        ["NG_012337.3(SDHD_v001):c.274G>T"],
+        ["NC_000011.10:g.112088971del"],
+        ["NC_000011.10:g.112088971d"],
       ];
+    },
+    getInputFileExample() {
+      let rows = this.getInputRows();
+      let outputContent =
+        "data:text/csv;charset=utf-8," +
+        rows.map((e) => e.join("\t")).join("\n");
+      var encodedUri = encodeURI(outputContent);
+      var download_link = document.createElement("a");
+      download_link.setAttribute("href", encodedUri);
+      download_link.setAttribute("download", "example_batch_input.csv");
+      document.body.appendChild(download_link);
+      download_link.click();
+    },
+    getOutputFileExample() {
+      let rows = [...this.getHeaderRow(), ...this.getExampleRows()];
+      let outputContent =
+        "data:text/csv;charset=utf-8," +
+        rows.map((e) => e.join("\t")).join("\n");
+      var encodedUri = encodeURI(outputContent);
+      var download_link = document.createElement("a");
+      download_link.setAttribute("href", encodedUri);
+      download_link.setAttribute("download", "example_batch_output.csv");
+      document.body.appendChild(download_link);
+      download_link.click();
+    },
+    getRows() {
+      let rows = [];
       for (let variant of this.variants) {
         // Input description
         let row = [variant.input];
@@ -378,6 +477,90 @@ export default {
         }
         rows.push(row);
       }
+      return rows;
+    },
+    getExampleRows() {
+      return [
+        [
+          "NG_012337.3(NM_003002.4):c.274G>T",
+          "N/A",
+          "Success",
+          "NG_012337.3(NM_003002.4):c.274G>T",
+          "NG_012337.3:g.7125G>T",
+          "N/A",
+          "NG_012337.3(NM_003002.4):r.(274g>u)",
+          "NG_012337.3(NP_002993.1):p.(Asp92Tyr)",
+        ],
+        [
+          "NG_012337.3:g.4830del",
+          "N/A",
+          "Success",
+          "NG_012337.3:g.4830del",
+          "N/A",
+          "N/A",
+          "N/A",
+          "N/A",
+        ],
+        [
+          "NG_012337.3:g.4830del",
+          "NM_012459.4",
+          "Success",
+          "NG_012337.3:g.4830del",
+          "N/A",
+          "NG_012337.3(NM_012459.4):c.49del",
+          "N/A",
+          "N/A",
+        ],
+        [
+          "NG_012337.3(SDHD_v001):c.274G>T",
+          "N/A",
+          "Corrected",
+          "NG_012337.3(NM_003002.4):c.274G>T",
+          "NG_012337.3:g.7125G>T",
+          "N/A",
+          "NG_012337.3(NM_003002.4):r.(274g>u)",
+          "NG_012337.3(NP_002993.1):p.(Asp92Tyr)",
+        ],
+        [
+          "NC_000011.10:g.112088971del",
+          "N/A",
+          "Success",
+          "NC_000011.10:g.112088971del",
+          "N/A",
+          "NC_000011.10(NM_003002.4):c.274del",
+          "N/A",
+          "N/A",
+        ],
+        [
+          "NC_000011.10:g.112088971d",
+          "N/A",
+          "Failed",
+          "N/A",
+          "N/A",
+          "N/A",
+          "N/A",
+          "N/A",
+        ],
+      ];
+    },
+    getHeaderRow() {
+      return [
+        [
+          "Input description",
+          "Input selector ID",
+          "Status",
+          "Normalized",
+          "DNA g.",
+          "DNA selector c.",
+          "RNA",
+          "Protein",
+        ],
+      ];
+    },
+    getCsv() {
+      let rows = [].concat(this.getHeaderRow(), this.getRows());
+      console.log(rows);
+
       let outputContent =
         "data:text/csv;charset=utf-8," +
         rows.map((e) => e.join("\t")).join("\n");
