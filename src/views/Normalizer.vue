@@ -1019,10 +1019,10 @@ export default {
     },
     sorted_equivalent: function (descriptions) {
       const sorted = [...descriptions].sort((a, b) => {
-        if (a.tag && !b.tag) {
-          return -1;
-        }
-        return 0;
+        if (a.tag && !b.tag) return -1;
+        if (!a.tag && b.tag) return 1;
+        if (a.description > b.description) return -1;
+        if (a.description < b.description) return 1;
       });
       return sorted;
     },
