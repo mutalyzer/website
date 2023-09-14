@@ -15,9 +15,9 @@
               <p>
                 The Batch Processor accepts a <b>tab</b> delimited text file as
                 input. Each row consists of a variant description and an
-                optional second field as a coding transcript ID. Note that empty
-                lines are removed from the batch input file and that no
-                header-row is accepted.
+                optional second field as a selector (coding transcript) ID. Note
+                that empty lines are removed from the batch input file and that
+                no header-row is accepted.
               </p>
               <v-btn class="mb-5" depressed @click="getInputFileExample">
                 Download Input File Example
@@ -25,10 +25,18 @@
               </v-btn>
               <h4>Output file format</h4>
               <p>
-                The output of a Mutalyzer Batch Processor is a
-                <b>tab</b> delimited CSV file, which has a header-row to clarify
-                the results. We recommend opening the file in a spreadsheet
-                program, such as OpenOffice Calc or Microsoft Excel.
+                The output of the Batch Processor is a <b>tab</b> delimited CSV
+                file, which has a header-row to clarify the results. We
+                recommend opening the file in a spreadsheet program, such as
+                OpenOffice Calc or Microsoft Excel. Please check the table below
+                for details regarding each column output. Note that the
+                descriptions present in the
+                <span class="font-weight-medium">RNA</span> and
+                <span class="font-weight-medium">Protein</span> columns are
+                relative to the input description if the input description
+                contains a coding transcript, otherwise to the transcript
+                mentioned in the second column of the input file or to the only
+                MANE transcript present in the reference sequence.
               </p>
               <v-simple-table>
                 <template v-slot:default>
@@ -409,12 +417,12 @@ export default {
         }
       } else if (j == 3) {
         if (item == "N/A" && row[2] == "Failed") {
-          return "There is no normalized description since normalization failed.";
+          return "No normalized description since normalization failed.";
         }
       } else if (j == 4) {
         if (item == "N/A") {
           if (row[2] == "Failed") {
-            return "There is no equivalent genomic description since normalization failed.";
+            return "No equivalent genomic description since normalization failed.";
           } else {
             return "The normalized description (previous column) is also the genomic one.";
           }
@@ -422,15 +430,47 @@ export default {
       } else if (j == 5) {
         if (item == "N/A") {
           if (row[2] == "Failed") {
-            return "There is description since normalization failed.";
+            return "No description since normalization failed.";
           } else if (row[1] == "N/A") {
-            return "There was no selector ID present in the input file.";
+            return "No description since there was no selector ID present in the input file and no equivalent MANE transcript within the equivalent descriptions.";
           }
         } else if (item) {
           if (row[1] == "N/A") {
             return "The equivalent coding description for the only MANE transcript.";
           } else if (row[1]) {
             return "The equivalent coding description for the selector ID present in the input file.";
+          }
+        }
+      } else if (j == 6) {
+        if (item == "N/A") {
+          if (row[2] == "Failed") {
+            return "No description since normalization failed.";
+          } else if (row[1] == "N/A" && row[5] == "N/A") {
+            return "No RNA prediction since there was no selector ID present in the input file and no equivalent MANE transcript within the equivalent descriptions.";
+          }
+        } else if (item) {
+          if (row[4] != "N/A") {
+            return "The predicted RNA description for the input description.";
+          } else if (row[1] != "N/A" && row[5] != "N/A") {
+            return "The predicted RNA description for the selector ID present in the input file.";
+          } else {
+            return "The predicted RNA description for the MANE transcript.";
+          }
+        }
+      } else if (j == 7) {
+        if (item == "N/A") {
+          if (row[2] == "Failed") {
+            return "No description since normalization failed.";
+          } else if (row[1] == "N/A" && row[5] == "N/A") {
+            return "No protein prediction since there was no selector ID present in the input file and no equivalent MANE selector ID within the equivalent descriptions.";
+          }
+        } else if (item) {
+          if (row[4] != "N/A") {
+            return "The predicted protein description for the input description.";
+          } else if (row[1] != "N/A" && row[5] != "N/A") {
+            return "The predicted protein description for the selector ID present in the input file.";
+          } else {
+            return "The predicted protein description for the MANE transcript.";
           }
         }
       }
