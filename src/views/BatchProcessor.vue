@@ -50,7 +50,14 @@
                   </thead>
                   <tbody>
                     <tr v-for="(row, i) in getExampleRows()" :key="i">
-                      <td v-for="(item, j) in row" :key="j">{{ item }}</td>
+                      <td v-for="(item, j) in row" :key="j">
+                        <v-tooltip bottom>
+                          <template v-slot:activator="{ on, attrs }">
+                            <span v-bind="attrs" v-on="on">{{ item }}</span>
+                          </template>
+                          <span>{{ getRowTooltip(row, i, item, j) }}</span>
+                        </v-tooltip>
+                      </td>
                     </tr>
                   </tbody>
                 </template>
@@ -266,6 +273,7 @@ export default {
     fileData: null,
     validVariantsNumber: true,
     variants: [],
+    processed_number: 0,
     progress: false,
     progressValue: 0,
     done: false,
@@ -310,26 +318,31 @@ export default {
         }
       };
     },
+
     batchCheck() {
       this.progress = true;
-      let i = 0;
-
       for (let variant of this.variants) {
         MutalyzerService.normalizeHgvs(variant.input)
           .then((response) => {
             if (response.data) {
-              i += 1;
-              // variant.response = response.data;
               Vue.set(variant, "response", response.data);
-              this.progressValue = (i / this.variants.length) * 100;
-              if (i == this.variants.length) {
-                this.progress = false;
-                this.done = true;
+
+              let dna_c = this.getDnaC(variant);
+              if (dna_c && dna_c != "N/A") {
+                MutalyzerService.normalizeHgvs(dna_c)
+                  .then((response) => {
+                    Vue.set(variant, "dna_c", response.data);
+                    this.updateStatus();
+                  })
+                  .catch(() => {
+                    this.updateStatus();
+                  });
+              } else {
+                this.updateStatus();
               }
             }
           })
           .catch((error) => {
-            i += 1;
             if (error.response) {
               if (
                 error.response.status == 422 &&
@@ -349,32 +362,80 @@ export default {
             } else {
               variant.error = { details: "Some error occured." };
             }
-            this.progressValue = (i / this.variants.length) * 100;
-            if (i == this.variants.length) {
-              this.progress = false;
-              this.done = true;
-            }
+            this.updateStatus();
           });
+      }
+    },
+    updateStatus() {
+      this.processed_number += 1;
+      this.progressValue = (this.processed_number / this.variants.length) * 100;
+      if (this.processed_number == this.variants.length) {
+        this.progress = false;
+        this.done = true;
       }
     },
     getHeaderTooltip(header) {
       if (header == "Input description") {
-        return "The description present in the input file";
+        return "The description present in the input file.";
       } else if (header == "Input selector ID") {
-        return "The selector ID present in the input file";
+        return "The selector ID present in the input file.";
       } else if (header == "Status") {
-        return "The status of the normalization procedure";
+        return "The status of the normalization procedure.";
       } else if (header == "Normalized") {
-        return "The normalized description";
+        return "The normalized description.";
       } else if (header == "DNA g.") {
-        return "The equivalent genomic description";
+        return "The equivalent genomic description.";
       } else if (header == "DNA selector c.") {
-        return "If an input selector ID was specified then this is the equivalent coding description for that selector";
+        return "If an input selector ID was specified then this is the equivalent coding description for that selector.";
       } else if (header == "RNA") {
-        return "The predicted RNA description for normalized description (or the equivalent c. description)";
+        return "The predicted RNA description from the normalized description (or the equivalent c. description).";
       } else if (header == "Protein") {
-        return "The predicted RNA description for normalized description (or the equivalent c. description)";
+        return "The predicted RNA description from the normalized description (or the equivalent c. description).";
       }
+    },
+    getRowTooltip(row, i, item, j) {
+      let header = this.getHeaderRow()[0];
+      if (j == 1) {
+        if (item == "N/A") {
+          return "There was no selector ID present in the input file.";
+        }
+      } else if (j == 2) {
+        if (item == "Success") {
+          return "The input description was correct.";
+        } else if (item == "Corrected") {
+          return "The input description was corrected.";
+        } else if (item == "Failed") {
+          return "Mutalyzer was not able to normalize the input description.";
+        }
+      } else if (j == 3) {
+        if (item == "N/A" && row[2] == "Failed") {
+          return "There is no normalized description since normalization failed.";
+        }
+      } else if (j == 4) {
+        if (item == "N/A") {
+          if (row[2] == "Failed") {
+            return "There is no equivalent genomic description since normalization failed.";
+          } else {
+            return "The normalized description (previous column) is also the genomic one.";
+          }
+        }
+      } else if (j == 5) {
+        if (item == "N/A") {
+          if (row[2] == "Failed") {
+            return "There is description since normalization failed.";
+          } else if (row[1] == "N/A") {
+            return "There was no selector ID present in the input file.";
+          }
+        } else if (item) {
+          if (row[1] == "N/A") {
+            return "The equivalent coding description for the only MANE transcript.";
+          } else if (row[1]) {
+            return "The equivalent coding description for the selector ID present in the input file.";
+          }
+        }
+      }
+
+      return this.getHeaderTooltip(header[j]);
     },
     getInputRows() {
       return [
@@ -383,6 +444,7 @@ export default {
         ["NG_012337.3:g.4830del", "NM_012459.4"],
         ["NG_012337.3(SDHD_v001):c.274G>T"],
         ["NC_000011.10:g.112088971del"],
+        ["NC_000011.10(NM_003002.4):c.274del", "NM_001276504.2"],
         ["NC_000011.10:g.112088971d"],
       ];
     },
@@ -454,13 +516,19 @@ export default {
         // DNA selector c.
         row.push(this.getDnaC(variant));
 
-        // DNA g.
+        // RNA
         if (
           variant.response &&
           variant.response.rna &&
           variant.response.rna.description
         ) {
           row.push(variant.response.rna.description);
+        } else if (
+          variant.dna_c &&
+          variant.dna_c.rna &&
+          variant.dna_c.rna.description
+        ) {
+          row.push(variant.dna_c.rna.description);
         } else {
           row.push("N/A");
         }
@@ -472,6 +540,12 @@ export default {
           variant.response.protein.description
         ) {
           row.push(variant.response.protein.description);
+        } else if (
+          variant.dna_c &&
+          variant.dna_c.protein &&
+          variant.dna_c.protein.description
+        ) {
+          row.push(variant.dna_c.protein.description);
         } else {
           row.push("N/A");
         }
@@ -508,8 +582,8 @@ export default {
           "NG_012337.3:g.4830del",
           "N/A",
           "NG_012337.3(NM_012459.4):c.49del",
-          "N/A",
-          "N/A",
+          "NG_012337.3(NM_012459.4):r.(49del)",
+          "NG_012337.3(NP_036591.3):p.(Ala17Profs*32)",
         ],
         [
           "NG_012337.3(SDHD_v001):c.274G>T",
@@ -528,8 +602,18 @@ export default {
           "NC_000011.10:g.112088971del",
           "N/A",
           "NC_000011.10(NM_003002.4):c.274del",
-          "N/A",
-          "N/A",
+          "NC_000011.10(NM_003002.4):r.(274del)",
+          "NC_000011.10(NP_002993.1):p.(Asp92Thrfs*43)",
+        ],
+        [
+          "NC_000011.10(NM_003002.4):c.274del",
+          "NM_001276504.2",
+          "Success",
+          "NC_000011.10(NM_003002.4):c.274del",
+          "NC_000011.10:g.112088971del",
+          "NC_000011.10(NM_001276504.2):c.157del",
+          "NC_000011.10(NM_003002.4):r.(274del)",
+          "NC_000011.10(NP_002993.1):p.(Asp92Thrfs*43)",
         ],
         [
           "NC_000011.10:g.112088971d",
@@ -559,8 +643,6 @@ export default {
     },
     getCsv() {
       let rows = [].concat(this.getHeaderRow(), this.getRows());
-      console.log(rows);
-
       let outputContent =
         "data:text/csv;charset=utf-8," +
         rows.map((e) => e.join("\t")).join("\n");
