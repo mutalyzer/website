@@ -13,7 +13,7 @@
             <v-expansion-panel-content color="grey lighten-5">
               <h4 class="mt-5">Input file format</h4>
               <p>
-                The Batch Processor accepts a <b>tab</b> delimited text file as
+                The Batch Processor accepts a <b>tab</b> delimited file as
                 input. Each row consists of a variant description and an
                 optional second field as a selector (coding transcript) ID. Note
                 that empty lines are removed from the batch input file and that
@@ -25,7 +25,7 @@
               </v-btn>
               <h4>Output file format</h4>
               <p>
-                The output of the Batch Processor is a <b>tab</b> delimited CSV
+                The output of the Batch Processor is a <b>tab</b> delimited
                 file, which has a header-row to clarify the results. We
                 recommend opening the file in a spreadsheet program, such as
                 OpenOffice Calc or Microsoft Excel. Please check the table below
@@ -391,9 +391,9 @@ export default {
         return "The status of the normalization procedure.";
       } else if (header == "Normalized") {
         return "The normalized description.";
-      } else if (header == "DNA g.") {
+      } else if (header == "DNA genomic") {
         return "The equivalent genomic description.";
-      } else if (header == "DNA selector c.") {
+      } else if (header == "DNA transcript") {
         return "If an input selector ID was specified then this is the equivalent coding description for that selector.";
       } else if (header == "RNA") {
         return "The predicted RNA description from the normalized description (or the equivalent c. description).";
@@ -540,7 +540,7 @@ export default {
           row.push(variant.response.normalized_description);
         }
 
-        // DNA g.
+        // DNA genomic
         if (
           variant.response &&
           variant.response.equivalent_descriptions &&
@@ -553,7 +553,7 @@ export default {
           row.push("N/A");
         }
 
-        // DNA selector c.
+        // DNA transcript
         row.push(this.getDnaC(variant));
 
         // RNA
@@ -674,8 +674,8 @@ export default {
           "Input selector ID",
           "Status",
           "Normalized",
-          "DNA g.",
-          "DNA selector c.",
+          "DNA genomic",
+          "DNA transcript",
           "RNA",
           "Protein",
         ],
