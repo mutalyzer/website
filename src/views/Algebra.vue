@@ -195,11 +195,13 @@
           tile
           v-if="
             response &&
-            (response.influence_lhs ||
-              response.influence_rhs ||
-              response.ref_seq ||
+            (response.ref_seq ||
               response.lhs_seq ||
-              response.rhs_seq)
+              response.rhs_seq ||
+              response.supremal_lhs ||
+              response.supremal_rhs ||
+              response.view_lhs_supremal ||
+              response.view_rhs_supremal)
           "
         >
           <v-expansion-panel>
@@ -253,35 +255,17 @@
                   :css_class="'ok-description'"
                 />
               </div>
-              <div v-if="response.view_lhs" class="mt-5">
-                <div class="overline">LHS Variants Overview</div>
-                <ViewVariantsCore
-                  :view="response.view_lhs"
-                  :influence="response.influence_lhs"
-                  :d_id="'lhs'"
-                />
-              </div>
               <div v-if="response.view_lhs_supremal" class="mt-5">
                 <div class="overline">LHS Supremal Variant Overview</div>
                 <ViewVariantsCore
                   :view="response.view_lhs_supremal"
-                  :influence="response.influence_lhs_supremal"
                   :d_id="'lhs_supremal'"
-                />
-              </div>
-              <div v-if="response.view_rhs" class="mt-5">
-                <div class="overline">RHS Variants Overview</div>
-                <ViewVariantsCore
-                  :view="response.view_rhs"
-                  :influence="response.influence_rhs"
-                  :d_id="'rhs'"
                 />
               </div>
               <div v-if="response.view_rhs_supremal" class="mt-5">
                 <div class="overline">RHS Supremal Variant Overview</div>
                 <ViewVariantsCore
                   :view="response.view_rhs_supremal"
-                  :influence="response.influence_rhs_supremal"
                   :d_id="'rhs_supremal'"
                 />
               </div>

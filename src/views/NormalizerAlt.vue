@@ -332,7 +332,6 @@
                 <div class="overline">Input</div>
                 <ViewVariantsCore
                   :view="this.response.view_corrected"
-                  :influence="this.response.influence"
                   :d_id="'corrected'"
                   :selector="this.response.selector_short"
                   class="mt-5 mb-5"
@@ -350,7 +349,6 @@
               <ViewVariantsCore
                 v-if="this.response.normalized_description"
                 :view="this.response.view_normalized"
-                :influence="this.response.influence"
                 :d_id="'normalized'"
                 :selector="this.response.selector_short"
               />
