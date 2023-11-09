@@ -3,6 +3,9 @@
     <v-btn icon color="primary" @click="getSvg">
       <v-icon>mdi-download</v-icon>
     </v-btn>
+    <v-btn icon color="primary" @click="resetGraph">
+      <v-icon>mdi-arrow-expand-all</v-icon>
+    </v-btn>
     <div
       id="dot-graph"
       style="
@@ -28,6 +31,10 @@ export default {
   }),
   mounted() {
     this.drawGraph();
+    window.addEventListener("resize", this.handleResize);
+  },
+  beforeDestroy: function () {
+    window.removeEventListener("resize", this.handleResize);
   },
   methods: {
     drawGraph() {
@@ -37,6 +44,13 @@ export default {
         .height(this.width / 3)
         .dot(this.dottext)
         .render();
+    },
+    handleResize() {
+      if (document.getElementById("dot-graph")) {
+        this.width =
+          document.getElementById("dot-graph-container").offsetWidth - 40;
+        this.drawGraph();
+      }
     },
     getSvg() {
       var svg = document.getElementById("dot-graph");
@@ -75,6 +89,9 @@ export default {
       download_link.setAttribute("download", "graph.svg");
       document.body.appendChild(download_link);
       download_link.click();
+    },
+    resetGraph() {
+      graphviz("#dot-graph").resetZoom();
     },
   },
 };
