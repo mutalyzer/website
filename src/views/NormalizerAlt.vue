@@ -349,11 +349,12 @@
               <ViewVariantsCore
                 v-if="this.response.normalized_description"
                 :view="this.response.view_normalized"
+                :influence="this.response.influence"
                 :d_id="'normalized'"
                 :selector="this.response.selector_short"
               />
               <div v-if="response.view_local_supremal" class="mt-5">
-                <div class="overline">Local Supremal Variants Overview</div>
+                <div class="overline">Local Supremal Variants</div>
                 <ViewVariantsCore
                   :view="response.view_local_supremal"
                   :d_id="'local_supremal'"

@@ -160,11 +160,7 @@
             hover_variants[v_i] = false;
             hover_sequence[v_i] = false;
           "
-          :class="
-            hover_variants[v_i] || hover_sequence[v_i]
-              ? 'seq-variant'
-              : 'seq-variant-hover'
-          "
+          :class="get_variant_seq_class(v_i)"
         >
           <div
             v-if="
@@ -919,18 +915,32 @@ export default {
         return "None";
       }
     },
-
     get_seq_class: function (v, s_i, key) {
-      if (
-        this.influence &&
-        (this.influence.min_pos || this.influence.min_pos == 0) &&
-        this.influence.max_pos &&
-        this.influence.min_pos + 1 <= this.get_position(v, s_i, key) &&
-        this.get_position(v, s_i, key) <= this.influence.max_pos
-      ) {
-        return "seq-elem-influence";
+      let view_position = this.get_position(v, s_i, key);
+      if (this.influence) {
+        for (const influence of this.influence) {
+          let min_pos = influence[0];
+          let max_pos = influence[1];
+          if (
+            (min_pos || min_pos == 0) &&
+            max_pos &&
+            min_pos + 1 <= view_position &&
+            view_position <= max_pos
+          ) {
+            return "seq-elem-influence";
+          }
+        }
       }
       return "seq-elem";
+    },
+    get_variant_seq_class: function (v_i) {
+      let influence_on = "";
+      if (this.influence) {
+        influence_on = "-influence";
+      }
+      return this.hover_variants[v_i] || this.hover_sequence[v_i]
+        ? "seq-variant" + influence_on
+        : "seq-variant-hover" + influence_on;
     },
   },
 };
@@ -969,7 +979,7 @@ export default {
 }
 
 .seq-variant {
-  background-color: var(--blue-grey-lighten-4);
+  background-color: var(--blue-grey-lighten-3);
   display: inline-block;
   vertical-align: middle;
   text-align: center;
@@ -979,7 +989,7 @@ export default {
 }
 
 .seq-variant-hover {
-  background-color: var(--blue-grey-lighten-5);
+  background-color: var(--blue-grey-lighten-4);
   display: inline-block;
   vertical-align: middle;
   text-align: center;
@@ -987,6 +997,32 @@ export default {
   margin: 0 auto;
   font-family: monospace;
 }
+.seq-variant-influence {
+  background-color: var(--blue-grey-lighten-3);
+  border-style: solid;
+  border-width: 4px;
+  border-color: var(--blue-grey-lighten-5);
+  display: inline-block;
+  vertical-align: middle;
+  text-align: center;
+  padding: 5px;
+  margin: 0 auto;
+  font-family: monospace;
+}
+
+.seq-variant-hover-influence {
+  background-color: var(--blue-grey-lighten-4);
+  border-style: solid;
+  border-width: 4px;
+  border-color: var(--blue-grey-lighten-5);
+  display: inline-block;
+  vertical-align: middle;
+  text-align: center;
+  padding: 5px;
+  margin: 0 auto;
+  font-family: monospace;
+}
+
 /* .blk{} */
 
 .seq {
