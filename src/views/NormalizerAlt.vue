@@ -543,34 +543,46 @@
               </div>
               <v-expansion-panels focusable hover flat class="mt-10 mb-10">
                 <v-expansion-panel>
-                  <v-expansion-panel-header class="overline">Details</v-expansion-panel-header>
+                  <v-expansion-panel-header class="overline"
+                    >Details</v-expansion-panel-header
+                  >
                   <v-expansion-panel-content>
                     <div
                       v-for="(supremal, index) in response.rna.local_supremals"
                       :key="index"
                       class="mt-4 mb-4"
                     >
-                      {{ supremal.supremal }}
+                      <Description
+                        :description="supremal.supremal.coding"
+                        :css_class="'ok-description'"
+                      />
                       <v-list-item>
                         <v-list-item-content>
                           <v-list-item-title
                             >Supremal:
-                            {{ supremal.supremal }}</v-list-item-title
+                            {{ supremal.supremal.coding }}</v-list-item-title
                           >
                           <v-list-item-subtitle
-                            >Splice site affected:
+                            >Splice site affected by supremal:
                             {{ supremal.splice_affected }}</v-list-item-subtitle
                           >
                           <v-list-item-subtitle v-if="supremal.push_exon"
                             >Can be pushed into exon as:
-                            {{ supremal.push_exon }}</v-list-item-subtitle
+                            {{
+                              supremal.push_exon.coding
+                            }}</v-list-item-subtitle
                           >
                           <v-list-item-subtitle v-if="supremal.push_intron"
                             >Can be pushed into the intron as:
-                            {{ supremal.push_intron }}</v-list-item-subtitle
+                            {{
+                              supremal.push_intron.coding
+                            }}</v-list-item-subtitle
                           >
                           <v-list-item-subtitle v-if="supremal.rna"
-                            >RNA part: {{ supremal.rna }}</v-list-item-subtitle
+                            >RNA part:
+                            {{
+                              outputVariants(supremal.rna)
+                            }}</v-list-item-subtitle
                           >
                         </v-list-item-content>
                       </v-list-item>
@@ -984,6 +996,12 @@ export default {
       } else {
         return "Minimal Descriptions";
       }
+    },
+    outputVariants: function (variants) {
+      if (variants.length == 1) {
+        return variants[0];
+      }
+      return variants.join(";");
     },
   },
 };
