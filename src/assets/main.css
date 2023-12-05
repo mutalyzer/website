@@ -1,8 +1,12 @@
 :root {
   --green: #4CAF50;
   --green-lighten-5: #E8F5E9;
+  --green-lighten-4: #C8E6C9;
   --light-blue-lighten-5: #E1F5FE;
   --red-accent-4: #D50000;
+  --red-lighten-2: #E57373;
+  --red-lighten-3: #EF9A9A;
+  --red-lighten-4: #FFCDD2;
   --red-lighten-5: #FFEBEE;
   --blue: #2196F3;
   --blue-lighten-5: #E3F2FD;
