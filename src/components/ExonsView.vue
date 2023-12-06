@@ -12,12 +12,15 @@ export default {
   props: {
     response: null,
   },
+  data: () => ({
+    color_out: "#1565C0",
+    color_on: "#0D47A1",
+  }),
   mounted: function () {
-    this.main();
+    this.draw();
   },
   methods: {
-    main() {
-      console.log(this.response.selector_short);
+    draw() {
       this.getExons();
       var width = 600;
       var height = 600;
@@ -28,41 +31,21 @@ export default {
         .attr("height", height)
         .append("g");
 
-      // svg
-      //   .append("rect")
-      //   .attr("x", 0)
-      //   .attr("y", 0)
-      //   .attr("width", 500)
-      //   .attr("height", 400)
-      //   .style("fill", "red");
-      // svg
-      //   .append("line")
-      //   .attr("x1", 100)
-      //   .attr("y1", 100)
-      //   .attr("x2", 600)
-      //   .attr("y2", 100)
-      //   .style("stroke", "rgb(255,255,0)")
-      //   .style("stroke-width", 2);
-      // svg
-      //   .append("text")
-      //   .text(this.response.selector_short.exons.g)
-      //   .attr("x", 20)
-      //   .attr("y", 40);
-      svg.append("text").text(this.getExons()).attr("x", 20).attr("y", 20);
-      svg.append("text").text(this.getCds()).attr("x", 20).attr("y", 40);
-      // let features = this.getFeatures();
+      let features = this.getFeatures();
+      let rows = this.getRows(600, features);
 
-      let features2 = this.getFeatures2();
-      let rows = this.getRows(600, features2);
-
-      let y = 60;
+      let y = 20;
       let x = 0;
       let f_height = 40;
+
+      let color_out = "#1976D2";
+      let color_on = "#0D47A1";
+      console.log("======");
       for (let row of rows) {
+        console.log("-------");
         for (let f of row) {
-          console.log(f);
-          console.log(f.size);
           if (f.type == "feature") {
+            let exon = features[f.exon_index];
             svg
               .append("rect")
               .attr("id", "exon" + f.exon_index)
@@ -70,12 +53,20 @@ export default {
               .attr("y", y)
               .attr("width", f.size)
               .attr("height", f_height)
-              .style("fill", "blue")
+              .style("fill", color_out)
               .on("mouseover", function () {
-                d3.selectAll("#exon" + f.exon_index).style("fill", "red");
+                d3.selectAll("#exon" + f.exon_index)
+                  .transition()
+                  .duration(200)
+                  .style("cursor", "pointer")
+                  .style("fill", color_on);
               })
               .on("mouseout", function () {
-                d3.selectAll("#exon" + f.exon_index).style("fill", "blue");
+                d3.selectAll("#exon" + f.exon_index)
+                  .transition()
+                  .duration(200)
+                  .style("cursor", "default")
+                  .style("fill", color_out);
               });
             svg
               .append("text")
@@ -83,12 +74,73 @@ export default {
               .attr("x", x + f.size / 2)
               .attr("y", y + f_height / 1.6)
               .style("text-anchor", "middle")
-              .style("fill", "white");
-            if (f.part) {
+              .style("fill", "white")
+              .on("mouseover", function () {
+                d3.selectAll("#exon" + f.exon_index)
+                  .transition()
+                  .duration(200)
+                  .style("cursor", "pointer")
+                  .style("fill", color_on);
+              })
+              .on("mouseout", function () {
+                d3.selectAll("#exon" + f.exon_index)
+                  .transition()
+                  .duration(200)
+                  .style("cursor", "default")
+                  .style("fill", color_out);
+              });
+            if ("part" in exon) {
               console.log("we should check the part type");
             } else {
-              if (features2[f.exon_index].phase_start) {
-                console.log("we should add the phase");
+              if ("phase_start" in exon) {
+                if (exon.phase_start == 1) {
+                  svg
+                    .append("polygon")
+                    .attr("points", [
+                      [x - 10, y],
+                      [x, y],
+                      [x, y + f_height],
+                      [x - 10, y + f_height],
+                      [x, y + f_height / 2],
+                    ])
+                    .style("fill", this.color_out)
+                    .style("opacity", 0.7);
+                } else if (exon.phase_start == 2) {
+                  svg
+                    .append("polygon")
+                    .attr("points", [
+                      [x, y],
+                      [x - 10, y + f_height / 2],
+                      [x, y + f_height],
+                    ])
+                    .style("fill", this.color_out)
+                    .style("opacity", 0.7);
+                }
+              }
+              if ("phase_end" in exon) {
+                if (exon.phase_end == 1) {
+                  svg
+                    .append("polygon")
+                    .attr("points", [
+                      [x + f.size, y],
+                      [x + f.size + 10, y + f_height / 2],
+                      [x + f.size, y + f_height],
+                    ])
+                    .style("fill", this.color_out)
+                    .style("opacity", 0.7);
+                } else if (exon.phase_end == 2) {
+                  svg
+                    .append("polygon")
+                    .attr("points", [
+                      [x + f.size, y],
+                      [x + f.size + 10, y],
+                      [x + f.size + 5, y + f_height / 2],
+                      [x + f.size + 10, y + f_height],
+                      [x + f.size, y + f_height],
+                    ])
+                    .style("fill", this.color_out)
+                    .style("opacity", 0.7);
+                }
               }
             }
           }
@@ -97,63 +149,6 @@ export default {
         y += 60;
         x = 0;
       }
-
-      // let x = 0;
-      // let x_l = 600;
-      // let y = 60;
-      // let previous_feature = "";
-      // for (let f of features) {
-      //   // console.log(f);
-      //   let f_size = f[1] - f[0];
-      //   // console.log(f_size);
-      //   let x_offset = 20;
-      //   if (previous_feature == "exon" && f[2] == "cds") {
-      //     x_offset = 0;
-      //   }
-      //   previous_feature = f[2];
-      //   if (f_size > x_l - x) {
-      //     console.log("does not fit");
-      //   } else {
-      //     let f_height = 50;
-      //     let y_offset = 0;
-      //     if (f[2] == "exon") {
-      //       f_height = 30;
-      //       y_offset = 10;
-      //     }
-      //     svg
-      //       .append("rect")
-      //       .attr("x", x + x_offset)
-      //       .attr("y", y + y_offset)
-      //       .attr("width", f_size)
-      //       .attr("height", f_height)
-      //       .style("fill", "blue")
-      //       .on("mouseover", function () {
-      //         d3.select(this).style("fill", "red");
-      //       })
-      //       .on("mouseout", function () {
-      //         d3.select(this).style("fill", "blue");
-      //       });
-      //   }
-      //   x = x + f_size + x_offset;
-      // }
-      // svg
-      //   .append("text")
-      //   .text(features)
-      //   .attr("x", 20)
-      //   .attr("y", y + 100);
-      // svg
-      //   .append("polygon")
-      //   .attr(
-      //     "points",
-      //     "0,190 50,190 50,170 150,170 150,230 50,230 50,210 0,210"
-      //   )
-      //   .style("fill", "blue")
-      //   .on("mouseover", function () {
-      //     d3.select(this).style("fill", "red");
-      //   })
-      //   .on("mouseout", function () {
-      //     d3.select(this).style("fill", "blue");
-      //   });
     },
     getExons() {
       let exons = [];
@@ -171,46 +166,13 @@ export default {
       return cds;
     },
     getFeatures() {
-      console.log("-----");
-      let exons = this.getExons();
-      let cds = this.getCds();
-      // let exons = [
-      //   [0, 100],
-      //   [200, 300],
-      // ];
-      // let cds = [99, 204];
-      let features = [];
-      for (let e of exons) {
-        // console.log(e, cds);
-        if (e[0] <= cds[0] && e[1] < cds[0]) {
-          // console.log("cds after exon");
-          features.push([e[0], e[1], "exon"]);
-        } else if (e[0] <= cds[0] && e[1] < cds[1]) {
-          // console.log("cds start within exon");
-          features.push([e[0], cds[0], "exon"]);
-          features.push([cds[0], e[1], "cds"]);
-        } else if (e[1] > cds[0] && e[1] < cds[1]) {
-          // console.log("exon within cds");
-          features.push([e[0], e[1], "cds"]);
-        } else if (e[0] < cds[1] && e[1] > cds[0]) {
-          // console.log("cds end within exon");
-          features.push([e[0], cds[1], "cds"]);
-          features.push([cds[1], e[1], "exon"]);
-        } else if (e[0] > cds[1] && e[1] > cds[1]) {
-          // console.log("cds end before exon");
-          features.push([e[0], e[1], "exon"]);
-        }
-      }
-      return features;
-    },
-    getFeatures2() {
       let exons = this.getExons();
       let cds = this.getCds();
       let features = [];
-      var previous_phase = 0;
+      let previous_phase = 0;
       for (let e of exons) {
-        var feature_type = "noncoding";
-        var phase = 0;
+        let feature_type = "noncoding";
+        let phase = 0;
         if (e[0] <= cds[0] && e[1] < cds[1]) {
           feature_type = "coding_start";
           phase = (e[1] - cds[0]) % 3;
@@ -237,7 +199,7 @@ export default {
     },
     getRows(width, features) {
       console.log("-----");
-      let gap = 20;
+      let gap = 30;
       let row_width = 0;
       let remaining = width - row_width;
       let rows = [];
