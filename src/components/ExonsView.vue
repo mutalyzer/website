@@ -1,6 +1,12 @@
 <template>
   <div>
     <div id="svgcontainer"></div>
+    <div id="tooltip" class="hidden">
+      <p>
+        <strong>Exon <span id="exonnumber"></span></strong>
+      </p>
+      <p><span id="exonstart"></span> - <span id="exonend"></span></p>
+    </div>
   </div>
 </template>
 
@@ -40,12 +46,14 @@ export default {
 
       let color_out = "#1976D2";
       let color_on = "#0D47A1";
+
       console.log("======");
       for (let row of rows) {
         console.log("-------");
         for (let f of row) {
           if (f.type == "feature") {
             let exon = features[f.exon_index];
+            console.log(exon);
             svg
               .append("rect")
               .attr("id", "exon" + f.exon_index)
@@ -60,6 +68,39 @@ export default {
                   .duration(200)
                   .style("cursor", "pointer")
                   .style("fill", color_on);
+
+                // Update Tooltip's position and text
+                d3.select("#tooltip").select("#exonnumber").text(f.exon_index);
+
+                d3.select("#tooltip")
+                  .select("#exonstart")
+                  .text(exon.exon_start);
+
+                d3.select("#tooltip").select("#exonend").text(exon.exon_end);
+
+                d3.select("#tooltip").classed("hidden", false);
+
+                console.log(
+                  parseFloat(d3.select(this).attr("x")),
+                  f.size,
+                  d3.select("#tooltip").node().getBoundingClientRect().width
+                );
+                var xPos =
+                  parseFloat(d3.select(this).attr("x")) +
+                  f.size / 2 -
+                  d3.select("#tooltip").node().getBoundingClientRect().width /
+                    3;
+                var yPos = parseFloat(d3.select(this).attr("y")) + f_height/2;
+                console.log(
+                  parseFloat(d3.select(this).attr("x")),
+                  f.size / 2,
+                  d3.select("#tooltip").node().getBoundingClientRect().width / 3
+                );
+                console.log(xPos);
+
+                d3.select("#tooltip")
+                  .style("left", xPos + "px")
+                  .style("top", yPos + "px");
               })
               .on("mouseout", function () {
                 d3.selectAll("#exon" + f.exon_index)
@@ -67,6 +108,7 @@ export default {
                   .duration(200)
                   .style("cursor", "default")
                   .style("fill", color_out);
+                d3.select("#tooltip").classed("hidden", true);
               });
             svg
               .append("text")
@@ -93,7 +135,18 @@ export default {
               console.log("we should check the part type");
             } else {
               if ("phase_start" in exon) {
-                if (exon.phase_start == 1) {
+                if (exon.phase_start == 0) {
+                  svg
+                    .append("polygon")
+                    .attr("points", [
+                      [x - 10, y],
+                      [x, y],
+                      [x, y + f_height],
+                      [x - 10, y + f_height],
+                    ])
+                    .style("fill", this.color_out)
+                    .style("opacity", 0.7);
+                } else if (exon.phase_start == 1) {
                   svg
                     .append("polygon")
                     .attr("points", [
@@ -118,7 +171,18 @@ export default {
                 }
               }
               if ("phase_end" in exon) {
-                if (exon.phase_end == 1) {
+                if (exon.phase_end == 0) {
+                  svg
+                    .append("polygon")
+                    .attr("points", [
+                      [x + f.size, y],
+                      [x + f.size + 10, y],
+                      [x + f.size + 10, y + f_height],
+                      [x + f.size, y + f_height],
+                    ])
+                    .style("fill", this.color_out)
+                    .style("opacity", 0.7);
+                } else if (exon.phase_end == 1) {
                   svg
                     .append("polygon")
                     .attr("points", [
@@ -299,5 +363,29 @@ export default {
   font-weight: bold;
   color: #990000;
   overflow-wrap: break-word;
+}
+
+#tooltip {
+  position: absolute;
+  width: auto;
+  height: auto;
+  padding: 10px;
+  background-color: #e3f2fd;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+  -webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+  -moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+}
+#tooltip.hidden {
+  display: none;
+}
+#tooltip p {
+  margin: 0;
+  font-family: sans-serif;
+  font-size: 16px;
+  line-height: 20px;
 }
 </style>
