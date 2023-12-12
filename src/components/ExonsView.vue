@@ -1,11 +1,16 @@
 <template>
   <div>
     <div id="svgcontainer"></div>
-    <div id="tooltip" class="hidden">
+    <div id="exontip" class="hidden">
       <p>
         <strong>Exon <span id="exonnumber"></span></strong>
       </p>
       <p><span id="exonstart"></span> - <span id="exonend"></span></p>
+    </div>
+    <div id="phasetip" class="hidden">
+      <p>
+        <strong>Phase</strong>
+      </p>
     </div>
   </div>
 </template>
@@ -26,186 +31,13 @@ export default {
     this.draw();
   },
   methods: {
-    draw2() {
-      this.getExons();
-      var width = 600;
-      var height = 600;
-      var svg = d3
-        .select("#svgcontainer")
-        .append("svg")
-        .attr("width", width)
-        .attr("height", height)
-        .append("g");
-
-      let features = this.getFeatures();
-      let rows = this.getRows(250, features);
-      console.log(rows);
-      this.render(features, width, 30, 50, 40);
-
-      let y = 20;
-      let x = 0;
-      let f_height = 40;
-
-      let color_out = "#1976D2";
-      let color_on = "#0D47A1";
-
-      for (let row of rows) {
-        for (let f of row) {
-          if (f.type == "feature") {
-            let exon = features[f.exon_index];
-            svg
-              .append("rect")
-              .attr("id", "exon" + f.exon_index)
-              .attr("x", x)
-              .attr("y", y)
-              .attr("width", f.size)
-              .attr("height", f_height)
-              .style("fill", color_out)
-              .on("mouseover", function () {
-                d3.selectAll("#exon" + f.exon_index)
-                  .transition()
-                  .duration(200)
-                  .style("cursor", "pointer")
-                  .style("fill", color_on);
-
-                // Update Tooltip's position and text
-                d3.select("#tooltip").select("#exonnumber").text(f.exon_index);
-
-                d3.select("#tooltip")
-                  .select("#exonstart")
-                  .text(exon.exon_start);
-
-                d3.select("#tooltip").select("#exonend").text(exon.exon_end);
-
-                d3.select("#tooltip").classed("hidden", false);
-
-                var xPos =
-                  parseFloat(d3.select(this).attr("x")) +
-                  f.size / 2 -
-                  d3.select("#tooltip").node().getBoundingClientRect().width /
-                    3;
-                var yPos = parseFloat(d3.select(this).attr("y")) + f_height / 2;
-
-                d3.select("#tooltip")
-                  .style("left", xPos + "px")
-                  .style("top", yPos + "px");
-              })
-              .on("mouseout", function () {
-                d3.selectAll("#exon" + f.exon_index)
-                  .transition()
-                  .duration(200)
-                  .style("cursor", "default")
-                  .style("fill", color_out);
-                d3.select("#tooltip").classed("hidden", true);
-              });
-            svg
-              .append("text")
-              .text(f.exon_index)
-              .attr("x", x + f.size / 2)
-              .attr("y", y + f_height / 1.6)
-              .style("text-anchor", "middle")
-              .style("fill", "white")
-              .on("mouseover", function () {
-                d3.selectAll("#exon" + f.exon_index)
-                  .transition()
-                  .duration(200)
-                  .style("cursor", "pointer")
-                  .style("fill", color_on);
-              })
-              .on("mouseout", function () {
-                d3.selectAll("#exon" + f.exon_index)
-                  .transition()
-                  .duration(200)
-                  .style("cursor", "default")
-                  .style("fill", color_out);
-              });
-            if ("part" in exon) {
-              console.log("we should check the part type");
-            } else {
-              if ("phase_start" in exon) {
-                if (exon.phase_start == 0) {
-                  svg
-                    .append("polygon")
-                    .attr("points", [
-                      [x - 10, y],
-                      [x, y],
-                      [x, y + f_height],
-                      [x - 10, y + f_height],
-                    ])
-                    .style("fill", this.color_out)
-                    .style("opacity", 0.7);
-                } else if (exon.phase_start == 1) {
-                  svg
-                    .append("polygon")
-                    .attr("points", [
-                      [x - 10, y],
-                      [x, y],
-                      [x, y + f_height],
-                      [x - 10, y + f_height],
-                      [x, y + f_height / 2],
-                    ])
-                    .style("fill", this.color_out)
-                    .style("opacity", 0.7);
-                } else if (exon.phase_start == 2) {
-                  svg
-                    .append("polygon")
-                    .attr("points", [
-                      [x, y],
-                      [x - 10, y + f_height / 2],
-                      [x, y + f_height],
-                    ])
-                    .style("fill", this.color_out)
-                    .style("opacity", 0.7);
-                }
-              }
-              if ("phase_end" in exon) {
-                if (exon.phase_end == 0) {
-                  svg
-                    .append("polygon")
-                    .attr("points", [
-                      [x + f.size, y],
-                      [x + f.size + 10, y],
-                      [x + f.size + 10, y + f_height],
-                      [x + f.size, y + f_height],
-                    ])
-                    .style("fill", this.color_out)
-                    .style("opacity", 0.7);
-                } else if (exon.phase_end == 1) {
-                  svg
-                    .append("polygon")
-                    .attr("points", [
-                      [x + f.size, y],
-                      [x + f.size + 10, y + f_height / 2],
-                      [x + f.size, y + f_height],
-                    ])
-                    .style("fill", this.color_out)
-                    .style("opacity", 0.7);
-                } else if (exon.phase_end == 2) {
-                  svg
-                    .append("polygon")
-                    .attr("points", [
-                      [x + f.size, y],
-                      [x + f.size + 10, y],
-                      [x + f.size + 5, y + f_height / 2],
-                      [x + f.size + 10, y + f_height],
-                      [x + f.size, y + f_height],
-                    ])
-                    .style("fill", this.color_out)
-                    .style("opacity", 0.7);
-                }
-              }
-            }
-          }
-          x += f.size;
-        }
-        y += 60;
-        x = 0;
-      }
-    },
     draw() {
       this.getExons();
-      var width = 500;
-      var height = 600;
+      var width = 700;
+      var height = 800;
+      let feature_height = 40;
+      let gap = 30;
+      let feature_min = 50;
       var svg = d3
         .select("#svgcontainer")
         .append("svg")
@@ -214,67 +46,224 @@ export default {
         .append("g");
 
       let exons = this.getFeatures();
-      let features = this.render(exons, width, 30, 50, 40);
+      let cds = this.getCds();
+      let features = this.render(
+        exons,
+        cds,
+        width,
+        gap,
+        feature_min,
+        feature_height
+      );
 
-      let f_height = 40;
-
-      let color_out = "#1976D2";
+      // let color_out = "#1976D2";
+      let color_out = "#0D47A1";
       // let color_on = "#0D47A1";
+      let color_phase = "#FFCC80";
 
       for (let f of features) {
         console.log(f);
+        let exon = exons[f.exon_index];
+        let y_offset = 0;
+        let height_offset = 0;
+        if (f.type == "noncoding") {
+          y_offset = feature_height / 4;
+          height_offset = feature_height / 2;
+        }
+        // exons
         svg
           .append("rect")
+          .attr("id", "exon_" + f.exon_index)
           .attr("x", f.x)
-          .attr("y", f.y)
+          .attr("y", f.y + y_offset)
           .attr("width", f.size)
-          .attr("height", f_height)
-          .style("fill", color_out);
+          .attr("height", feature_height - height_offset)
+          .style("fill", color_out)
+          .style("opacity", 0.8)
+          .on("mouseover", function () {
+            d3.selectAll("#exon_" + f.exon_index)
+              .transition()
+              .duration(200)
+              .style("cursor", "pointer")
+              .style("opacity", 1);
+            // Update Exontip's position and text
+            d3.select("#exontip").select("#exonnumber").text(f.exon_index);
+            d3.select("#exontip").select("#exonstart").text(exon.exon_start);
+            d3.select("#exontip").select("#exonend").text(exon.exon_end);
+            d3.select("#exontip").classed("hidden", false);
+            var xPos =
+              parseFloat(d3.select(this).attr("x")) +
+              f.size / 2 -
+              d3.select("#exontip").node().getBoundingClientRect().width / 3;
+            var yPos =
+              parseFloat(d3.select(this).attr("y")) + feature_height / 2;
+            d3.select("#exontip")
+              .style("left", xPos + "px")
+              .style("top", yPos + "px");
+          })
+          .on("mouseout", function () {
+            d3.selectAll("#exon_" + f.exon_index)
+              .transition()
+              .duration(200)
+              .style("cursor", "default")
+              .style("fill", color_out)
+              .style("opacity", 0.8);
+            d3.select("#exontip").classed("hidden", true);
+          });
+
+        // phasing rectangles
+        // exon end
         if (f.phase_end) {
           svg
             .append("rect")
+            .attr("id", "exon_phase_" + f.exon_index)
             .attr("x", f.x + f.size - 7)
             .attr("y", f.y + 2)
             .attr("width", 5)
-            .attr("height", f_height - 4)
-            .style("fill", "#E3F2FD")
-            .style("opacity", 0.5);
+            .attr("height", f.height - 4)
+            .style("fill", color_phase)
+            .style("opacity", 0.5)
+            .on("mouseover", function () {
+              d3.selectAll("#exon_phase_" + f.exon_index)
+                .transition()
+                .duration(200)
+                .style("cursor", "pointer")
+                .style("opacity", 1);
+              // Update Exontip's position and text
+              d3.select("#phasetip").classed("hidden", false);
+              var xPos =
+                parseFloat(d3.select(this).attr("x")) +
+                5 -
+                d3.select("#phasetip").node().getBoundingClientRect().width / 3;
+              var yPos = parseFloat(d3.select(this).attr("y")) + feature_height;
+              d3.select("#phasetip")
+                .style("left", xPos + "px")
+                .style("top", yPos + "px");
+            })
+            .on("mouseout", function () {
+              d3.selectAll("#exon_phase_" + f.exon_index)
+                .transition()
+                .duration(200)
+                .style("cursor", "default")
+                .style("opacity", 0.5);
+              d3.select("#phasetip").classed("hidden", true);
+            });
         }
         if (f.phase_end == 2) {
           svg
             .append("rect")
+            .attr("id", "exon_phase_" + f.exon_index)
             .attr("x", f.x + f.size - 14)
             .attr("y", f.y + 2)
             .attr("width", 5)
-            .attr("height", f_height - 4)
-            .style("fill", "#E3F2FD")
-            .style("opacity", 0.5);
+            .attr("height", f.height - 4)
+            .style("fill", color_phase)
+            .style("opacity", 0.5)
+            .on("mouseover", function () {
+              d3.selectAll("#exon_phase_" + f.exon_index)
+                .transition()
+                .duration(200)
+                .style("cursor", "pointer")
+                .style("opacity", 1);
+              // Update Exontip's position and text
+              d3.select("#phasetip").classed("hidden", false);
+              var xPos =
+                parseFloat(d3.select(this).attr("x")) +
+                5 -
+                d3.select("#phasetip").node().getBoundingClientRect().width / 3;
+              var yPos = parseFloat(d3.select(this).attr("y")) + feature_height;
+              d3.select("#phasetip")
+                .style("left", xPos + "px")
+                .style("top", yPos + "px");
+            })
+            .on("mouseout", function () {
+              d3.selectAll("#exon_phase_" + f.exon_index)
+                .transition()
+                .duration(200)
+                .style("cursor", "default")
+                .style("opacity", 0.5);
+              d3.select("#phasetip").classed("hidden", true);
+            });
         }
+        // exon start
         if (f.phase_start) {
           svg
             .append("rect")
+            .attr("id", "exon_phase_" + (f.exon_index - 1))
             .attr("x", f.x + 2)
             .attr("y", f.y + 2)
             .attr("width", 5)
-            .attr("height", f_height - 4)
-            .style("fill", "#E3F2FD")
-            .style("opacity", 0.5);
+            .attr("height", f.height - 4)
+            .style("fill", color_phase)
+            .style("opacity", 0.5)
+            .on("mouseover", function () {
+              d3.selectAll("#exon_phase_" + (f.exon_index - 1))
+                .transition()
+                .duration(200)
+                .style("cursor", "pointer")
+                .style("opacity", 1);
+              // Update Exontip's position and text
+              d3.select("#phasetip").classed("hidden", false);
+              var xPos =
+                parseFloat(d3.select(this).attr("x")) +
+                5 -
+                d3.select("#phasetip").node().getBoundingClientRect().width / 3;
+              var yPos = parseFloat(d3.select(this).attr("y")) + feature_height;
+              d3.select("#phasetip")
+                .style("left", xPos + "px")
+                .style("top", yPos + "px");
+            })
+            .on("mouseout", function () {
+              d3.selectAll("#exon_phase_" + (f.exon_index - 1))
+                .transition()
+                .duration(200)
+                .style("cursor", "default")
+                .style("opacity", 0.5);
+              d3.select("#phasetip").classed("hidden", true);
+            });
         }
         if (f.phase_start == 2) {
           svg
             .append("rect")
+            .attr("id", "exon_phase_" + (f.exon_index - 1))
             .attr("x", f.x + 9)
             .attr("y", f.y + 2)
             .attr("width", 5)
-            .attr("height", f_height - 4)
-            .style("fill", "#E3F2FD")
-            .style("opacity", 0.5);
+            .attr("height", f.height - 4)
+            .style("fill", color_phase)
+            .style("opacity", 0.5)
+            .on("mouseover", function () {
+              d3.selectAll("#exon_phase_" + (f.exon_index - 1))
+                .transition()
+                .duration(200)
+                .style("cursor", "pointer")
+                .style("opacity", 1);
+              // Update Exontip's position and text
+              d3.select("#phasetip").classed("hidden", false);
+              var xPos =
+                parseFloat(d3.select(this).attr("x")) +
+                5 -
+                d3.select("#phasetip").node().getBoundingClientRect().width / 3;
+              var yPos = parseFloat(d3.select(this).attr("y")) + feature_height;
+              d3.select("#phasetip")
+                .style("left", xPos + "px")
+                .style("top", yPos + "px");
+            })
+            .on("mouseout", function () {
+              d3.selectAll("#exon_phase_" + (f.exon_index - 1))
+                .transition()
+                .duration(200)
+                .style("cursor", "default")
+                .style("opacity", 0.5);
+              d3.select("#phasetip").classed("hidden", true);
+            });
         }
+        // text
         svg
           .append("text")
           .text(f.exon_index)
           .attr("x", f.x + f.size / 2)
-          .attr("y", f.y + f_height / 1.6)
+          .attr("y", f.y + f.height / 1.6)
           .style("text-anchor", "middle")
           .style("fill", "white");
       }
@@ -326,58 +315,7 @@ export default {
       }
       return features;
     },
-    getRows(width, features) {
-      let gap = 30;
-      let row_width = 0;
-      let remaining = width - row_width;
-      let rows = [];
-      let row = [];
-
-      for (const [i, f] of features.entries()) {
-        let f_size = f.exon_end - f.exon_start;
-        if (remaining - f_size > 0) {
-          // Fits
-          remaining -= f_size;
-          row.push({ size: f_size, type: "feature", exon_index: i });
-        } else {
-          // Does not fit
-          row.push({
-            size: remaining,
-            type: "feature",
-            exon_index: i,
-            part: "start",
-          });
-          rows.push(row);
-          let extra_rows = Math.floor((f_size - remaining) / width);
-          for (let j = 0; j < extra_rows; j += 1) {
-            rows.push([
-              { size: width, type: "feature", exon_index: i, part: "between" },
-            ]);
-          }
-          row = [
-            {
-              size: f_size - remaining - extra_rows * width,
-              type: "feature",
-              exon_index: i,
-              part: "end",
-            },
-          ];
-          remaining = width - (f_size - remaining - extra_rows * width);
-        }
-        if (remaining > gap) {
-          remaining -= gap;
-          row.push({ size: gap, feature: "gap" });
-        } else {
-          rows.push(row);
-          row = [];
-        }
-      }
-      if (row) {
-        rows.push(row);
-      }
-      return rows;
-    },
-    render(exons, width, gap, feature_min, feature_height) {
+    render(exons, cds, width, gap, feature_min, feature_height) {
       console.log("--- render ---");
       console.log(exons, width);
       console.log("width", width);
@@ -408,27 +346,44 @@ export default {
             if (size < feature_min) {
               smallers.push([i, size]);
             }
-            let feature = {
-              x: width - remaining,
-              y: y,
-              size: size,
-              exon_index: i,
-            };
+            let feature = {};
+
+            // split into coding and noncoding
+            if (["coding_start", "coding_end"].includes(exon.type)) {
+              let coding_size = scale * (cds[0] - exon.exon_start);
+              if (exon.type == "coding_end") {
+                coding_size = scale * (cds[1] - exon.exon_start);
+              }
+              features.push({
+                x: width - remaining,
+                y: y,
+                size: size - coding_size,
+                exon_index: i,
+                type: "noncoding",
+                height: feature_height,
+              });
+              feature = {
+                x: width - remaining + (size - coding_size),
+                y: y,
+                size: coding_size,
+                exon_index: i,
+                type: "coding",
+                height: feature_height,
+              };
+            } else {
+              feature = {
+                x: width - remaining,
+                y: y,
+                size: size,
+                exon_index: i,
+                height: feature_height,
+                type: exon.type,
+              };
+            }
             // adding phasing information
-            if (["coding_start", "coding"].includes(exon.type)) {
-              if ([1, 2].includes(exon.phase_end)) {
-                feature["phase_end"] = exon.phase_end;
-              }
-            }
-            if (["coding_end", "coding"].includes(exon.type)) {
-              if ([1, 2].includes(exon.phase_start)) {
-                if (exon.phase_start == 1) {
-                  feature["phase_start"] = 2;
-                } else if (exon.phase_start == 2) {
-                  feature["phase_start"] = 1;
-                }
-              }
-            }
+            this.addPhasingStart(exon, feature);
+            this.addPhasingEnd(exon, feature);
+
             features.push(feature);
 
             // update remaining
@@ -445,62 +400,85 @@ export default {
           } else {
             // the exon should be split
             console.log("should split");
-            // check first if the exon part size is readable
-            if (size < feature_min) {
-              smallers.push([i, size]);
-            }
 
-            // push the part to fit the current row
-            console.log("push x", width - remaining, "y", y);
-            let feature = {
-              x: width - remaining,
-              y: y,
-              size: remaining,
-              exon_index: i,
-            };
-            // adding phasing information
-            if (["coding_end", "coding"].includes(exon.type)) {
-              if ([1, 2].includes(exon.phase_start)) {
-                if (exon.phase_start == 1) {
-                  feature["phase_start"] = 2;
-                } else if (exon.phase_start == 2) {
-                  feature["phase_start"] = 1;
-                }
-              }
-            }
-            features.push(feature);
+            if (exon.type == "coding_end") {
+              // the coding part
+              let coding_size = scale * (cds[1] - exon.exon_start);
+              let s = this.splitFeature(
+                i,
+                width,
+                gap,
+                feature_min,
+                feature_height,
+                coding_size,
+                remaining,
+                y,
+                "coding"
+              );
+              // adding phasing information
+              this.addPhasingStart(exon, s.features[0]);
+              this.addPhasingEnd(exon, s.features[s.features.length - 1]);
 
-            // push the parts for other complete rows
-            let extra_rows = Math.floor((size - remaining) / width);
-            for (let j = 0; j < extra_rows; j += 1) {
-              y += feature_height + gap;
-              features.push({ x: 0, y: y, size: width, exon_index: i });
-            }
-            y += feature_height + gap;
+              features.push(...s.features);
+              smallers.push(...s.smallers);
+              remaining = s.remaining;
+              y = s.y;
 
-            size = size - remaining - extra_rows * width;
-            if (size < feature_min) {
-              smallers.push([i, size]);
-            }
-            // push whatever remains on the last row
-            console.log("push x", 0, "y", y, "size", size);
+              // the noncoding part
+              s = this.splitFeature(
+                i,
+                width,
+                gap,
+                feature_min,
+                feature_height,
+                size - coding_size,
+                remaining,
+                y,
+                "noncoding"
+              );
+              features.push(...s.features);
+              smallers.push(...s.smallers);
+              remaining = s.remaining;
+              y = s.y;
+            } else if (exon.type == "coding") {
+              let s = this.splitFeature(
+                i,
+                width,
+                gap,
+                feature_min,
+                feature_height,
+                size,
+                remaining,
+                y,
+                "coding"
+              );
 
-            feature = {
-              x: 0,
-              y: y,
-              size: size,
-              exon_index: i,
-            };
-            // adding phasing information
-            features.push(feature);
-            if (["coding_start", "coding"].includes(exon.type)) {
-              if ([1, 2].includes(exon.phase_end)) {
-                feature["phase_end"] = exon.phase_end;
-              }
-            }
+              // adding phasing information
+              this.addPhasingStart(exon, s.features[0]);
+              this.addPhasingEnd(exon, s.features[s.features.length - 1]);
 
+              features.push(...s.features);
+              smallers.push(...s.smallers);
+              remaining = s.remaining;
+              y = s.y;
+            } else {
+              let splitted = this.splitFeature(
+                i,
+                width,
+                gap,
+                feature_min,
+                feature_height,
+                size,
+                remaining,
+                y,
+                "noncoding"
+              );
+              features.push(...splitted.features);
+              smallers.push(...splitted.smallers);
+              remaining = splitted.remaining;
+              y = splitted.y;
+            }
             // update remaining
-            remaining = width - size;
             if (remaining > gap) {
               remaining -= gap;
             } else {
@@ -537,7 +515,94 @@ export default {
       console.log(features);
       return features;
     },
-    tryRender() {},
+    splitFeature(
+      i,
+      width,
+      gap,
+      feature_min,
+      feature_height,
+      size,
+      remaining,
+      y,
+      feature_type
+    ) {
+      let features = [];
+      let smallers = [];
+      // check first if the feature part size is readable
+      if (size < feature_min) {
+        smallers.push([i, size]);
+      }
+
+      // push the part to fit the current row
+      console.log("push x", width - remaining, "y", y);
+      features.push({
+        x: width - remaining,
+        y: y,
+        size: remaining,
+        exon_index: i,
+        height: feature_height,
+        type: feature_type,
+      });
+
+      // push the parts for other complete rows
+      let extra_rows = Math.floor((size - remaining) / width);
+      for (let j = 0; j < extra_rows; j += 1) {
+        y += feature_height + gap;
+        features.push({
+          x: 0,
+          y: y,
+          size: width,
+          exon_index: i,
+          height: feature_height,
+          type: feature_type,
+        });
+      }
+      y += feature_height + gap;
+
+      size = size - remaining - extra_rows * width;
+      if (size < feature_min) {
+        smallers.push([i, size]);
+      }
+      // push whatever remains on the last row
+      console.log("push x", 0, "y", y, "size", size);
+
+      features.push({
+        x: 0,
+        y: y,
+        size: size,
+        exon_index: i,
+        height: feature_height,
+        type: feature_type,
+      });
+
+      // update remaining
+      remaining = width - size;
+
+      return {
+        features: features,
+        smallers: smallers,
+        remaining: remaining,
+        y: y,
+      };
+    },
+    addPhasingStart(exon, feature) {
+      if (["coding_end", "coding"].includes(exon.type)) {
+        if ([1, 2].includes(exon.phase_start)) {
+          if (exon.phase_start == 1) {
+            feature["phase_start"] = 2;
+          } else if (exon.phase_start == 2) {
+            feature["phase_start"] = 1;
+          }
+        }
+      }
+    },
+    addPhasingEnd(exon, feature) {
+      if (["coding_start", "coding"].includes(exon.type)) {
+        if ([1, 2].includes(exon.phase_end)) {
+          feature["phase_end"] = exon.phase_end;
+        }
+      }
+    },
   },
 };
 </script>
@@ -590,7 +655,7 @@ export default {
   overflow-wrap: break-word;
 }
 
-#tooltip {
+#exontip {
   position: absolute;
   width: auto;
   height: auto;
@@ -604,10 +669,33 @@ export default {
   box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
   pointer-events: none;
 }
-#tooltip.hidden {
+#exontip.hidden {
   display: none;
 }
-#tooltip p {
+#exontip p {
+  margin: 0;
+  font-family: sans-serif;
+  font-size: 16px;
+  line-height: 20px;
+}
+#phasetip {
+  position: absolute;
+  width: auto;
+  height: auto;
+  padding: 10px;
+  background-color: #ffcc80;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  border-radius: 5px;
+  -webkit-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+  -moz-box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+}
+#phasetip.hidden {
+  display: none;
+}
+#phasetip p {
   margin: 0;
   font-family: sans-serif;
   font-size: 16px;
