@@ -34,16 +34,9 @@ export default {
     draw() {
       this.getExons();
       var width = 700;
-      var height = 800;
       let feature_height = 40;
       let gap = 30;
       let feature_min = 50;
-      var svg = d3
-        .select("#svgcontainer")
-        .append("svg")
-        .attr("width", width)
-        .attr("height", height)
-        .append("g");
 
       let exons = this.getFeatures();
       let cds = this.getCds();
@@ -56,13 +49,19 @@ export default {
         feature_height
       );
 
+      var svg = d3
+        .select("#svgcontainer")
+        .append("svg")
+        .attr("width", width)
+        .attr("height", features[features.length - 1].y + 100)
+        .append("g");
+
       // let color_out = "#1976D2";
       let color_out = "#0D47A1";
       // let color_on = "#0D47A1";
       let color_phase = "#FFCC80";
 
       for (let f of features) {
-        console.log(f);
         let exon = exons[f.exon_index];
         let y_offset = 0;
         let height_offset = 0;
@@ -316,15 +315,7 @@ export default {
       return features;
     },
     render(exons, cds, width, gap, feature_min, feature_height) {
-      console.log("--- render ---");
-      console.log(exons, width);
-      console.log("width", width);
-      console.log("gap", gap);
-      console.log("feature_min", feature_min);
-      console.log("feature_height", feature_height);
-
-      let scale = 1.5;
-      console.log(scale);
+      let scale = 0.8;
       let remaining = width;
       let features = [];
       let y = 0;
@@ -333,15 +324,11 @@ export default {
       while (running) {
         let smallers = [];
         for (const [i, exon] of exons.entries()) {
-          console.log("---");
           let size = scale * (exon.exon_end - exon.exon_start);
-          console.log("exon", i, "size", size, "remaining", remaining);
-          console.log(exon.type);
-          console.log(exon);
 
           if (remaining > size) {
             // enough to fit the exon size
-            console.log("push x", width - remaining, "y", y);
+
             // check if the exon size is readable
             if (size < feature_min) {
               smallers.push([i, size]);
@@ -389,17 +376,13 @@ export default {
             // update remaining
             if (remaining - size > gap) {
               remaining -= size + gap;
-              console.log("update remaining to", remaining);
             } else {
               // not enough to start another exon
-              console.log("remaining smaller then the gap", remaining - size);
               y += feature_height + gap;
               remaining = width;
-              console.log("update remaining to width", remaining);
             }
           } else {
             // the exon should be split
-            console.log("should split");
 
             if (exon.type == "coding_end") {
               // the coding part
@@ -485,7 +468,6 @@ export default {
               remaining = width;
               y += feature_height + gap;
             }
-            console.log("update remaining to width", remaining);
           }
         }
         console.log("\n============ smallers");
@@ -496,7 +478,6 @@ export default {
         // running = false;
 
         if (smallers.length > 0) {
-          console.log("entered");
           smallers = [];
           remaining = width;
           features = [];
