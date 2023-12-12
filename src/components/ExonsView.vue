@@ -35,7 +35,7 @@ export default {
       this.getExons();
       var width = 700;
       let feature_height = 40;
-      let gap = 30;
+      let gap = 20;
       let feature_min = 50;
 
       let exons = this.getFeatures();
@@ -510,7 +510,7 @@ export default {
       let features = [];
       let smallers = [];
       // check first if the feature part size is readable
-      if (size < feature_min) {
+      if (remaining < feature_min) {
         smallers.push([i, size]);
       }
 
