@@ -42,10 +42,10 @@ export default {
     };
   },
   created: function () {
-    this.getReference();
-    // console.log(this.predicted[0]);
-    // console.log(this.predicted[1]);
-    // console.log(this.predicted[2]);
+    [this.reference, this.predicted] = this.getParts(
+      this.protein.reference,
+      this.protein.predicted
+    );
   },
   methods: {
     reverseString(s) {
@@ -75,10 +75,7 @@ export default {
       }
       return this.reverseString(suffix);
     },
-    getReference() {
-      var r = this.protein.reference;
-      var p = this.protein.predicted;
-
+    getParts(r, p) {
       if (r == p || p == "?") {
         this.reference.push({ seq: r, type: "equal" });
         this.predicted.push({ seq: p, type: "equal" });
@@ -95,37 +92,28 @@ export default {
       var prefix = this.getPrefix(r, p);
       var suffix = this.getSuffix(r, p);
 
-      var r_middle = r.split(prefix)[1].split(suffix)[0];
-      var p_middle = p.split(prefix)[1].split(suffix)[0];
+      var r_middle = r.slice(prefix.length, r.length - suffix.length);
+      var p_middle = p.slice(prefix.length, p.length - suffix.length);
 
-      // console.log(prefix.length);
-      // console.log(suffix.length);
-      // console.log(r.length);
-      // console.log(r_middle.length);
-      // console.log(p_middle.length);
-
-      let middle_length = prefix.length + suffix.length - r.length;
-      if (middle_length > 0) {
-        let suffix_common = r.slice(
-          r.length - suffix.length,
-          r.length - suffix.length + middle_length
-        );
-        let prefix_common = r.slice(
-          r.length - suffix.length,
-          r.length - suffix.length + middle_length
-        );
-        if (suffix_common == prefix_common) {
-          p_middle += suffix_common;
-          suffix = suffix.slice(middle_length, suffix.length);
-        }
+      let common_length = prefix.length + suffix.length - r.length;
+      if (common_length > 0) {
+        p_middle = p.slice(prefix.length, prefix.length + common_length);
+        suffix = suffix.slice(common_length, suffix.length);
       }
-      this.reference.push({ seq: prefix, type: "equal" });
-      this.reference.push({ seq: r_middle, type: "diff" });
-      this.reference.push({ seq: suffix, type: "equal" });
 
-      this.predicted.push({ seq: prefix, type: "equal" });
-      this.predicted.push({ seq: p_middle, type: "diff" });
-      this.predicted.push({ seq: suffix, type: "equal" });
+      return [
+        [
+          { seq: prefix, type: "equal" },
+          { seq: r_middle, type: "diff" },
+          { seq: suffix, type: "equal" },
+        ],
+
+        [
+          { seq: prefix, type: "equal" },
+          { seq: p_middle, type: "diff" },
+          { seq: suffix, type: "equal" },
+        ],
+      ];
     },
   },
 };
