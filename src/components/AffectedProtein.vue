@@ -20,6 +20,10 @@
       <span class="protein-equal">{{ predicted[0].seq }}</span>
       <span class="protein-diff">{{ predicted[1].seq }}</span>
       <span class="protein-equal">{{ predicted[2].seq }}</span>
+      <div v-if="this.fancy_protein" class="overline">Fancy</div>
+      <div v-if="this.fancy_protein" class="protein-seq">
+        <pre v-html="this.fancy_protein"></pre>
+      </div>
     </div>
   </div>
 </template>
@@ -39,10 +43,12 @@ export default {
     return {
       reference: [],
       predicted: [],
+      fancy_protein: null,
     };
   },
   created: function () {
     [this.reference, this.predicted] = this.getParts(this.protein);
+    this.fancy_protein = this.fancy(this.protein);
   },
   methods: {
     reverseString(s) {
@@ -93,6 +99,34 @@ export default {
         ],
       ];
     },
+    fancy(protein) {
+      let seq = protein.reference;
+      let blocks = 10;
+      let cols = 6;
+      let last_pos_index =
+        Math.floor(seq.length / (blocks * cols)) * (blocks * cols) + 1;
+      let last_pos_index_length = last_pos_index.toString().length;
+      let rows = [];
+      for (let row = 0; row < Math.ceil(seq.length / (blocks * cols)); row++) {
+        let current_seq = seq.slice(
+          blocks * cols * row,
+          blocks * cols * (row + 1)
+        );
+        let current_row_fancy = [];
+
+        current_row_fancy.push(
+          (blocks * cols * row + 1)
+            .toString()
+            .padStart(last_pos_index_length, " ")
+        );
+
+        for (let i = 0; i < current_seq.length; i += blocks) {
+          current_row_fancy.push(current_seq.substr(i, blocks));
+        }
+        rows.push(current_row_fancy.join(" "));
+      }
+      return rows.join("<br>");
+    },
   },
 };
 </script>
@@ -121,7 +155,7 @@ export default {
   display: block;
   color: #004d40;
   background-color: #efefef;
-  overflow-wrap: break-word;
+  overflow-x: auto;
 }
 
 .protein-equal {
