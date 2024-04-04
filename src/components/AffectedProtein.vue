@@ -42,76 +42,54 @@ export default {
     };
   },
   created: function () {
-    [this.reference, this.predicted] = this.getParts(
-      this.protein.reference,
-      this.protein.predicted
-    );
+    [this.reference, this.predicted] = this.getParts(this.protein);
   },
   methods: {
     reverseString(s) {
       return s.split("").reverse().join("");
     },
-    getPrefix(s1, s2) {
-      var i;
-      var prefix = "";
-      for (i = 0; i < Math.max(s1.length, s2.length); i++) {
-        if (s1[i] != s2[i]) {
-          break;
-        } else {
-          prefix += s1[i];
-        }
-      }
-      return prefix;
-    },
-    getSuffix(s1, s2) {
-      var i;
-      var suffix = "";
-      for (i = 0; i < Math.max(s1.length, s2.length); i++) {
-        if (s1[s1.length - i - 1] != s2[s2.length - i - 1]) {
-          break;
-        } else {
-          suffix += s1[s1.length - i - 1];
-        }
-      }
-      return this.reverseString(suffix);
-    },
-    getParts(r, p) {
-      if (r == p || p == "?") {
-        this.reference.push({ seq: r, type: "equal" });
-        this.predicted.push({ seq: p, type: "equal" });
+    getParts(protein) {
+      let r = protein.reference;
+      let p = protein.predicted;
+      var r_prefix = r;
+      var p_prefix = p;
+      var r_middle = "";
+      var p_middle = "";
+      var r_suffix = "";
+      var p_suffix = "";
 
-        this.reference.push({ seq: "", type: "diff" });
-        this.predicted.push({ seq: "", type: "diff" });
+      if (
+        "position_first" in protein &&
+        "position_last_original" in protein &&
+        "position_last_predicted" in protein
+      ) {
+        r_prefix = r.slice(0, protein.position_first);
+        p_prefix = p.slice(0, protein.position_first);
 
-        this.reference.push({ seq: "", type: "equal" });
-        this.predicted.push({ seq: "", type: "equal" });
+        r_middle = r.slice(
+          protein.position_first,
+          protein.position_last_original
+        );
+        r_suffix = r.slice(protein.position_last_original, r.length);
 
-        return;
-      }
-
-      var prefix = this.getPrefix(r, p);
-      var suffix = this.getSuffix(r, p);
-
-      var r_middle = r.slice(prefix.length, r.length - suffix.length);
-      var p_middle = p.slice(prefix.length, p.length - suffix.length);
-
-      let common_length = prefix.length + suffix.length - r.length;
-      if (common_length > 0) {
-        p_middle = p.slice(prefix.length, prefix.length + common_length);
-        suffix = suffix.slice(common_length, suffix.length);
+        p_middle = p.slice(
+          protein.position_first,
+          protein.position_last_predicted
+        );
+        p_suffix = p.slice(protein.position_last_predicted, p.length);
       }
 
       return [
         [
-          { seq: prefix, type: "equal" },
+          { seq: r_prefix, type: "equal" },
           { seq: r_middle, type: "diff" },
-          { seq: suffix, type: "equal" },
+          { seq: r_suffix, type: "equal" },
         ],
 
         [
-          { seq: prefix, type: "equal" },
+          { seq: p_prefix, type: "equal" },
           { seq: p_middle, type: "diff" },
-          { seq: suffix, type: "equal" },
+          { seq: p_suffix, type: "equal" },
         ],
       ];
     },
