@@ -9,25 +9,17 @@
         :to_params="{ descriptionRouter: protein.description }"
       />
     </div>
-    <div class="overline">Affected Protein Reference Sequence</div>
-    <div class="protein-seq">
-      <span class="protein-equal">{{ reference[0].seq }}</span>
-      <span class="protein-diff">{{ reference[1].seq }}</span>
-      <span class="protein-equal">{{ reference[2].seq }}</span>
+    <div v-if="this.fancy_protein_reference" class="overline">
+      AFFECTED PROTEIN REFERENCE SEQUENCE
     </div>
-    <div class="overline">Affected Protein Predicted Sequence</div>
-    <div class="protein-seq">
-      <span class="protein-equal">{{ predicted[0].seq }}</span>
-      <span class="protein-diff">{{ predicted[1].seq }}</span>
-      <span class="protein-equal">{{ predicted[2].seq }}</span>
-      <div v-if="this.fancy_protein" class="overline">Fancy</div>
-      <div v-if="this.fancy_protein" class="protein-seq">
-        <pre v-html="this.fancy_protein"></pre>
-      </div>
-      <div v-if="this.fancy_protein_2" class="overline">Fancy</div>
-      <div v-if="this.fancy_protein_2" class="protein-seq">
-        <pre v-html="this.fancy_protein_2"></pre>
-      </div>
+    <div v-if="this.fancy_protein_reference" class="protein-seq">
+      <pre v-html="this.fancy_protein_reference"></pre>
+    </div>
+    <div v-if="this.fancy_protein_predicted" class="overline">
+      AFFECTED PROTEIN PREDICTED SEQUENCE
+    </div>
+    <div v-if="this.fancy_protein_predicted" class="protein-seq">
+      <pre v-html="this.fancy_protein_predicted"></pre>
     </div>
   </div>
 </template>
@@ -47,14 +39,26 @@ export default {
     return {
       reference: [],
       predicted: [],
-      fancy_protein: null,
-      fancy_protein_2: null,
+      fancy_protein_reference: null,
+      fancy_protein_predicted: null,
     };
   },
   created: function () {
     [this.reference, this.predicted] = this.getParts(this.protein);
-    this.fancy_protein = this.fancy(this.protein);
-    this.fancy_protein_2 = this.fancy_2(this.protein);
+    this.fancy_protein_reference = this.fancy(
+      this.protein.reference,
+      10,
+      6,
+      this.protein.position_first,
+      this.protein.position_last_original
+    );
+    this.fancy_protein_predicted = this.fancy(
+      this.protein.predicted,
+      10,
+      6,
+      this.protein.position_first,
+      this.protein.position_last_predicted
+    );
   },
   methods: {
     reverseString(s) {
@@ -105,108 +109,113 @@ export default {
         ],
       ];
     },
-    fancy(protein) {
-      let seq = protein.reference;
-      let blocks = 10;
-      let cols = 6;
-      let last_pos_index =
-        Math.floor(seq.length / (blocks * cols)) * (blocks * cols) + 1;
-      let last_pos_index_length = last_pos_index.toString().length;
-      let rows = [];
-      for (let row = 0; row < Math.ceil(seq.length / (blocks * cols)); row++) {
-        let current_seq = seq.slice(
-          blocks * cols * row,
-          blocks * cols * (row + 1)
-        );
-        let current_row_fancy = [];
+    fancy(
+      sequence,
+      block_length,
+      columns,
+      position_change_first = null,
+      position_change_last = null
+    ) {
+      let blocks = this.blockSplit(sequence, block_length);
 
-        current_row_fancy.push(
-          (blocks * cols * row + 1)
-            .toString()
-            .padStart(last_pos_index_length, " ")
-        );
-
-        for (let i = 0; i < current_seq.length; i += blocks) {
-          current_row_fancy.push(current_seq.substr(i, blocks));
-        }
-        rows.push(current_row_fancy.join(" "));
+      let after_i = Math.floor(position_change_last / block_length);
+      let after_i_i =
+        position_change_last -
+        Math.floor(position_change_last / block_length) * block_length;
+      if (after_i == blocks.length) {
+        after_i--;
+        after_i_i = blocks[blocks.length - 1].length;
       }
-      return rows.join("<br>");
-    },
-    fancy_2(protein) {
-      let chunk_length = 10;
-      let columns = 6;
-      console.log(columns);
-      let chunks = this.chunkSplit(protein.reference, chunk_length);
+      blocks[after_i] = this.insertInto(blocks[after_i], after_i_i, "</b>");
 
-      if (
-        "position_first" in protein &&
-        "position_last_original" in protein &&
-        "position_last_predicted" in protein
-      ) {
-        console.log("we should get the chunk index and seq index");
-        console.log(protein.position_first);
-        console.log(protein.position_last_original);
-        console.log(protein.position_last_predicted);
-
-        let after_i = Math.floor(protein.position_last_original / chunk_length);
-        let after_i_i =
-          protein.position_last_original -
-          Math.floor(protein.position_last_original / chunk_length) *
-            chunk_length;
-        if (after_i == chunks.length) {
-          after_i--;
-          after_i_i = chunks[chunks.length - 1].length;
-        }
-        console.log("should insert at ", after_i, after_i_i);
-        chunks[after_i] = this.insertInto(chunks[after_i], after_i_i, "</b>");
-
-        let before_i = Math.floor(protein.position_first / chunk_length);
-        let before_i_i =
-          protein.position_first -
-          Math.floor(protein.position_first / chunk_length) * chunk_length;
-        chunks[before_i] = this.insertInto(
-          chunks[before_i],
-          before_i_i,
-          '<b style="color:#FF0000">'
-        );
-      }
-      console.log(chunks);
-
-      let last_pos_index =
-        Math.floor(protein.reference.length / (chunk_length * columns)) *
-          (chunk_length * columns) +
-        1;
-      let last_pos_index_length = last_pos_index.toString().length;
-      let rows = [];
-      for (
-        let row = 0;
-        row < Math.ceil(protein.reference.length / (chunk_length * columns));
-        row++
-      ) {
-        console.log("row", row);
-        let current_row_fancy = [];
-        current_row_fancy.push(
-          (chunk_length * columns * row + 1)
-            .toString()
-            .padStart(last_pos_index_length, " ")
-        );
-        for (let col = 0; col < columns; col++) {
-          console.log(row * columns + col);
-          current_row_fancy.push(chunks[row * columns + col]);
-        }
-        rows.push(current_row_fancy.join(" "));
-      }
-      console.log(rows);
+      let before_i = Math.floor(position_change_first / block_length);
+      let before_i_i =
+        position_change_first -
+        Math.floor(position_change_first / block_length) * block_length;
+      blocks[before_i] = this.insertInto(
+        blocks[before_i],
+        before_i_i,
+        '<b style="color:#990000">'
+      );
+      let rows = this.addPositions(
+        sequence,
+        blocks,
+        block_length,
+        columns,
+        position_change_first,
+        position_change_last
+      );
       return rows.join("<br>");
     },
     insertInto(s, i, c) {
       return s.slice(0, i) + c + s.slice(i);
     },
-    chunkSplit(s, chunk_length) {
+    addPositions(
+      sequence,
+      blocks,
+      block_length,
+      columns,
+      position_change_first = null,
+      position_change_last = null
+    ) {
+      let last_column_position =
+        Math.floor(sequence.length / (block_length * columns)) *
+          (block_length * columns) +
+        1;
+      let last_column_position_length = last_column_position.toString().length;
+
+      let rows = [];
+      for (
+        let row_i = 0;
+        row_i < Math.ceil(sequence.length / (block_length * columns));
+        row_i++
+      ) {
+        let current_row_fancy = [
+          (block_length * columns * row_i + 1)
+            .toString()
+            .padStart(last_column_position_length, " "),
+        ];
+
+        let row_position_start = row_i * columns * block_length;
+        let row_position_end =
+          row_i * columns * block_length + columns * block_length;
+
+        if (position_change_first != null && position_change_last != null) {
+          if (
+            row_position_start > position_change_first &&
+            row_position_start < position_change_last
+          ) {
+            blocks[row_i * columns] = this.insertInto(
+              blocks[row_i * columns],
+              0,
+              '<b style="color:#990000">'
+            );
+          }
+          if (
+            (row_position_start < position_change_first &&
+              row_position_end < position_change_last) ||
+            (row_position_start > position_change_first &&
+              row_position_end < position_change_last)
+          ) {
+            blocks[row_i * columns + columns - 1] = this.insertInto(
+              blocks[row_i * columns + columns - 1],
+              blocks[row_i * columns + columns - 1].length,
+              "</b>"
+            );
+          }
+        }
+
+        for (let column_i = 0; column_i < columns; column_i++) {
+          current_row_fancy.push(blocks[row_i * columns + column_i]);
+        }
+        rows.push(current_row_fancy.join(" "));
+      }
+      return rows;
+    },
+    blockSplit(s, block_length) {
       let chunks = [];
-      for (let i = 0; i < s.length; i += chunk_length) {
-        chunks.push(s.substr(i, chunk_length));
+      for (let i = 0; i < s.length; i += block_length) {
+        chunks.push(s.substr(i, block_length));
       }
       return chunks;
     },
@@ -234,7 +243,7 @@ export default {
   margin-left: 5px;
   padding: 10px;
   text-decoration: none;
-  font-size: 13px;
+  font-size: 0.9em;
   font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
   display: block;
   color: #004d40;
