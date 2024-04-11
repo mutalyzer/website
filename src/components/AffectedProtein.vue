@@ -9,17 +9,55 @@
         :to_params="{ descriptionRouter: protein.description }"
       />
     </div>
-    <div v-if="this.fancy_protein_reference" class="overline">
-      AFFECTED PROTEIN REFERENCE SEQUENCE
+    <div v-if="this.fancy_protein_reference">
+      <div class="overline">AFFECTED PROTEIN REFERENCE SEQUENCE</div>
+      <v-row>
+        <v-col class="grow" style="overflow-x: auto">
+          <div class="protein-seq">
+            <pre v-html="this.fancy_protein_reference"></pre>
+          </div>
+        </v-col>
+        <v-col class="shrink" align-self="start">
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn
+                v-bind="attrs"
+                v-on="on"
+                icon
+                v-clipboard="protein.reference"
+              >
+                <v-icon>mdi-content-copy</v-icon>
+              </v-btn>
+            </template>
+            <span>Copy the reference protein sequence</span>
+          </v-tooltip>
+        </v-col>
+      </v-row>
     </div>
-    <div v-if="this.fancy_protein_reference" class="protein-seq">
-      <pre v-html="this.fancy_protein_reference"></pre>
-    </div>
-    <div v-if="this.fancy_protein_predicted" class="overline">
-      AFFECTED PROTEIN PREDICTED SEQUENCE
-    </div>
-    <div v-if="this.fancy_protein_predicted" class="protein-seq">
-      <pre v-html="this.fancy_protein_predicted"></pre>
+    <div v-if="this.fancy_protein_predicted">
+      <div class="overline">AFFECTED PROTEIN PREDICTED SEQUENCE</div>
+      <v-row>
+        <v-col class="grow" style="overflow-x: auto">
+          <div class="protein-seq">
+            <pre v-html="this.fancy_protein_predicted"></pre>
+          </div>
+        </v-col>
+        <v-col class="shrink" align-self="start">
+          <v-tooltip bottom>
+            <template v-slot:activator="{ on, attrs }">
+              <v-btn
+                v-bind="attrs"
+                v-on="on"
+                icon
+                v-clipboard="protein.predicted"
+              >
+                <v-icon>mdi-content-copy</v-icon>
+              </v-btn>
+            </template>
+            <span>Copy the predicted protein sequence</span>
+          </v-tooltip>
+        </v-col>
+      </v-row>
     </div>
   </div>
 </template>
@@ -41,75 +79,28 @@ export default {
       predicted: [],
       fancy_protein_reference: null,
       fancy_protein_predicted: null,
+      block_length: 10,
+      columns: 6,
     };
   },
   created: function () {
-    [this.reference, this.predicted] = this.getParts(this.protein);
-    this.fancy_protein_reference = this.fancy(
+    this.fancy_protein_reference = this.fancyFormat(
       this.protein.reference,
-      10,
-      6,
+      this.block_length,
+      this.columns,
       this.protein.position_first,
       this.protein.position_last_original
     );
-    this.fancy_protein_predicted = this.fancy(
+    this.fancy_protein_predicted = this.fancyFormat(
       this.protein.predicted,
-      10,
-      6,
+      this.block_length,
+      this.columns,
       this.protein.position_first,
       this.protein.position_last_predicted
     );
   },
   methods: {
-    reverseString(s) {
-      return s.split("").reverse().join("");
-    },
-    getParts(protein) {
-      let r = protein.reference;
-      let p = protein.predicted;
-      var r_prefix = r;
-      var p_prefix = p;
-      var r_middle = "";
-      var p_middle = "";
-      var r_suffix = "";
-      var p_suffix = "";
-
-      if (
-        "position_first" in protein &&
-        "position_last_original" in protein &&
-        "position_last_predicted" in protein
-      ) {
-        r_prefix = r.slice(0, protein.position_first);
-        p_prefix = p.slice(0, protein.position_first);
-
-        r_middle = r.slice(
-          protein.position_first,
-          protein.position_last_original
-        );
-        r_suffix = r.slice(protein.position_last_original, r.length);
-
-        p_middle = p.slice(
-          protein.position_first,
-          protein.position_last_predicted
-        );
-        p_suffix = p.slice(protein.position_last_predicted, p.length);
-      }
-
-      return [
-        [
-          { seq: r_prefix, type: "equal" },
-          { seq: r_middle, type: "diff" },
-          { seq: r_suffix, type: "equal" },
-        ],
-
-        [
-          { seq: p_prefix, type: "equal" },
-          { seq: p_middle, type: "diff" },
-          { seq: p_suffix, type: "equal" },
-        ],
-      ];
-    },
-    fancy(
+    fancyFormat(
       sequence,
       block_length,
       columns,
@@ -224,21 +215,6 @@ export default {
 </script>
 <style scoped src="../assets/main.css"></style>
 <style lang="scss" scoped>
-.protein-description {
-  text-decoration: none;
-  margin: 0;
-  padding: 2px;
-  font-family: monospace;
-  display: inline;
-
-  color: #004d40;
-  background-color: #ffffff;
-  padding-left: 10px;
-  padding-right: 10px;
-  padding-top: 5px;
-  padding-bottom: 5px;
-}
-
 .protein-seq {
   margin-left: 5px;
   padding: 10px;
@@ -247,28 +223,7 @@ export default {
   font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
   display: block;
   color: #004d40;
-  background-color: #efefef;
+  background-color: #fafafa;
   overflow-x: auto;
-}
-
-.protein-equal {
-  margin: 0;
-  padding: 0;
-  text-decoration: none;
-  font-family: monospace;
-  display: inline;
-  color: #000000;
-  overflow-wrap: break-word;
-}
-
-.protein-diff {
-  margin: 0;
-  padding: 0;
-  text-decoration: none;
-  font-family: monospace;
-  display: inline;
-  font-weight: bold;
-  color: #990000;
-  overflow-wrap: break-word;
 }
 </style>
