@@ -3,11 +3,31 @@
     <v-layout>
       <v-flex xs12>
         <h1 class="display-1 mt-10">Normalizer</h1>
-        <p>
-          The Normalizer takes a variant description as input and checks whether
-          it is correct.
-        </p>
-        <v-sheet elevation="2" class="pa-5 mt-10">
+
+        <v-expansion-panels flat hover>
+          <v-expansion-panel>
+            <v-expansion-panel-header expand-icon="mdi-help" disable-icon-rotate
+              >Normalize a variant description.</v-expansion-panel-header
+            >
+            <v-expansion-panel-content color="grey lighten-5">
+              <p class="mt-5">
+                The Normalizer accepts as input an interpretable description and
+                provides as primary output its canonical (<a
+                  href="https://hgvs-nomenclature.org/"
+                  target="_blank"
+                  >HGVS</a
+                >) description.
+              </p>
+              <h4 class="mt-5">Consequences</h4>
+              <p>
+                If possible, consequences at the DNA, RNA and protein levels are
+                presented.
+              </p>
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+        </v-expansion-panels>
+
+        <v-sheet elevation="2" class="pa-5 mt-5">
           <v-row class="pt-1 pr-0">
             <v-spacer></v-spacer>
             <v-menu open-on-hover bottom left content-class="elevation-2">
@@ -375,6 +395,57 @@
           hover
           class="mt-5 mb-5"
           tile
+          v-if="response && (response.rna || response.protein)"
+          :value="consequences_open"
+        >
+          <v-expansion-panel>
+            <v-expansion-panel-header class="overline"
+              >Consequences</v-expansion-panel-header
+            >
+            <v-expansion-panel-content class="pt-5">
+              <div
+                v-if="response.rna && response.rna.description"
+                class="overline"
+              >
+                Predicted RNA Description
+              </div>
+              <v-sheet v-if="response.rna && response.rna.errors">
+                <v-alert
+                  color="red lighten-1"
+                  tile
+                  border="left"
+                  dark
+                  v-for="(error, index) in response.rna.errors"
+                  :key="index"
+                >
+                  <div>
+                    {{ getMessage(error) }}
+                  </div>
+                </v-alert>
+              </v-sheet>
+
+              <div v-if="response.rna && response.rna.description">
+                <Description
+                  :description="response.rna.description"
+                  :css_class="'ok-description-link'"
+                  :to_name="'Normalizer'"
+                  :to_params="{ descriptionRouter: response.rna.description }"
+                />
+              </div>
+
+              <AffectedProtein
+                v-if="response.protein"
+                :protein="response.protein"
+              />
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+        </v-expansion-panels>
+
+        <v-expansion-panels
+          focusable
+          hover
+          class="mt-5 mb-5"
+          tile
           v-if="response && response.equivalent_descriptions"
           :value="equivalent_open"
         >
@@ -474,78 +545,6 @@
                   >{{ equivalentDescription }}</router-link
                 >
               </div>
-            </v-expansion-panel-content>
-          </v-expansion-panel>
-        </v-expansion-panels>
-
-        <v-expansion-panels
-          focusable
-          hover
-          class="mt-5 mb-5"
-          tile
-          v-if="response && response.rna"
-          :value="rna_open"
-        >
-          <v-expansion-panel>
-            <v-expansion-panel-header class="overline"
-              >RNA Prediction</v-expansion-panel-header
-            >
-            <v-expansion-panel-content class="pt-5">
-              <v-sheet v-if="response.rna.errors">
-                <v-alert
-                  color="red lighten-1"
-                  tile
-                  border="left"
-                  dark
-                  v-for="(error, index) in response.rna.errors"
-                  :key="index"
-                >
-                  <div>
-                    {{ getMessage(error) }}
-                  </div>
-                </v-alert>
-              </v-sheet>
-
-              <div class="mt-4 mb-4" v-if="response.rna.description">
-                <Description
-                  :description="response.rna.description"
-                  :css_class="'ok-description-link'"
-                  :to_name="'Normalizer'"
-                  :to_params="{ descriptionRouter: response.rna.description }"
-                />
-              </div>
-            </v-expansion-panel-content>
-          </v-expansion-panel>
-        </v-expansion-panels>
-
-        <v-expansion-panels
-          focusable
-          hover
-          class="mt-5 mb-5"
-          tile
-          v-if="response && response.protein"
-          :value="protein_open"
-        >
-          <v-expansion-panel>
-            <v-expansion-panel-header class="overline"
-              >Protein Prediction</v-expansion-panel-header
-            >
-            <v-expansion-panel-content class="pt-5">
-              <v-sheet v-if="response.protein.errors">
-                <v-alert
-                  color="red lighten-1"
-                  tile
-                  border="left"
-                  dark
-                  v-for="(error, index) in response.rna.errors"
-                  :key="index"
-                >
-                  <div>
-                    {{ getMessage(error) }}
-                  </div>
-                </v-alert>
-              </v-sheet>
-              <AffectedProtein v-else :protein="this.response.protein" />
             </v-expansion-panel-content>
           </v-expansion-panel>
         </v-expansion-panels>
@@ -680,8 +679,7 @@ export default {
     mode: "hgvs",
     genomic_open: 0,
     equivalent_open: 0,
-    rna_open: 1,
-    protein_open: 1,
+    consequences_open: 1,
     back_translated_open: 1,
   }),
   created: function () {
@@ -1038,10 +1036,10 @@ export default {
       if (
         this.response &&
         this.response.normalized_model &&
-        this.response.normalized_model.coordinate_system == "c"
+        (this.response.normalized_model.coordinate_system == "c" ||
+          this.response.normalized_model.coordinate_system == "r")
       ) {
-        this.rna_open = 0;
-        this.protein_open = 0;
+        this.consequences_open = 0;
       }
       if (
         this.response &&

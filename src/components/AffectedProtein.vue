@@ -1,6 +1,6 @@
 <template>
   <div>
-    <div class="overline">Affected Protein Description</div>
+    <div class="overline">Predicted Protein Description</div>
     <div>
       <Description
         :description="protein.description"
@@ -219,7 +219,7 @@ export default {
   margin-left: 5px;
   padding: 10px;
   text-decoration: none;
-  font-size: 0.9em;
+  font-size: 0.8em;
   font-family: Menlo, Monaco, Consolas, "Courier New", monospace;
   display: block;
   color: #004d40;
