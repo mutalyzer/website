@@ -433,6 +433,18 @@
                 />
               </div>
 
+              <div v-if="response.protein && response.protein.description">
+                <div class="overline">Predicted Protein Description</div>
+                <Description
+                  :description="response.protein.description"
+                  :css_class="'ok-description-link'"
+                  :to_name="'Normalizer'"
+                  :to_params="{
+                    descriptionRouter: response.protein.description,
+                  }"
+                />
+              </div>
+
               <AffectedProtein
                 v-if="response.protein"
                 :protein="response.protein"

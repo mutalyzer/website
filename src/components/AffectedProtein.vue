@@ -1,75 +1,91 @@
 <template>
   <div>
-    <div class="overline">Predicted Protein Description</div>
-    <div>
-      <Description
-        :description="protein.description"
-        :css_class="'ok-description-link'"
-        :to_name="'Normalizer'"
-        :to_params="{ descriptionRouter: protein.description }"
-      />
-    </div>
-    <div v-if="this.fancy_protein_reference">
-      <div class="overline">AFFECTED PROTEIN REFERENCE SEQUENCE</div>
-      <v-row>
-        <v-col class="grow" style="overflow-x: auto">
-          <div class="protein-seq">
-            <pre v-html="this.fancy_protein_reference"></pre>
-          </div>
-        </v-col>
-        <v-col class="shrink" align-self="start">
-          <v-tooltip bottom>
-            <template v-slot:activator="{ on, attrs }">
-              <v-btn
-                v-bind="attrs"
-                v-on="on"
-                icon
-                v-clipboard="protein.reference"
-              >
-                <v-icon>mdi-content-copy</v-icon>
-              </v-btn>
-            </template>
-            <span>Copy the reference protein sequence</span>
-          </v-tooltip>
-        </v-col>
-      </v-row>
-    </div>
-    <div v-if="this.fancy_protein_predicted">
-      <div class="overline">AFFECTED PROTEIN PREDICTED SEQUENCE</div>
-      <v-row>
-        <v-col class="grow" style="overflow-x: auto">
-          <div class="protein-seq">
-            <pre v-html="this.fancy_protein_predicted"></pre>
-          </div>
-        </v-col>
-        <v-col class="shrink" align-self="start">
-          <v-tooltip bottom>
-            <template v-slot:activator="{ on, attrs }">
-              <v-btn
-                v-bind="attrs"
-                v-on="on"
-                icon
-                v-clipboard="protein.predicted"
-              >
-                <v-icon>mdi-content-copy</v-icon>
-              </v-btn>
-            </template>
-            <span>Copy the predicted protein sequence</span>
-          </v-tooltip>
-        </v-col>
-      </v-row>
-    </div>
+    <v-row align="center">
+      <v-col
+        class="grow overline"
+        v-bind="attrs"
+        v-on="on"
+        @click="showSequences = !showSequences"
+      >
+        Protein Sequences
+      </v-col>
+      <v-col class="shrink">
+        <v-tooltip bottom>
+          <template v-slot:activator="{ on, attrs }">
+            <v-btn
+              v-bind="attrs"
+              v-on="on"
+              icon
+              @click="showSequences = !showSequences"
+            >
+              <v-icon>
+                mdi-details {{ showSequences ? "mdi-rotate-180" : "" }}
+              </v-icon>
+            </v-btn>
+          </template>
+          <span>{{ showSequences ? "Hide" : "See" }} Sequences</span>
+        </v-tooltip>
+      </v-col>
+    </v-row>
+    <v-expand-transition>
+      <v-sheet
+        v-if="
+          (fancy_protein_reference || fancy_protein_predicted) && showSequences
+        "
+        ><div class="overline">AFFECTED PROTEIN REFERENCE SEQUENCE</div>
+        <v-row>
+          <v-col class="grow" style="overflow-x: auto">
+            <div class="protein-seq">
+              <pre v-html="this.fancy_protein_reference"></pre>
+            </div>
+          </v-col>
+          <v-col class="shrink" align-self="start">
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                  v-bind="attrs"
+                  v-on="on"
+                  icon
+                  v-clipboard="protein.reference"
+                >
+                  <v-icon>mdi-content-copy</v-icon>
+                </v-btn>
+              </template>
+              <span>Copy the reference protein sequence</span>
+            </v-tooltip>
+          </v-col>
+        </v-row>
+        <div class="overline">AFFECTED PROTEIN PREDICTED SEQUENCE</div>
+        <v-row>
+          <v-col class="grow" style="overflow-x: auto">
+            <div class="protein-seq">
+              <pre v-html="this.fancy_protein_predicted"></pre>
+            </div>
+          </v-col>
+          <v-col class="shrink" align-self="start">
+            <v-tooltip bottom>
+              <template v-slot:activator="{ on, attrs }">
+                <v-btn
+                  v-bind="attrs"
+                  v-on="on"
+                  icon
+                  v-clipboard="protein.predicted"
+                >
+                  <v-icon>mdi-content-copy</v-icon>
+                </v-btn>
+              </template>
+              <span>Copy the predicted protein sequence</span>
+            </v-tooltip>
+          </v-col>
+        </v-row>
+      </v-sheet>
+    </v-expand-transition>
   </div>
 </template>
 
 <script>
-import Description from "../components/Description.vue";
-
 export default {
   name: "AffectedProtein",
-  components: {
-    Description,
-  },
   props: {
     protein: null,
   },
@@ -77,6 +93,7 @@ export default {
     return {
       reference: [],
       predicted: [],
+      showSequences: false,
       fancy_protein_reference: null,
       fancy_protein_predicted: null,
       block_length: 10,
