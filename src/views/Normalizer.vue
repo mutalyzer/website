@@ -400,31 +400,50 @@
         >
           <v-expansion-panel>
             <v-expansion-panel-header class="overline"
-              >Consequences</v-expansion-panel-header
+              >Biological Information Transfer</v-expansion-panel-header
             >
             <v-expansion-panel-content class="pt-5">
               <div
-                v-if="response.rna && response.rna.description"
-                class="overline"
+                v-if="
+                  response &&
+                  response.equivalent_descriptions &&
+                  response.equivalent_descriptions.g
+                "
               >
-                Predicted RNA Description
+                <div class="overline">Genomic Description</div>
+                <Description
+                  :description="
+                    response.equivalent_descriptions.g[0].description
+                  "
+                  :css_class="'ok-description-link'"
+                  :to_name="'Normalizer'"
+                  :to_params="{
+                    descriptionRouter:
+                      response.equivalent_descriptions.g[0].description,
+                  }"
+                />
               </div>
-              <v-sheet v-if="response.rna && response.rna.errors">
-                <v-alert
-                  color="red lighten-1"
-                  tile
-                  border="left"
-                  dark
-                  v-for="(error, index) in response.rna.errors"
-                  :key="index"
-                >
-                  <div>
-                    {{ getMessage(error) }}
-                  </div>
-                </v-alert>
-              </v-sheet>
+
+              <div v-if="response.rna && response.rna.errors">
+                <div class="overline">Predictions</div>
+                <v-sheet>
+                  <v-alert
+                    color="red lighten-1"
+                    tile
+                    border="left"
+                    dark
+                    v-for="(error, index) in response.rna.errors"
+                    :key="index"
+                  >
+                    <div>
+                      {{ getMessage(error) }}
+                    </div>
+                  </v-alert>
+                </v-sheet>
+              </div>
 
               <div v-if="response.rna && response.rna.description">
+                <div class="overline">Predicted RNA Description</div>
                 <Description
                   :description="response.rna.description"
                   :css_class="'ok-description-link'"
@@ -443,12 +462,11 @@
                     descriptionRouter: response.protein.description,
                   }"
                 />
+                <AffectedProtein
+                  v-if="response.protein && response.protein.description"
+                  :protein="response.protein"
+                />
               </div>
-
-              <AffectedProtein
-                v-if="response.protein"
-                :protein="response.protein"
-              />
             </v-expansion-panel-content>
           </v-expansion-panel>
         </v-expansion-panels>
@@ -478,13 +496,9 @@
                 <v-subheader class="overline" v-else-if="c_s == 'n'"
                   >Noncoding</v-subheader
                 >
-                <v-subheader class="overline" v-else-if="c_s == 'g'"
-                  >Genomic</v-subheader
-                >
                 <v-subheader class="overline" v-else-if="c_s == 'p'"
                   >Protein</v-subheader
                 >
-                <v-subheader v-else> {{ c_s }} </v-subheader>
                 <v-sheet
                   v-for="(e_d, index) in sorted_equivalent(
                     response.equivalent_descriptions[c_s]
@@ -508,7 +522,7 @@
                           :selector="e_d.selector"
                         />
                       </template>
-                      <template v-else>
+                      <template v-else-if="c_s != 'g'">
                         <Description
                           :description="e_d.description"
                           :css_class="'ok-description-link'"
