@@ -476,33 +476,23 @@
           hover
           class="mt-5 mb-5"
           tile
-          v-if="response && response.equivalent_descriptions"
+          v-if="this.showTranscripts()"
           :value="equivalent_open"
         >
           <v-expansion-panel>
             <v-expansion-panel-header class="overline"
-              >Equivalent Descriptions</v-expansion-panel-header
+              >Other Annotated Transcripts</v-expansion-panel-header
             >
-            <v-expansion-panel-content>
+            <v-expansion-panel-content class="pt-5">
               <v-sheet
-                v-for="c_s in get_equivalent_descriptions(
+                v-for="equivalent in getEquivalentDescriptions(
                   response.equivalent_descriptions
                 )"
-                :key="c_s"
+                :key="equivalent.type"
               >
-                <v-subheader class="overline" v-if="c_s == 'c'"
-                  >Coding</v-subheader
-                >
-                <v-subheader class="overline" v-else-if="c_s == 'n'"
-                  >Noncoding</v-subheader
-                >
-                <v-subheader class="overline" v-else-if="c_s == 'p'"
-                  >Protein</v-subheader
-                >
+                <div class="overline">{{ equivalent.type }}</div>
                 <v-sheet
-                  v-for="(e_d, index) in sorted_equivalent(
-                    response.equivalent_descriptions[c_s]
-                  )"
+                  v-for="(e_d, index) in equivalent.descriptions"
                   :key="index"
                 >
                   <v-hover v-slot="{ hover }">
@@ -510,32 +500,20 @@
                       :color="hover ? 'grey lighten-3' : ''"
                       class="pa-2 ma-1"
                     >
-                      <template v-if="c_s === 'c'">
-                        <Description
-                          :description="e_d.description"
-                          :css_class="'ok-description-link'"
-                          :to_name="'Normalizer'"
-                          :to_params="{
-                            descriptionRouter: e_d.description,
-                          }"
-                          :tag="e_d.tag"
-                          :selector="e_d.selector"
-                        />
-                      </template>
-                      <template v-else-if="c_s != 'g'">
-                        <Description
-                          :description="e_d.description"
-                          :css_class="'ok-description-link'"
-                          :to_name="'Normalizer'"
-                          :to_params="{ descriptionRouter: e_d.description }"
-                        />
-                      </template>
+                      <Description
+                        :description="e_d.description"
+                        :css_class="'ok-description-link'"
+                        :to_name="'Normalizer'"
+                        :to_params="{
+                          descriptionRouter: e_d.description,
+                        }"
+                        :tag="e_d.tag"
+                        :selector="e_d.selector"
+                      />
                     </v-sheet>
                   </v-hover>
                   <v-divider
-                    v-if="
-                      index != response.equivalent_descriptions[c_s].length - 1
-                    "
+                    v-if="index != equivalent.descriptions.length - 1"
                   ></v-divider>
                 </v-sheet>
               </v-sheet>
@@ -543,6 +521,32 @@
           </v-expansion-panel>
         </v-expansion-panels>
 
+        <v-expansion-panels
+          focusable
+          hover
+          class="mt-5 mb-5"
+          tile
+          v-if="this.showEquivalentProtein()"
+          :value="equivalent_open"
+        >
+          <v-expansion-panel>
+            <v-expansion-panel-header class="overline"
+              >Equivalent Description</v-expansion-panel-header
+            >
+            <v-expansion-panel-content class="pt-5">
+              <Description
+                :description="
+                  this.response.equivalent_descriptions.p[0].description
+                "
+                :css_class="'ok-description-link'"
+                :to_name="'Normalizer'"
+                :to_params="{
+                  descriptionRouter: this.response.equivalent_descriptions.p[0]
+                    .description,
+                }"
+              /> </v-expansion-panel-content
+          ></v-expansion-panel>
+        </v-expansion-panels>
         <v-expansion-panels
           focusable
           hover
@@ -779,7 +783,7 @@ export default {
                 this.$nextTick(() => {
                   this.$vuetify.goTo(this.$refs.successAlert, this.options);
                 });
-                this.open_panels();
+                this.openPanels();
               }
             }
           })
@@ -1026,22 +1030,27 @@ export default {
         };
       }
     },
-    get_equivalent_descriptions: function (equivalent) {
+    getEquivalentDescriptions: function (equivalent) {
       var c_s_mapping = {
-        g: "Genomic",
         c: "Coding",
         n: "Noncoding",
-        p: "Protein",
       };
       var c_s_l = [];
       for (let c_s in c_s_mapping) {
         if (equivalent[c_s]) {
-          c_s_l.push(c_s);
+          let descriptions = [];
+          for (let d in equivalent[c_s]) {
+            descriptions.push(equivalent[c_s][d]);
+          }
+          c_s_l.push({
+            type: c_s_mapping[c_s],
+            descriptions: this.sortedEquivalent(descriptions),
+          });
         }
       }
       return c_s_l;
     },
-    sorted_equivalent: function (descriptions) {
+    sortedEquivalent: function (descriptions) {
       const sorted = [...descriptions].sort((a, b) => {
         if (a.tag && !b.tag) return -1;
         if (!a.tag && b.tag) return 1;
@@ -1058,7 +1067,7 @@ export default {
       this.inputDescriptionTextBox = this.descriptionExamples[i];
       this.$refs.refInputDescriptionTextBox.focus();
     },
-    open_panels: function () {
+    openPanels: function () {
       if (
         this.response &&
         this.response.normalized_model &&
@@ -1075,6 +1084,26 @@ export default {
       ) {
         this.back_translated_open = 0;
       }
+    },
+    showTranscripts: function () {
+      if (this.response && this.response.equivalent_descriptions) {
+        for (let c_s in this.response.equivalent_descriptions) {
+          if (c_s == "c" || c_s == "n") {
+            return true;
+          }
+        }
+      }
+      return false;
+    },
+    showEquivalentProtein: function () {
+      if (this.response && this.response.equivalent_descriptions) {
+        for (let c_s in this.response.equivalent_descriptions) {
+          if (c_s == "p") {
+            return true;
+          }
+        }
+      }
+      return false;
     },
   },
 };

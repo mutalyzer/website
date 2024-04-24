@@ -1,12 +1,7 @@
 <template>
   <div>
     <v-row align="center">
-      <v-col
-        class="grow overline"
-        v-bind="attrs"
-        v-on="on"
-        @click="showSequences = !showSequences"
-      >
+      <v-col class="grow overline" @click="showSequences = !showSequences">
         Protein Sequences
       </v-col>
       <v-col class="shrink">
