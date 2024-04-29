@@ -46,6 +46,44 @@
                           @click.prevent="selectDescriptionExample(index)"
                           >{{ example }}</span
                         >
+                        <v-menu transition="slide-x-transition">
+                          <template v-slot:activator="{ on, attrs }">
+                            <span
+                              class="example-link"
+                              color="success"
+                              v-bind="attrs"
+                              v-on="on"
+                            >
+                              ...
+                            </span>
+                          </template>
+                          <v-list>
+                            <v-list-item link>
+                              <v-list-item-title
+                                color="success"
+                                class="example-item"
+                                @click.prevent="
+                                  inputDescriptionTextBox =
+                                    'NG_012337.3(NM_003002.4):c.[53-10del;274G>T]';
+                                  $refs.refInputDescriptionTextBox.focus();
+                                "
+                                >NG_012337.3(NM_003002.4):c.[53-10del;274G>T]</v-list-item-title
+                              >
+                            </v-list-item>
+                            <v-list-item link>
+                              <v-list-item-title
+                                color="success"
+                                class="example-item"
+                                @click.prevent="
+                                  inputDescriptionTextBox =
+                                    'NC_000011.10(NM_003002.4):c.274del';
+                                  $refs.refInputDescriptionTextBox.focus();
+                                "
+                                >NC_000011.10(NM_003002.4):c.274del</v-list-item-title
+                              >
+                            </v-list-item>
+                          </v-list>
+                        </v-menu>
                       </div>
                     </v-col>
                   </v-row>
