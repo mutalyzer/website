@@ -24,10 +24,10 @@
       </span>
     </div>
     <div class="wrapper" id="parent-div">
-      <v-icon v-if="!view.inverted" class="mr-2" id="sense-arrow"
+      <v-icon v-if="!view.inverted" class="mr-2" :id="d_id + '_sense-arrow'"
         >mdi-arrow-right-bold</v-icon
       >
-      <v-icon v-if="view.inverted" class="mr-2" id="sense-arrow"
+      <v-icon v-if="view.inverted" class="mr-2" :id="d_id + '_sense-arrow'"
         >mdi-arrow-left-bold</v-icon
       >
       <div v-for="(v, v_i) in view.views" :key="'v' + v_i" class="seq">
@@ -425,7 +425,7 @@ export default {
   },
   mounted: function () {
     this.nextTickSteroids(() => {
-      var elmnt = document.getElementById("sense-arrow");
+      var elmnt = document.getElementById(this.d_id + "_sense-arrow");
       elmnt.scrollIntoView({
         block: "nearest",
         inline: "center",
@@ -434,6 +434,7 @@ export default {
       this.features_boundaries = features;
       this.nextTickSteroids(() => {
         var elmnt = document.getElementById(this.d_id + "_variant_1");
+        console.log("scroll to: ", this.d_id + "_variant_1");
         if (elmnt) {
           elmnt.scrollIntoView({
             block: "nearest",
@@ -810,6 +811,7 @@ export default {
     },
     scroll_to_variant: function (v_i) {
       var elmnt = document.getElementById(this.d_id + "_variant_" + v_i);
+      console.log(this.d_id + "_variant_" + v_i);
       elmnt.scrollIntoView({
         behavior: "smooth",
         block: "nearest",
