@@ -434,7 +434,6 @@ export default {
       this.features_boundaries = features;
       this.nextTickSteroids(() => {
         var elmnt = document.getElementById(this.d_id + "_variant_1");
-        console.log("scroll to: ", this.d_id + "_variant_1");
         if (elmnt) {
           elmnt.scrollIntoView({
             block: "nearest",
@@ -811,7 +810,6 @@ export default {
     },
     scroll_to_variant: function (v_i) {
       var elmnt = document.getElementById(this.d_id + "_variant_" + v_i);
-      console.log(this.d_id + "_variant_" + v_i);
       elmnt.scrollIntoView({
         behavior: "smooth",
         block: "nearest",
