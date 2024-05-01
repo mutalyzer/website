@@ -277,6 +277,137 @@
         </v-expand-transition>
 
         <v-expansion-panels
+          focusable
+          hover
+          class="mt-5 mb-5"
+          tile
+          v-if="response && (response.rna || response.protein)"
+          :value="consequences_open"
+        >
+          <v-expansion-panel>
+            <v-expansion-panel-header class="overline"
+              >Biological Information Transfer</v-expansion-panel-header
+            >
+            <v-expansion-panel-content class="pt-5">
+              <div
+                v-if="
+                  response &&
+                  response.equivalent_descriptions &&
+                  response.equivalent_descriptions.g
+                "
+              >
+                <div class="overline">Genomic Description</div>
+                <Description
+                  :description="
+                    response.equivalent_descriptions.g[0].description
+                  "
+                  :css_class="'ok-description-link'"
+                  :to_name="'NormalizerAlt'"
+                  :to_params="{
+                    descriptionRouter:
+                      response.equivalent_descriptions.g[0].description,
+                  }"
+                />
+              </div>
+
+              <div v-if="response.rna && response.rna.errors">
+                <div class="overline">Predictions</div>
+                <v-sheet>
+                  <v-alert
+                    color="red lighten-1"
+                    tile
+                    border="left"
+                    dark
+                    v-for="(error, index) in response.rna.errors"
+                    :key="index"
+                  >
+                    <div>
+                      {{ getMessage(error) }}
+                    </div>
+                  </v-alert>
+                </v-sheet>
+              </div>
+
+              <div v-if="response.rna && response.rna.description">
+                <div class="overline">Predicted RNA Description</div>
+                <Description
+                  :description="response.rna.description"
+                  :css_class="'ok-description-link'"
+                  :to_name="'NormalizerAlt'"
+                  :to_params="{ descriptionRouter: response.rna.description }"
+                />
+              </div>
+
+              <div v-if="response.protein && response.protein.description">
+                <div class="overline">Predicted Protein Description</div>
+                <Description
+                  :description="response.protein.description"
+                  :css_class="'ok-description-link'"
+                  :to_name="'NormalizerAlt'"
+                  :to_params="{
+                    descriptionRouter: response.protein.description,
+                  }"
+                />
+                <AffectedProtein
+                  v-if="response.protein && response.protein.description"
+                  :protein="response.protein"
+                />
+              </div>
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+        </v-expansion-panels>
+
+        <v-expansion-panels
+          focusable
+          hover
+          class="mt-5 mb-5"
+          tile
+          v-if="
+            response &&
+            response.normalized_description &&
+            response.normalized_model
+          "
+        >
+          <v-expansion-panel
+            v-if="this.response.view_corrected || this.response.view_normalized"
+          >
+            <v-expansion-panel-header class="overline"
+              >View Variants Sequence Overview</v-expansion-panel-header
+            >
+            <v-expansion-panel-content class="pt-2 pb-2">
+              <div
+                v-if="
+                  this.response.corrected_description !=
+                  this.response.normalized_description
+                "
+              >
+                <div class="overline">Input</div>
+                <ViewVariantsCore
+                  :view="this.response.view_corrected"
+                  :d_id="'corrected'"
+                  class="mt-5 mb-5"
+                />
+              </div>
+              <div
+                v-if="
+                  this.response.corrected_description !=
+                  this.response.normalized_description
+                "
+                class="overline"
+              >
+                Output
+              </div>
+              <ViewVariantsCore
+                v-if="this.response.normalized_description"
+                :view="this.response.view_normalized"
+                :influence="this.response.influence"
+                :d_id="'normalized'"
+              />
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+        </v-expansion-panels>
+
+        <v-expansion-panels
           v-if="
             response &&
             (response.supremal || response.dot || response.minimal_descriptions)
@@ -395,118 +526,6 @@
           hover
           class="mt-5 mb-5"
           tile
-          v-if="
-            response &&
-            response.normalized_description &&
-            response.normalized_model
-          "
-        >
-          <v-expansion-panel
-            v-if="this.response.view_corrected || this.response.view_normalized"
-          >
-            <v-expansion-panel-header class="overline"
-              >View Variants Sequence Overview</v-expansion-panel-header
-            >
-            <v-expansion-panel-content class="pt-2 pb-2">
-              <div
-                v-if="
-                  this.response.corrected_description !=
-                  this.response.normalized_description
-                "
-              >
-                <div class="overline">Input</div>
-                <ViewVariantsCore
-                  :view="this.response.view_corrected"
-                  :d_id="'corrected'"
-                  class="mt-5 mb-5"
-                />
-              </div>
-              <div
-                v-if="
-                  this.response.corrected_description !=
-                  this.response.normalized_description
-                "
-                class="overline"
-              >
-                Output
-              </div>
-              <ViewVariantsCore
-                v-if="this.response.normalized_description"
-                :view="this.response.view_normalized"
-                :influence="this.response.influence"
-                :d_id="'normalized'"
-              />
-            </v-expansion-panel-content>
-          </v-expansion-panel>
-        </v-expansion-panels>
-
-        <v-expansion-panels
-          focusable
-          hover
-          class="mt-5 mb-5"
-          tile
-          v-if="response && response.equivalent_descriptions"
-        >
-          <v-expansion-panel>
-            <v-expansion-panel-header class="overline"
-              >Equivalent Descriptions</v-expansion-panel-header
-            >
-            <v-expansion-panel-content>
-              <v-sheet
-                v-for="(values, c_s) in response.equivalent_descriptions"
-                :key="c_s"
-              >
-                <v-subheader class="overline" v-if="c_s == 'c'"
-                  >Coding</v-subheader
-                >
-                <v-subheader class="overline" v-else-if="c_s == 'n'"
-                  >Noncoding</v-subheader
-                >
-                <v-subheader class="overline" v-else-if="c_s == 'g'"
-                  >Genomic</v-subheader
-                >
-                <v-subheader v-else-if="c_s == 'p'"></v-subheader>
-                <v-subheader v-else> {{ c_s }} </v-subheader>
-                <v-sheet v-for="(e_d, index) in values" :key="index">
-                  <v-hover v-slot="{ hover }">
-                    <v-sheet
-                      :color="hover ? 'grey lighten-3' : ''"
-                      class="pa-2 ma-1"
-                    >
-                      <template v-if="c_s === 'c'">
-                        <Description
-                          :description="e_d.description"
-                          :css_class="'ok-description-link'"
-                          :to_name="'NormalizerAlt'"
-                          :to_params="{
-                            descriptionRouter: e_d.description,
-                          }"
-                          :tag="e_d.tag"
-                          :selector="e_d.selector"
-                        />
-                      </template>
-                      <template v-else>
-                        <Description
-                          :description="e_d.description"
-                          :css_class="'ok-description-link'"
-                          :to_name="'NormalizerAlt'"
-                          :to_params="{ descriptionRouter: e_d.description }"
-                        />
-                      </template>
-                    </v-sheet>
-                  </v-hover>
-                  <v-divider v-if="index != values.length - 1"></v-divider>
-                </v-sheet>
-              </v-sheet>
-            </v-expansion-panel-content>
-          </v-expansion-panel>
-        </v-expansion-panels>
-
-        <v-expansion-panels
-          focusable
-          hover
-          class="mt-5 mb-5"
-          tile
           v-if="response && response.back_translated_descriptions"
         >
           <v-expansion-panel>
@@ -529,125 +548,6 @@
                   >{{ equivalentDescription }}</router-link
                 >
               </div>
-            </v-expansion-panel-content>
-          </v-expansion-panel>
-        </v-expansion-panels>
-
-        <v-expansion-panels
-          focusable
-          hover
-          class="mt-5 mb-5"
-          tile
-          v-if="response && response.rna"
-        >
-          <v-expansion-panel>
-            <v-expansion-panel-header class="overline"
-              >RNA Prediction</v-expansion-panel-header
-            >
-            <v-expansion-panel-content class="pt-5">
-              <v-sheet v-if="response.rna.errors">
-                <v-alert
-                  color="red lighten-1"
-                  tile
-                  border="left"
-                  dark
-                  v-for="(error, index) in response.rna.errors"
-                  :key="index"
-                >
-                  <div>
-                    {{ getMessage(error) }}
-                  </div>
-                </v-alert>
-              </v-sheet>
-
-              <div class="mt-4 mb-4" v-if="response.rna.description">
-                <Description
-                  :description="response.rna.description"
-                  :css_class="'ok-description-link'"
-                  :to_name="'NormalizerAlt'"
-                  :to_params="{ descriptionRouter: response.rna.description }"
-                />
-              </div>
-              <v-expansion-panels focusable hover flat class="mt-10 mb-10">
-                <v-expansion-panel>
-                  <v-expansion-panel-header class="overline"
-                    >Details</v-expansion-panel-header
-                  >
-                  <v-expansion-panel-content>
-                    <div
-                      v-for="(supremal, index) in response.rna.local_supremals"
-                      :key="index"
-                      class="mt-4 mb-4"
-                    >
-                      <Description
-                        :description="supremal.supremal.coding"
-                        :css_class="'ok-description'"
-                      />
-                      <v-list-item>
-                        <v-list-item-content>
-                          <v-list-item-title
-                            >Supremal:
-                            {{ supremal.supremal.coding }}</v-list-item-title
-                          >
-                          <v-list-item-subtitle
-                            >Splice site affected by supremal:
-                            {{ supremal.splice_affected }}</v-list-item-subtitle
-                          >
-                          <v-list-item-subtitle v-if="supremal.push_exon"
-                            >Can be pushed into exon as:
-                            {{
-                              supremal.push_exon.coding
-                            }}</v-list-item-subtitle
-                          >
-                          <v-list-item-subtitle v-if="supremal.push_intron"
-                            >Can be pushed into the intron as:
-                            {{
-                              supremal.push_intron.coding
-                            }}</v-list-item-subtitle
-                          >
-                          <v-list-item-subtitle v-if="supremal.rna"
-                            >RNA part:
-                            {{
-                              outputVariants(supremal.rna)
-                            }}</v-list-item-subtitle
-                          >
-                        </v-list-item-content>
-                      </v-list-item>
-                    </div>
-                  </v-expansion-panel-content>
-                </v-expansion-panel>
-              </v-expansion-panels>
-            </v-expansion-panel-content>
-          </v-expansion-panel>
-        </v-expansion-panels>
-
-        <v-expansion-panels
-          focusable
-          hover
-          class="mt-5 mb-5"
-          tile
-          v-if="response && response.protein"
-        >
-          <v-expansion-panel>
-            <v-expansion-panel-header class="overline"
-              >Protein Prediction</v-expansion-panel-header
-            >
-            <v-expansion-panel-content class="pt-5">
-              <v-sheet v-if="response.protein.errors">
-                <v-alert
-                  color="red lighten-1"
-                  tile
-                  border="left"
-                  dark
-                  v-for="(error, index) in response.rna.errors"
-                  :key="index"
-                >
-                  <div>
-                    {{ getMessage(error) }}
-                  </div>
-                </v-alert>
-              </v-sheet>
-              <AffectedProtein v-else :protein="this.response.protein" />
             </v-expansion-panel-content>
           </v-expansion-panel>
         </v-expansion-panels>
@@ -702,6 +602,8 @@ export default {
     sequence: null,
     only_variants: false,
     mode: "hgvs",
+    consequences_open: 1,
+    back_translated_open: 1,
   }),
   created: function () {
     this.run();
@@ -774,6 +676,7 @@ export default {
                 this.$nextTick(() => {
                   this.$vuetify.goTo(this.$refs.successAlert, this.options);
                 });
+                this.openPanels();
               }
             }
           })
@@ -1029,6 +932,63 @@ export default {
         return variants[0];
       }
       return variants.join(";");
+    },
+    openPanels: function () {
+      if (
+        this.response &&
+        this.response.normalized_model &&
+        (this.response.normalized_model.coordinate_system == "c" ||
+          this.response.normalized_model.coordinate_system == "r")
+      ) {
+        this.consequences_open = 0;
+      }
+      if (
+        this.response &&
+        this.response.normalized_model &&
+        this.response.normalized_model.coordinate_system == "p" &&
+        this.response.back_translated_descriptions
+      ) {
+        this.back_translated_open = 0;
+      }
+    },
+    showTranscripts: function () {
+      if (this.response && this.response.equivalent_descriptions) {
+        for (let c_s in this.response.equivalent_descriptions) {
+          if (c_s == "c" || c_s == "n") {
+            return true;
+          }
+        }
+      }
+      return false;
+    },
+    getEquivalentDescriptions: function (equivalent) {
+      var c_s_mapping = {
+        c: "Coding",
+        n: "Noncoding",
+      };
+      var c_s_l = [];
+      for (let c_s in c_s_mapping) {
+        if (equivalent[c_s]) {
+          let descriptions = [];
+          for (let d in equivalent[c_s]) {
+            descriptions.push(equivalent[c_s][d]);
+          }
+          c_s_l.push({
+            type: c_s_mapping[c_s],
+            descriptions: this.sortedEquivalent(descriptions),
+          });
+        }
+      }
+      return c_s_l;
+    },
+    sortedEquivalent: function (descriptions) {
+      const sorted = [...descriptions].sort((a, b) => {
+        if (a.tag && !b.tag) return -1;
+        if (!a.tag && b.tag) return 1;
+        if (a.description > b.description) return -1;
+        if (a.description < b.description) return 1;
+      });
+      return sorted;
     },
   },
 };
