@@ -579,8 +579,8 @@
                 :css_class="'ok-description-link'"
                 :to_name="'Normalizer'"
                 :to_params="{
-                  descriptionRouter: this.response.equivalent_descriptions.p[0]
-                    .description,
+                  descriptionRouter:
+                    this.response.equivalent_descriptions.p[0].description,
                 }"
               /> </v-expansion-panel-content
           ></v-expansion-panel>
@@ -833,7 +833,15 @@ export default {
                 error.response.data &&
                 error.response.data.custom
               ) {
-                this.response = error.response.data.custom;
+                let errors = error.response.data.custom.errors;
+                if (
+                  (errors.length === 1 && errors[0].code === "ESYNTAXUEOF") ||
+                  errors[0].code === "ESYNTAXUC"
+                ) {
+                  this.spdiToHgvs(error.response.data.custom);
+                } else {
+                  this.response = error.response.data.custom;
+                }
               } else {
                 this.connectionErrors = {
                   details: "Some response error occured.",
@@ -895,6 +903,35 @@ export default {
             } else {
               this.connectionErrors = { details: "Some error occured." };
             }
+          });
+      }
+    },
+    spdiToHgvs: function (hgvs_error) {
+      if (this.inputDescriptionTextBox !== null) {
+        this.loadingOverlay = true;
+        this.inputDescription = null;
+        this.response = null;
+        this.connectionErrors = null;
+        this.showCorrections = false;
+        this.inputDescriptionTextBox = this.inputDescriptionTextBox.trim();
+
+        MutalyzerService.spdiConverter(this.inputDescriptionTextBox)
+          .then((response) => {
+            if (response.data) {
+              this.loadingOverlay = false;
+              this.response = response.data;
+              this.inputDescription = this.inputDescriptionTextBox;
+              if (this.isNormalized()) {
+                this.$nextTick(() => {
+                  this.$vuetify.goTo(this.$refs.successAlert, this.options);
+                });
+                this.openPanels();
+              }
+            }
+          })
+          .catch(() => {
+            this.loadingOverlay = false;
+            this.response = hgvs_error;
           });
       }
     },

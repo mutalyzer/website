@@ -56,6 +56,9 @@ export default {
       "/related_references/" + encodeURIComponent(reference_id)
     );
   },
+  spdiConverter(description) {
+    return apiClient.get("/spdi_converter/" + encodeURIComponent(description));
+  },
   version() {
     return apiClient.get("/version");
   },
