@@ -110,6 +110,28 @@
                       >NC_000011.10(NM_003002.4):c.274del</v-list-item-title
                     >
                   </v-list-item>
+                  <v-list-item link>
+                    <v-list-item-title
+                      color="success"
+                      class="example-item"
+                      @click.prevent="
+                        inputDescriptionTextBox = 'NG_012337.3:7124:G:T';
+                        $refs.refInputDescriptionTextBox.focus();
+                      "
+                      >NG_012337.3:7124:G:T</v-list-item-title
+                    >
+                  </v-list-item>
+                  <v-list-item link>
+                    <v-list-item-title
+                      color="success"
+                      class="example-item"
+                      @click.prevent="
+                        inputDescriptionTextBox = 'NM_003002.4:308:1:';
+                        $refs.refInputDescriptionTextBox.focus();
+                      "
+                      >NM_003002.4:308:1:</v-list-item-title
+                    >
+                  </v-list-item>
                 </v-list>
               </v-menu>
             </div>
@@ -909,24 +931,24 @@ export default {
     spdiToHgvs: function (hgvs_error) {
       if (this.inputDescriptionTextBox !== null) {
         this.loadingOverlay = true;
-        this.inputDescription = null;
-        this.response = null;
-        this.connectionErrors = null;
-        this.showCorrections = false;
-        this.inputDescriptionTextBox = this.inputDescriptionTextBox.trim();
-
         MutalyzerService.spdiConverter(this.inputDescriptionTextBox)
           .then((response) => {
-            if (response.data) {
-              this.loadingOverlay = false;
-              this.response = response.data;
-              this.inputDescription = this.inputDescriptionTextBox;
-              if (this.isNormalized()) {
-                this.$nextTick(() => {
-                  this.$vuetify.goTo(this.$refs.successAlert, this.options);
-                });
-                this.openPanels();
-              }
+            if (response.data.normalized_description) {
+              MutalyzerService.normalizeHgvs(
+                response.data.normalized_description
+              ).then((response) => {
+                if (response.data) {
+                  this.loadingOverlay = false;
+                  this.response = response.data;
+                  this.inputDescription = this.inputDescriptionTextBox;
+                  if (this.isNormalized()) {
+                    this.$nextTick(() => {
+                      this.$vuetify.goTo(this.$refs.successAlert, this.options);
+                    });
+                    this.openPanels();
+                  }
+                }
+              });
             }
           })
           .catch(() => {
