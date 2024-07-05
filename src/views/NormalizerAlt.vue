@@ -281,7 +281,7 @@
           hover
           class="mt-5 mb-5"
           tile
-          v-if="response && (response.rna || response.protein)"
+          v-if="response && (response.dna || response.rna || response.protein)"
           :value="consequences_open"
         >
           <v-expansion-panel>
@@ -337,6 +337,18 @@
                   :to_params="{ descriptionRouter: response.rna.description }"
                 />
               </div>
+
+
+              <div v-if="response.dna && response.dna.description">
+                <div class="overline">Predicted DNA Description</div>
+                <Description
+                  :description="response.dna.description"
+                  :css_class="'ok-description-link'"
+                  :to_name="'NormalizerAlt'"
+                  :to_params="{ descriptionRouter: response.dna.description }"
+                />
+              </div>
+
 
               <div v-if="response.protein && response.protein.description">
                 <div class="overline">Predicted Protein Description</div>
