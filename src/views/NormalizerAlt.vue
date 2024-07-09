@@ -338,6 +338,23 @@
                 />
               </div>
 
+              <div v-if="response.dna && response.dna.errors">
+                <div class="overline">Predicted DNA description</div>
+                <v-sheet>
+                  <v-alert
+                    color="red lighten-1"
+                    tile
+                    border="left"
+                    dark
+                    v-for="(error, index) in response.dna.errors"
+                    :key="index"
+                  >
+                    <div>
+                      {{ getMessage(error) }}
+                    </div>
+                  </v-alert>
+                </v-sheet>
+              </div>
 
               <div v-if="response.dna && response.dna.description">
                 <div class="overline">Predicted DNA Description</div>
@@ -348,7 +365,6 @@
                   :to_params="{ descriptionRouter: response.dna.description }"
                 />
               </div>
-
 
               <div v-if="response.protein && response.protein.description">
                 <div class="overline">Predicted Protein Description</div>
@@ -950,6 +966,7 @@ export default {
         this.response &&
         this.response.normalized_model &&
         (this.response.normalized_model.coordinate_system == "c" ||
+          this.response.normalized_model.coordinate_system == "n" ||
           this.response.normalized_model.coordinate_system == "r")
       ) {
         this.consequences_open = 0;
