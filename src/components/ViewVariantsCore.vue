@@ -49,7 +49,11 @@
                         v-on="{ ...onMenu, ...onTooltip }"
                         >{{ s }}</span
                       ></template
-                    ><span>{{ get_position(v, s_i, "sequence") }} </span>
+                    ><span
+                      >{{
+                        get_position_tooltip(get_position(v, s_i, "sequence"))
+                      }}
+                    </span>
                   </v-tooltip>
                 </template>
                 <v-list>
@@ -82,7 +86,9 @@
                         v-on="{ ...onMenu, ...onTooltip }"
                         >{{ s }}</span
                       ></template
-                    ><span>{{ get_position(v, s_i, "left") }}</span>
+                    ><span>{{
+                      get_position_tooltip(get_position(v, s_i, "left"))
+                    }}</span>
                   </v-tooltip>
                 </template>
                 <v-list>
@@ -132,7 +138,9 @@
                         v-on="{ ...onMenu, ...onTooltip }"
                         >{{ s }}</span
                       ></template
-                    ><span>{{ get_position(v, s_i, "right") }}</span>
+                    ><span>{{
+                      get_position_tooltip(get_position(v, s_i, "right"))
+                    }}</span>
                   </v-tooltip>
                 </template>
                 <v-list>
@@ -184,7 +192,9 @@
                       <span>{{ s }}</span></span
                     ></template
                   >
-                  <span>{{ get_position(v, s_i, "sequence") }}</span>
+                  <span>{{
+                    get_position_tooltip(get_position(v, s_i, "sequence"))
+                  }}</span>
                 </v-tooltip>
               </span>
             </div>
@@ -204,7 +214,9 @@
                       <span>{{ s }}</span></span
                     ></template
                   >
-                  <span>{{ get_position(v, s_i, "left") }}</span>
+                  <span>{{
+                    get_position_tooltip(get_position(v, s_i, "left"))
+                  }}</span>
                 </v-tooltip>
               </span>
             </div>
@@ -247,7 +259,9 @@
                       <span>{{ s }}</span></span
                     ></template
                   >
-                  <span>{{ get_position(v, s_i, "right-deleted") }}</span>
+                  <span>{{
+                    get_position_tooltip(get_position(v, s_i, "right-deleted"))
+                  }}</span>
                 </v-tooltip>
               </span>
             </div>
@@ -318,7 +332,9 @@
                       <span>{{ s }}</span></span
                     ></template
                   >
-                  <span>{{ get_position(v, s_i, "sequence") }}</span>
+                  <span>{{
+                    get_position_tooltip(get_position(v, s_i, "sequence"))
+                  }}</span>
                 </v-tooltip>
               </span>
             </div>
@@ -336,7 +352,9 @@
                       <span>{{ s }}</span></span
                     ></template
                   >
-                  <span>{{ get_position(v, s_i, "left") }}</span>
+                  <span>{{
+                    get_position_tooltip(get_position(v, s_i, "left"))
+                  }}</span>
                 </v-tooltip>
               </span>
             </div>
@@ -373,7 +391,9 @@
                       <span>{{ s }}</span></span
                     ></template
                   >
-                  <span>{{ get_position(v, s_i, "right-deleted") }}</span>
+                  <span>{{
+                    get_position_tooltip(get_position(v, s_i, "right-deleted"))
+                  }}</span>
                 </v-tooltip>
               </span>
             </div>
@@ -418,12 +438,28 @@ export default {
       last_seq_id: null,
       draw_exons: false,
       features_boundaries: null,
+      exons: null,
+      cds: null,
     };
   },
   created: function () {
     this.hover_init();
   },
   mounted: function () {
+    if (
+      this.selector &&
+      this.selector.exon &&
+      this.selector.exon.g &&
+      this.selector.cds &&
+      this.selector.cds.g
+    ) {
+      this.exons = this.selector.exon.g.map(function (x) {
+        return [parseInt(x[0], 10) - 1, parseInt(x[1], 10)];
+      });
+      this.cds = this.selector.cds.g.map(function (x) {
+        return [parseInt(x[0], 10) - 1, parseInt(x[1], 10)];
+      })[0];
+    }
     this.nextTickSteroids(() => {
       var elmnt = document.getElementById(this.d_id + "_sense-arrow");
       elmnt.scrollIntoView({
@@ -537,6 +573,39 @@ export default {
 
       position += 1;
       return position;
+    },
+    get_position_tooltip: function (position) {
+      var output = "";
+      if (this.exons && this.cds) {
+        var coding = this.coordinateToCoding(
+          position - 1,
+          this.exons,
+          this.cds,
+          false,
+          true
+        );
+        var pos = coding[0];
+        var offset = coding[1];
+        var section = coding[2];
+
+        if (section == -1) {
+          pos = Math.abs(pos);
+          output += "-" + pos;
+        } else if (section == 1) {
+          output += "*" + pos;
+        } else {
+          if (offset < 0) {
+            output += pos + "-" + Math.abs(offset);
+          } else if (offset > 0) {
+            output += pos + "+" + Math.abs(offset);
+          } else {
+            output += pos;
+          }
+        }
+      } else {
+        output = position;
+      }
+      return output;
     },
     get_position: function (view, s_i, key) {
       let position = this._get_position(view, s_i, key);
@@ -941,6 +1010,157 @@ export default {
       return this.hover_variants[v_i] || this.hover_sequence[v_i]
         ? "seq-variant" + influence_on
         : "seq-variant-hover" + influence_on;
+    },
+    nearestBoundary: function (lb, rb, c, p) {
+      const dl = c - lb + 1;
+      const dr = rb - c;
+
+      if (dl < dr) {
+        return 0;
+      }
+      if (dl > dr) {
+        return 1;
+      }
+      return p;
+    },
+    nearestLocation: function (ls, c, p = 0) {
+      let rb = ls.length - 1;
+      let lb = 0;
+      let i;
+
+      while (lb <= rb) {
+        i = Math.floor((lb + rb) / 2);
+
+        if (c < ls[i][0]) {
+          // `c` lies before this location.
+          rb = i - 1;
+        } else if (c >= ls[i][1]) {
+          // `c` lies after this location.
+          lb = i + 1;
+        } else {
+          // `c` lies in this location.
+          return i;
+        }
+      }
+
+      if (i && c < ls[i][0]) {
+        // `c` lies before this location.
+        return i - 1 + this.nearestBoundary(ls[i - 1][1], ls[i][0], c, p);
+      }
+      if (i < ls.length - 1) {
+        // `c` lies after this location.
+        return i + this.nearestBoundary(ls[i][1], ls[i + 1][0], c, p);
+      }
+
+      return i;
+    },
+    getOffsets: function (locations) {
+      let s = 0;
+      const output = [0];
+      for (let loc of locations.slice(0, -1)) {
+        s += Math.abs(loc[0] - loc[1]);
+        output.push(s);
+      }
+      return output;
+    },
+    getOutside: function (coordinate, loci) {
+      if (coordinate < loci[0].boundary[0]) {
+        return coordinate - loci[0].boundary[0];
+      }
+      if (coordinate > loci[loci.length - 1].boundary[1]) {
+        return coordinate - loci[loci.length - 1].boundary[1];
+      }
+      return 0;
+    },
+    getDirection: function (index, offsets, inverted = false) {
+      if (inverted) {
+        return offsets.length - index - 1;
+      }
+      return index;
+    },
+    locusToPosition: function (coordinate, location, inverted = false) {
+      const boundary = [location[0], location[1] - 1];
+      const end = boundary[1] - boundary[0];
+
+      if (inverted) {
+        if (coordinate > boundary[1]) {
+          return [0, boundary[1] - coordinate];
+        }
+        if (coordinate < boundary[0]) {
+          return [end, boundary[0] - coordinate];
+        }
+        return [boundary[1] - coordinate, 0];
+      }
+
+      if (coordinate < boundary[0]) {
+        return [0, coordinate - boundary[0]];
+      }
+      if (coordinate > boundary[1]) {
+        return [end, coordinate - boundary[1]];
+      }
+      return [coordinate - boundary[0], 0];
+    },
+    multiLocusToPosition: function (coordinate, locations, inverted = false) {
+      const loci = locations.map((location) => ({
+        boundary: [location[0], location[1] - 1],
+        end: location[1] - 1 - location[0],
+      }));
+      const orientation = inverted ? -1 : 1;
+      const offsets = this.getOffsets(locations);
+      const index = this.nearestLocation(locations, coordinate, inverted);
+      const outside = orientation * this.getOutside(coordinate, loci);
+      const location = this.locusToPosition(
+        coordinate,
+        locations[index],
+        inverted
+      );
+
+      return [
+        location[0] + offsets[this.getDirection(index, offsets, inverted)],
+        location[1],
+        outside,
+      ];
+    },
+    coordinateToCoding: function (
+      coordinate,
+      exons,
+      cds,
+      inverted = false,
+      degenerate = false
+    ) {
+      const b0 = this.multiLocusToPosition(cds[0], exons, inverted);
+      const b1 = this.multiLocusToPosition(cds[1], exons, inverted);
+
+      let coding, cdsLen;
+      if (inverted) {
+        coding = [b1[0] + b1[1] + 1, b0[0] + b0[1] + 1];
+        cdsLen = b0[0] + b0[1] - (b1[0] + b1[1]);
+      } else {
+        coding = [b0[0] + b0[1], b1[0] + b1[1]];
+        cdsLen = b1[0] + b1[1] - (b0[0] + b0[1]);
+      }
+      let pos = this.multiLocusToPosition(coordinate, exons, inverted);
+      if (pos[0] < coding[0]) {
+        pos = [pos[0] - coding[0], pos[1], -1, pos[2]];
+      } else if (pos[0] >= coding[1]) {
+        pos = [pos[0] - coding[1] + 1, pos[1], 1, pos[2]];
+      } else {
+        pos = [pos[0] - coding[0] + 1, pos[1], 0, pos[2]];
+      }
+
+      if (degenerate && pos[3]) {
+        if (pos[2] === 0) {
+          if (pos[0] === 1 && pos[1] < 0) {
+            return [pos[1], 0, -1, pos[3]];
+          }
+          if (pos[0] === cdsLen && pos[1] > 0) {
+            return [pos[0] + pos[1] - cdsLen, 0, 1, pos[3]];
+          }
+        }
+        return [pos[0] + pos[1], 0, pos[2], pos[3]];
+      }
+
+      return pos;
     },
   },
 };
