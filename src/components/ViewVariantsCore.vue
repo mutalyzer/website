@@ -440,6 +440,7 @@ export default {
       features_boundaries: null,
       exons: null,
       cds: null,
+      inverted: false,
     };
   },
   created: function () {
@@ -453,12 +454,29 @@ export default {
       this.selector.cds &&
       this.selector.cds.g
     ) {
-      this.exons = this.selector.exon.g.map(function (x) {
-        return [parseInt(x[0], 10) - 1, parseInt(x[1], 10)];
-      });
-      this.cds = this.selector.cds.g.map(function (x) {
-        return [parseInt(x[0], 10) - 1, parseInt(x[1], 10)];
-      })[0];
+      if (
+        parseInt(this.selector.cds.g[0][0], 10) >
+        parseInt(this.selector.cds.g[0][1], 10)
+      ) {
+        this.inverted = true;
+      }
+      if (this.inverted == true) {
+        this.exons = this.selector.exon.g
+          .map(function (x) {
+            return [parseInt(x[1], 10) - 1, parseInt(x[0], 10)];
+          })
+          .reverse();
+        this.cds = this.selector.cds.g.map(function (x) {
+          return [parseInt(x[1], 10) - 1, parseInt(x[0], 10)];
+        })[0];
+      } else {
+        this.exons = this.selector.exon.g.map(function (x) {
+          return [parseInt(x[0], 10) - 1, parseInt(x[1], 10)];
+        });
+        this.cds = this.selector.cds.g.map(function (x) {
+          return [parseInt(x[0], 10) - 1, parseInt(x[1], 10)];
+        })[0];
+      }
     }
     this.nextTickSteroids(() => {
       var elmnt = document.getElementById(this.d_id + "_sense-arrow");
@@ -581,7 +599,7 @@ export default {
           position - 1,
           this.exons,
           this.cds,
-          false,
+          this.inverted,
           true
         );
         var pos = coding[0];
@@ -602,6 +620,7 @@ export default {
             output += pos;
           }
         }
+        output = "c." + output + " | g." + position;
       } else {
         output = position;
       }

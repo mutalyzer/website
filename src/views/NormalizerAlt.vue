@@ -413,6 +413,7 @@
                 <ViewVariantsCore
                   :view="this.response.view_corrected"
                   :d_id="'corrected'"
+                  :selector="this.response.selector_short"
                   class="mt-5 mb-5"
                 />
               </div>
@@ -430,6 +431,7 @@
                 :view="this.response.view_normalized"
                 :influence="this.response.influence"
                 :d_id="'normalized'"
+                :selector="this.response.selector_short"
               />
             </v-expansion-panel-content>
           </v-expansion-panel>
