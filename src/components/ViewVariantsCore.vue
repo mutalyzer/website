@@ -1073,11 +1073,15 @@ export default {
 
       return i;
     },
-    getOffsets: function (locations) {
+    getOffsets: function (locations, orientation) {
       let s = 0;
-      const output = [0];
-      for (let loc of locations.slice(0, -1)) {
-        s += Math.abs(loc[0] - loc[1]);
+      let output = [0];
+
+      let locs =
+        orientation === 1 ? locations.slice() : locations.slice().reverse();
+
+      for (let i = 0; i < locs.length - 1; i++) {
+        s += Math.abs(locs[i][0] - locs[i][1]);
         output.push(s);
       }
       return output;
@@ -1125,7 +1129,7 @@ export default {
         end: location[1] - 1 - location[0],
       }));
       const orientation = inverted ? -1 : 1;
-      const offsets = this.getOffsets(locations);
+      const offsets = this.getOffsets(locations, orientation);
       const index = this.nearestLocation(locations, coordinate, inverted);
       const outside = orientation * this.getOutside(coordinate, loci);
       const location = this.locusToPosition(
