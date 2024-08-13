@@ -40,30 +40,17 @@
             :ref="get_html_id(get_position(v, s_i, 'sequence'))"
           >
             <v-list-item-action class="ma-0 pa-0" style="min-width: unset">
-              <v-menu>
-                <template #activator="{ on: onMenu }">
-                  <v-tooltip top>
-                    <template #activator="{ on: onTooltip }">
-                      <span
-                        :class="get_seq_class(v, s_i, 'sequence')"
-                        v-on="{ ...onMenu, ...onTooltip }"
-                        >{{ s }}</span
-                      ></template
-                    ><span
-                      >{{
-                        get_position_tooltip(get_position(v, s_i, "sequence"))
-                      }}
-                    </span>
-                  </v-tooltip>
-                </template>
-                <v-list>
-                  <v-list-item class="text-right">
-                    <v-btn small text color="primary">
-                      Get HGVS location
-                    </v-btn>
-                  </v-list-item>
-                </v-list>
-              </v-menu>
+              <v-tooltip top>
+                <template #activator="{ on: onTooltip }">
+                  <span
+                    :class="get_seq_class(v, s_i, 'sequence')"
+                    v-on="{ ...onTooltip }"
+                    >{{ s }}</span
+                  ></template
+                ><span
+                  >{{ get_position_tooltip(get_position(v, s_i, "sequence")) }}
+                </span>
+              </v-tooltip>
             </v-list-item-action>
           </span>
         </div>
@@ -76,30 +63,17 @@
             :id="get_html_id(get_position(v, s_i, 'sequence'))"
             :ref="get_html_id(get_position(v, s_i, 'sequence'))"
           >
-            <v-list-item-action class="ma-0 pa-0" style="min-width: unset">
-              <v-menu>
-                <template #activator="{ on: onMenu }">
-                  <v-tooltip top>
-                    <template #activator="{ on: onTooltip }">
-                      <span
-                        :class="get_seq_class(v, s_i, 'left')"
-                        v-on="{ ...onMenu, ...onTooltip }"
-                        >{{ s }}</span
-                      ></template
-                    ><span>{{
-                      get_position_tooltip(get_position(v, s_i, "left"))
-                    }}</span>
-                  </v-tooltip>
-                </template>
-                <v-list>
-                  <v-list-item class="text-right">
-                    <v-btn small text color="primary">
-                      Get HGVS location
-                    </v-btn>
-                  </v-list-item>
-                </v-list>
-              </v-menu>
-            </v-list-item-action>
+            <v-tooltip top>
+              <template #activator="{ on: onTooltip }">
+                <span
+                  :class="get_seq_class(v, s_i, 'left')"
+                  v-on="{ ...onTooltip }"
+                  >{{ s }}</span
+                ></template
+              ><span>{{
+                get_position_tooltip(get_position(v, s_i, "left"))
+              }}</span>
+            </v-tooltip>
           </span>
           <!-- middle dots -->
           <div
@@ -129,28 +103,17 @@
             :key="'r' + s_i"
           >
             <v-list-item-action class="ma-0 pa-0" style="min-width: unset">
-              <v-menu>
-                <template #activator="{ on: onMenu }">
-                  <v-tooltip top>
-                    <template #activator="{ on: onTooltip }">
-                      <span
-                        :class="get_seq_class(v, s_i, 'right')"
-                        v-on="{ ...onMenu, ...onTooltip }"
-                        >{{ s }}</span
-                      ></template
-                    ><span>{{
-                      get_position_tooltip(get_position(v, s_i, "right"))
-                    }}</span>
-                  </v-tooltip>
-                </template>
-                <v-list>
-                  <v-list-item class="text-right">
-                    <v-btn small text color="primary">
-                      Get HGVS location
-                    </v-btn>
-                  </v-list-item>
-                </v-list>
-              </v-menu>
+              <v-tooltip top>
+                <template #activator="{ on: onTooltip }">
+                  <span
+                    :class="get_seq_class(v, s_i, 'right')"
+                    v-on="{ ...onTooltip }"
+                    >{{ s }}</span
+                  ></template
+                ><span>{{
+                  get_position_tooltip(get_position(v, s_i, "right"))
+                }}</span>
+              </v-tooltip>
             </v-list-item-action>
           </span>
         </div>
@@ -652,8 +615,8 @@ export default {
         let end_right = this.view.seq_length - view.end + view.right.length + 1;
         let end = this.view.seq_length - view.end + 1;
         if (
-          (start <= location && location <= start_left) ||
-          (end_right <= location && location <= end)
+          (start >= location && location >= start_left) ||
+          (end_right >= location && location >= end)
         ) {
           return "seq_" + this.d_id + "-" + location;
         } else {
@@ -665,8 +628,8 @@ export default {
         let end_right = view.end - view.deleted.right.length;
         let end = view.end;
         if (
-          (start <= location && location <= start_left - 1) ||
-          (end_right <= location && location <= end)
+          (start >= location && location >= start_left - 1) ||
+          (end_right >= location && location >= end)
         ) {
           return "seq_" + this.d_id + "-" + location;
         } else {
@@ -754,7 +717,7 @@ export default {
               if (view_start >= exon_start && exon_start >= view_end) {
                 exons[i].start_seq = this.get_seq_id(view, exon_start);
               }
-              if (view_start >= exon_end && exon_end > view_end) {
+              if (view_start >= exon_end && exon_end >= view_end) {
                 exons[i].end_seq = this.get_seq_id(view, exon_end);
               }
             } else {
