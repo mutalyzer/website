@@ -601,8 +601,8 @@
                 :css_class="'ok-description-link'"
                 :to_name="'Normalizer'"
                 :to_params="{
-                  descriptionRouter:
-                    this.response.equivalent_descriptions.p[0].description,
+                  descriptionRouter: this.response.equivalent_descriptions.p[0]
+                    .description,
                 }"
               /> </v-expansion-panel-content
           ></v-expansion-panel>
@@ -708,6 +708,8 @@
                 :sequence="this.response.sequence"
                 :d_type="'normalized'"
                 :selector="this.response.selector_short"
+                :c_s_var="get_c_s_var()"
+                :c_s_seq="get_c_s_seq()"
               />
             </v-expansion-panel-content>
           </v-expansion-panel>
@@ -1201,6 +1203,26 @@ export default {
         }
       }
       return false;
+    },
+    get_c_s_var: function () {
+      if (
+        this.response &&
+        this.response.normalized_model &&
+        this.response.normalized_model.coordinate_system
+      ) {
+        return this.response.normalized_model.coordinate_system + ".";
+      }
+      return null;
+    },
+    get_c_s_seq: function () {
+      if (this.response && this.response.equivalent_descriptions) {
+        for (let c_s in this.response.equivalent_descriptions) {
+          if (c_s == "g") {
+            return "g.";
+          }
+        }
+      }
+      return null;
     },
   },
 };

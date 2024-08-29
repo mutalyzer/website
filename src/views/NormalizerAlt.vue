@@ -414,6 +414,8 @@
                   :view="this.response.view_corrected"
                   :d_id="'corrected'"
                   :selector="this.response.selector_short"
+                  :c_s_var="get_c_s_var()"
+                  :c_s_seq="get_c_s_seq()"
                   class="mt-5 mb-5"
                 />
               </div>
@@ -432,6 +434,8 @@
                 :influence="this.response.influence"
                 :d_id="'normalized'"
                 :selector="this.response.selector_short"
+                :c_s_var="get_c_s_var()"
+                :c_s_seq="get_c_s_seq()"
               />
             </v-expansion-panel-content>
           </v-expansion-panel>
@@ -1020,6 +1024,26 @@ export default {
         if (a.description < b.description) return 1;
       });
       return sorted;
+    },
+    get_c_s_var: function () {
+      if (
+        this.response &&
+        this.response.normalized_model &&
+        this.response.normalized_model.coordinate_system
+      ) {
+        return this.response.normalized_model.coordinate_system + ".";
+      }
+      return null;
+    },
+    get_c_s_seq: function () {
+      if (this.response && this.response.equivalent_descriptions) {
+        for (let c_s in this.response.equivalent_descriptions) {
+          if (c_s == "g") {
+            return "g.";
+          }
+        }
+      }
+      return null;
     },
   },
 };

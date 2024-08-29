@@ -7,6 +7,8 @@
       :view="view"
       :d_id="'normalize_' + d_type"
       :selector="selector"
+      :c_s_var="c_s_var"
+      :c_s_seq="c_s_seq"
     />
   </div>
 </template>
@@ -26,6 +28,8 @@ export default {
     sequence: null,
     d_type: null,
     selector: null,
+    c_s_var: null,
+    c_s_seq: null,
   },
   data() {
     return {

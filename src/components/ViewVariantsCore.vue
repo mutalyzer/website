@@ -391,6 +391,8 @@ export default {
     influence: null,
     d_id: null,
     selector: null,
+    c_s_var: null,
+    c_s_seq: null,
   },
   data: function () {
     return {
@@ -410,16 +412,10 @@ export default {
     this.hover_init();
   },
   mounted: function () {
-    if (
-      this.selector &&
-      this.selector.exon &&
-      this.selector.exon.g &&
-      this.selector.cds &&
-      this.selector.cds.g
-    ) {
+    if (this.selector && this.selector.exon && this.selector.exon.g) {
       if (
-        parseInt(this.selector.cds.g[0][0], 10) >
-        parseInt(this.selector.cds.g[0][1], 10)
+        parseInt(this.selector.exon.g[0][0], 10) >
+        parseInt(this.selector.exon.g[0][1], 10)
       ) {
         this.inverted = true;
       }
@@ -429,16 +425,20 @@ export default {
             return [parseInt(x[1], 10) - 1, parseInt(x[0], 10)];
           })
           .reverse();
-        this.cds = this.selector.cds.g.map(function (x) {
-          return [parseInt(x[1], 10) - 1, parseInt(x[0], 10)];
-        })[0];
+        if (this.selector.cds && this.selector.cds.g) {
+          this.cds = this.selector.cds.g.map(function (x) {
+            return [parseInt(x[1], 10) - 1, parseInt(x[0], 10)];
+          })[0];
+        }
       } else {
         this.exons = this.selector.exon.g.map(function (x) {
           return [parseInt(x[0], 10) - 1, parseInt(x[1], 10)];
         });
-        this.cds = this.selector.cds.g.map(function (x) {
-          return [parseInt(x[0], 10) - 1, parseInt(x[1], 10)];
-        })[0];
+        if (this.selector.cds && this.selector.cds.g) {
+          this.cds = this.selector.cds.g.map(function (x) {
+            return [parseInt(x[0], 10) - 1, parseInt(x[1], 10)];
+          })[0];
+        }
       }
     }
     this.nextTickSteroids(() => {
@@ -583,9 +583,30 @@ export default {
             output += pos;
           }
         }
-        output = "c." + output + " | g." + position;
+        if (this.c_s_var && this.c_s_seq) {
+          output = this.c_s_var + output + " | " + this.c_s_seq + position;
+        } else if (this.c_s_var) {
+          output = this.c_s_var + output + " | " + position;
+        }
+        //  else if (this.exons) {
+        // var noncoding = this.multiLocusToPosition(
+        //   position - 1,
+        //   this.exons,
+        //   this.inverted
+        // );
+        // console.log(noncoding);
+        // if (this.c_s_var && this.c_s_seq) {
+        //   output = this.c_s_var + output + " | " + this.c_s_seq + position;
+        // } else if (this.c_s_var) {
+        //   output = this.c_s_var + output + " | " + position;
+        // }
+        // }
       } else {
-        output = position;
+        if (this.c_s_var && this.c_s_var == "g.") {
+          output = this.c_s_var + position;
+        } else {
+          output = position;
+        }
       }
       return output;
     },
@@ -763,7 +784,7 @@ export default {
                 f_intron.start_seq,
                 f_intron.end_seq
               );
-              width_intron -= this.get_dotted_extra(f_intron.start_seq);
+              // width_intron -= this.get_dotted_extra(f_intron.start_seq);
               f_intron.style += "width: " + width_intron + "px;";
               features.push(f_intron);
               features.push(this._exon(exon, i));
@@ -780,11 +801,6 @@ export default {
               exon.start_seq != exon.end_seq
             ) {
               if (!this.is_dotted(exon.start_seq)) {
-                let f_intron = this._intron(exons[i - 1], exons[i]);
-                f_intron.style +=
-                  "width: " + this.get_dotted_extra(exon.start_seq) + "px;";
-                features.push(f_intron);
-              } else {
                 let f_intron = this._intron(exons[i - 1], exons[i]);
                 f_intron.style +=
                   "width: " + this.get_dotted_extra(exon.start_seq) + "px;";
