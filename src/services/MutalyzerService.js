@@ -1,4 +1,5 @@
 import axios from "axios";
+import mockup_data from "../../Hg38(chr11):g.112088972del.json";
 
 const apiBaseUrl = process.env.VUE_APP_API_URL;
 
@@ -12,11 +13,15 @@ const apiClient = axios.create({
 });
 
 export default {
+  data(){
+    return { mockup: mockup_data };
+  },
   compare(params) {
     return apiClient.get("/compare/", { params });
   },
-  normalizeHgvs(description) {
-    return apiClient.get("/normalize/" + encodeURIComponent(description));
+  normalizeHgvs() {
+    return Promise.resolve({data: mockup_data});
+    // return apiClient.get("/normalize/" + encodeURIComponent(description));
   },
   normalizeSequence(description, params) {
     return apiClient.get("/normalize/" + encodeURIComponent(description), {
@@ -58,5 +63,8 @@ export default {
   },
   version() {
     return apiClient.get("/version");
+  },
+  printTest() {
+    return apiClient.get("/printtest");
   },
 };

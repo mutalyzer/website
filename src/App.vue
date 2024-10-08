@@ -65,7 +65,7 @@
 
             <v-list-item to="/mapper">
               <v-list-item-icon>
-                <v-icon>mdi-description</v-icon>
+                <v-icon>mdi- </v-icon>
               </v-list-item-icon>
               <v-list-item-title>Mapper</v-list-item-title>
             </v-list-item>
@@ -96,6 +96,13 @@
                 <v-icon>mdi-description</v-icon>
               </v-list-item-icon>
               <v-list-item-title>About</v-list-item-title>
+            </v-list-item>
+
+            <v-list-item to="/printtest">
+              <v-list-item-icon>
+                <v-icon>mdi-description</v-icon>
+              </v-list-item-icon>
+              <v-list-item-title>Print Test</v-list-item-title>
             </v-list-item>
           </v-list-item-group>
         </v-list>

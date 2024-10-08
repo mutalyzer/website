@@ -1,0 +1,368 @@
+{
+  "input_description": "Hg38(chr11):g.112088972del",
+  "input_model": {
+    "type": "description_dna",
+    "reference": {
+      "id": "Hg38",
+      "selector": {
+        "id": "chr11"
+      }
+    },
+    "coordinate_system": "g",
+    "variants": [
+      {
+        "location": {
+          "type": "point",
+          "position": 112088972
+        },
+        "type": "deletion",
+        "source": "reference"
+      }
+    ]
+  },
+  "corrected_model": {
+    "type": "description_dna",
+    "reference": {
+      "id": "NC_000011.10"
+    },
+    "coordinate_system": "g",
+    "variants": [
+      {
+        "location": {
+          "type": "point",
+          "position": 112088972
+        },
+        "type": "deletion",
+        "source": "reference"
+      }
+    ]
+  },
+  "corrected_description": "NC_000011.10:g.112088972del",
+  "normalized_description": "NC_000011.10:g.112088972del",
+  "normalized_model": {
+    "variants": [
+      {
+        "type": "deletion",
+        "source": "reference",
+        "location": {
+          "type": "point",
+          "position": 112088972
+        }
+      }
+    ],
+    "reference": {
+      "id": "NC_000011.10"
+    },
+    "coordinate_system": "g"
+  },
+  "equivalent_descriptions": [
+    {
+      "source_name": "MANE",
+      "genes": [{
+        "gene_name":"CELA2B",
+        "descriptions":{
+          "c":[
+          {
+            "description": "NC_000001.11(NM_015849.3):c.793-472_793-471delinsTC",
+            "protein_prediction": "NC_000001.11(NP_056933.3):p.(=)",
+            "selector": {
+              "id": "NM_015849.3"
+            }
+          },
+          {
+            "description": "ENST00000375910.8:c.793-472_793-471delinsTC",
+            "protein_prediction": "ENSP00000365075.3:p.?",
+            "selector":{
+              "id": "ENST00000375910.8"
+            }
+          }]
+        }},
+        {
+          "gene_name": "CASP9",
+          "descriptions":{
+            "c":[
+              {
+                "description": "NC_000001.11(NM_001229.5):c.*2119_*2120delinsGA",
+                "protein_prediction": "NC_000001.11(NP_001220.2):p.(=)",
+                "selector": {
+                  "id": "NM_001229.5"
+                }
+              }              
+            ]
+          }
+        }
+        ]
+        },
+    {
+      "source_name": "NCBI",
+      "genes": [
+        {
+          "gene_name":"CELA2B",
+          "descriptions":{
+            "c": [
+                {
+                  "description": "NC_000001.11(NM_015849.3):c.793-472_793-471delinsTC",
+                  "protein_prediction": "NC_000001.11(NP_056933.3):p.(=)",
+                  "selector": {
+                    "id": "NM_015849.3"
+                  },
+                  "tag": {
+                    "id": "NM_015849.3",
+                    "details": "MANE Select"
+                  }
+                },
+                {
+                  "description": "NC_000001.11(NM_015849.2):c.793-472_793-471delinsTC",
+                  "protein_prediction": "NC_000001.11(NP_056933.2):p.(=)",
+                  "selector": {
+                    "id": "NM_015849.2"
+                  }
+                }
+              ],
+            "n": [
+              {
+                "description": "NC_000011.10(NM_001276506.2):c.275del",
+                "protein_prediction": "NC_000011.10(NP_001263435.1):p.(Asp92Alafs*112)",
+                "selector": {
+                  "id": "NM_001276506.2"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "gene_name":"CASP9",
+          "descriptions":{
+            "c":[
+              {
+                "description": "NC_000001.11(NM_001229.5):c.*2119_*2120delinsGA",
+                "protein_prediction": "NC_000001.11(NP_001220.2):p.(=)",
+                "selector": {
+                  "id": "NM_001229.5"
+                },
+                "tag": {
+                  "id": "NM_001229.5",
+                  "details": "MANE Select"
+                }
+              },
+              {
+                "description": "NC_000001.11(XM_005246014.3):c.*2119_*2120delinsGA",
+                "protein_prediction": "NC_000001.11(XP_005246071.1):p.(=)",
+                "selector": {
+                  "id": "XM_005246014.3"
+                }
+              },
+              {
+                "description": "NC_000001.11(XM_047432034.1):c.*2119_*2120delinsGA",
+                "protein_prediction": "NC_000001.11(XP_047287990.1):p.(=)",
+                "selector": {
+                  "id": "XM_047432034.1"
+                }
+              },
+              {
+                "description": "NC_000001.11(NM_032996.3):c.*2119_*2120delinsGA",
+                "protein_prediction": "NC_000001.11(NP_127463.2):p.(=)",
+                "selector": {
+                  "id": "NM_032996.3"
+                }
+              },
+              {
+                "description": "NC_000001.11(NM_001278054.2):c.*2119_*2120delinsGA",
+                "protein_prediction": "NC_000001.11(NP_001264983.1):p.(=)",
+                "selector": {
+                  "id": "NM_001278054.2"
+                }
+              },
+              {
+                "description": "NC_000001.11(XM_011542273.4):c.*2960_*2961delinsGA",
+                "protein_prediction": "NC_000001.11(XP_011540575.1):p.(=)",
+                "selector": {
+                  "id": "XM_011542273.4"
+                }
+              },
+              {
+                "description": "NC_000001.11(NM_001278054.1):c.*2119_*2120delinsGA",
+                "protein_prediction": "NC_000001.11(NP_001264983.1):p.(=)",
+                "selector": {
+                  "id": "NM_001278054.1"
+                }
+              },
+              {
+                "description": "NC_000001.11(NM_001229.4):c.*2119_*2120delinsGA",
+                "protein_prediction": "NC_000001.11(NP_001220.2):p.(=)",
+                "selector": {
+                  "id": "NM_001229.4"
+                }
+              },
+              {
+                "description": "NC_000001.11(XM_011542273.3):c.*2960_*2961delinsGA",
+                "protein_prediction": "NC_000001.11(XP_011540575.1):p.(=)",
+                "selector": {
+                  "id": "XM_011542273.3"
+                }
+              },
+              {
+                "description": "NC_000001.11(XM_005246014.2):c.*2119_*2120delinsGA",
+                "protein_prediction": "NC_000001.11(XP_005246071.1):p.(=)",
+                "selector": {
+                  "id": "XM_005246014.2"
+                }
+              }
+            ],
+            "n":[
+              {
+                "description": "NC_000011.10(NM_001276506.2):c.275del",
+                "protein_prediction": "NC_000011.10(NP_001263435.1):p.(Asp92Alafs*112)",
+                "selector": {
+                  "id": "NM_001276506.2"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "source_name": "EBI",
+      "genes":[
+        {
+          "gene_name":"CELA2B",
+          "descriptions": {
+            "c":[
+              {
+                "description": "ENST00000375910.8:c.793-472_793-471delinsTC",
+                "protein_prediction": "ENST00000375910.8(ENSP00000365075):p.(=)",
+                "selector":{
+                  "id": "ENST00000375910.8"
+                }              }
+            ],
+            "n": [
+              {
+                "description": "ENST00000528182.5:c.275del",
+                "protein_prediction": "ENSP00000435475:p.(Asp92Alafs*19)",
+                "selector": {
+                  "id": "ENST00000528182.5"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "equivalent_descriptions1": [
+    {
+      "source_name": "NCBI",
+      "genes": [
+        {
+          "name": "SDHD",
+          "descriptions": {
+            "c": [
+              {
+                "description": "NC_000011.10(NM_003002.4):c.275del",
+                "protein_prediction": "NC_000011.10(NP_002993.1):p.(Asp92Alafs*43)",
+                "selector": {
+                  "id": "NM_003002.4"
+                },
+                "tag": {
+                  "id": "NM_003002.4",
+                  "details": "MANE Select"
+                }
+              }
+            ],
+            "n": [
+              {
+                "description": "NC_000011.10(NM_001276506.2):c.275del",
+                "protein_prediction": "NC_000011.10(NP_001263435.1):p.(Asp92Alafs*112)",
+                "selector": {
+                  "id": "NM_001276506.2"
+                }
+              }
+            ]
+          }
+        }
+      ],
+      "infos": [
+        {
+          "code": "ASSEMBLY_CHROMOSOME_TO_ID",
+          "details": "Assembly Hg38 and chr11 corrected to NC_000011.10."
+        }
+      ]
+    },
+    {
+      "source_name": "EBI",
+      "genes": [
+        {
+          "name": "SDHD",
+          "descriptions": {
+            "c": [
+              {
+                "description": "ENST00000640554.1:c.*347del",
+                "protein_prediction": "ENSP00000491141:p.(=)",
+                "selector": {
+                  "id": "ENST00000640554.1"
+                }
+              }
+            ],
+            "n": [
+              {
+                "description": "ENST00000528182.5:c.275del",
+                "protein_prediction": "ENSP00000435475:p.(Asp92Alafs*19)",
+                "selector": {
+                  "id": "ENST00000528182.5"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "equivalent_descriptions2": [
+    {
+      "gene_name": "SDHD",
+      "coordinate_system": {
+        "c": {
+          "descriptions": [
+            {
+              "description": "NC_000011.10(NM_003002.4):c.275del",
+              "protein_prediction": "NC_000011.10(NP_002993.1):p.(Asp92Alafs*43)",
+              "selector": {
+                "id": "NM_003002.4"
+              },
+              "tag": {
+                "id": "NM_003002.4",
+                "details": "MANE Select"
+              }
+            },
+            {
+              "description": "ENST00000640554.1:c.*347del",
+              "protein_prediction": "ENSP00000491141:p.(=)",
+              "selector": {
+                "id": "ENST00000640554.1"
+              }
+            }
+          ]
+        },
+        "n": {
+          "descriptions": [
+            {
+              "description": "NC_000011.10(NM_001276506.2):c.275del",
+              "protein_prediction": "NC_000011.10(NP_001263435.1):p.(Asp92Alafs*112)",
+              "selector": {
+                "id": "NM_001276506.2"
+              }
+            },
+            {
+              "description": "ENST00000528182.5:c.275del",
+              "protein_prediction": "ENSP00000435475:p.(Asp92Alafs*19)",
+              "selector": {
+                "id": "ENST00000528182.5"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

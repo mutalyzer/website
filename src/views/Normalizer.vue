@@ -383,6 +383,9 @@
               >Equivalent Descriptions</v-expansion-panel-header
             >
             <v-expansion-panel-content>
+              <DescriptionbySource :model="this.response.equivalent_descriptions" />
+            </v-expansion-panel-content>
+            <!-- <v-expansion-panel-content>
               <v-sheet
                 v-for="c_s in get_equivalent_descriptions(
                   response.equivalent_descriptions
@@ -442,7 +445,7 @@
                   ></v-divider>
                 </v-sheet>
               </v-sheet>
-            </v-expansion-panel-content>
+            </v-expansion-panel-content> -->
           </v-expansion-panel>
         </v-expansion-panels>
 
@@ -647,6 +650,7 @@ import ReferenceInformation from "../components/ReferenceInformation.vue";
 import Related from "../components/Related.vue";
 import ViewVariants from "../components/ViewVariants.vue";
 import Description from "../components/Description.vue";
+import DescriptionbySource from "../components/DescriptionsbySource.vue";
 
 export default {
   components: {
@@ -658,6 +662,7 @@ export default {
     Related,
     ViewVariants,
     Description,
+    DescriptionbySource,
   },
   props: ["descriptionRouter"],
   data: () => ({

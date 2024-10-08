@@ -2,6 +2,7 @@ import Vue from "vue";
 import VueRouter from "vue-router";
 import Home from "../views/Home.vue";
 import About from "../views/About.vue";
+import print_test from "../views/print_test.vue";
 import Normalizer from "../views/Normalizer.vue";
 import NormalizerAlt from "../views/NormalizerAlt.vue";
 import PositionConverter from "../views/PositionConverter.vue";
@@ -66,6 +67,11 @@ const routes = [
   },
   {
     path: "/api",
+  },
+  {
+    path: "/printtest",
+    name: "Test",
+    component: print_test,
   },
   {
     path: "*",
