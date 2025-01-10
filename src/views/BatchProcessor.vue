@@ -39,7 +39,7 @@
                 MANE transcript present in the reference sequence.
               </p>
               <v-simple-table>
-                <template v-slot:default>
+                <template #default>
                   <thead>
                     <tr>
                       <th
@@ -48,7 +48,7 @@
                         class="text-left"
                       >
                         <v-tooltip bottom>
-                          <template v-slot:activator="{ on, attrs }">
+                          <template #activator="{ on, attrs }">
                             <span v-bind="attrs" v-on="on">{{ item }}</span>
                           </template>
                           <span>{{ getHeaderTooltip(item) }}</span>
@@ -60,7 +60,7 @@
                     <tr v-for="(row, i) in getExampleRows()" :key="i">
                       <td v-for="(item, j) in row" :key="j">
                         <v-tooltip bottom>
-                          <template v-slot:activator="{ on, attrs }">
+                          <template #activator="{ on, attrs }">
                             <span v-bind="attrs" v-on="on">{{ item }}</span>
                           </template>
                           <span>{{ getRowTooltip(row, i, item, j) }}</span>
@@ -80,8 +80,8 @@
 
         <v-sheet v-if="!(progress || done)" elevation="2" class="pa-5 mt-10">
           <v-file-input
-            truncate-length="15"
             v-model="filePath"
+            truncate-length="15"
             label="File input"
           ></v-file-input>
 
@@ -89,20 +89,20 @@
             ref="normalize"
             class="mt-5"
             color="primary"
-            @click="loadFile"
             :disabled="!filePath"
+            @click="loadFile"
           >
             Batch Process
           </v-btn>
         </v-sheet>
 
         <v-alert
+          v-if="!validVariantsNumber"
           prominent
           type="error"
           tile
           elevation="2"
           class="mt-10 mb-0"
-          v-if="!validVariantsNumber"
         >
           <v-row align="center">
             <v-col class="grow overline"
@@ -153,10 +153,10 @@
 
         <div v-if="variants && showDetails">
           <v-sheet
-            elevation="2"
-            class="pa-10 mt-10"
             v-for="(variant, index) in variants"
             :key="index"
+            elevation="2"
+            class="pa-10 mt-10"
           >
             <div style="font-family: monospace">
               <strong>{{ index + 1 }}/{{ variants.length }}</strong>
@@ -167,19 +167,19 @@
             </span>
 
             <v-alert
+              v-if="variant.response && variant.response.normalized_description"
               ref="successAlert"
               class="mt-5 mb-0"
               elevation="2"
               prominent
               tile
-              v-if="variant.response && variant.response.normalized_description"
               :color="getNormalizedColor(variant)"
               type="success"
             >
               <v-row align="center">
                 <v-col class="grow">
                   <v-tooltip bottom>
-                    <template v-slot:activator="{ on, attrs }">
+                    <template #activator="{ on, attrs }">
                       <span
                         style="font-family: monospace"
                         v-bind="attrs"
@@ -199,12 +199,12 @@
                 </v-col>
                 <v-col class="shrink">
                   <v-tooltip bottom>
-                    <template v-slot:activator="{ on, attrs }">
+                    <template #activator="{ on, attrs }">
                       <v-btn
-                        v-bind="attrs"
-                        v-on="on"
-                        icon
                         v-clipboard="variant.response.normalized_description"
+                        v-bind="attrs"
+                        icon
+                        v-on="on"
                       >
                         <v-icon>mdi-content-copy</v-icon>
                       </v-btn>
@@ -216,6 +216,7 @@
             </v-alert>
 
             <v-alert
+              v-if="variant.error"
               prominent
               type="error"
               tile
@@ -223,7 +224,6 @@
               class="mt-5"
               icon="mdi-network-off-outline"
               color="grey darken-4"
-              v-if="variant.error"
             >
               <v-row align="center">
                 <v-col class="grow">
@@ -233,12 +233,12 @@
             </v-alert>
 
             <v-alert
+              v-if="variant.response && variant.response.errors"
               prominent
               type="error"
               tile
               elevation="2"
               class="mt-5 mb-0"
-              v-if="variant.response && variant.response.errors"
             >
               <v-row align="center">
                 <v-col class="grow overline"
@@ -248,17 +248,17 @@
             </v-alert>
 
             <v-sheet
-              elevation="2"
               v-if="variant.response && variant.response.errors"
+              elevation="2"
             >
               <v-sheet class="pt-10 pr-10 pb-8 pl-10" color="red lighten-5">
                 <v-alert
+                  v-for="(error, index_errors) in variant.response.errors"
+                  :key="index_errors"
                   color="red lighten-1"
                   tile
                   border="left"
                   dark
-                  v-for="(error, index) in variant.response.errors"
-                  :key="index"
                 >
                   {{ getMessage(error) }}
                 </v-alert>
@@ -326,8 +326,10 @@ export default {
         }
       };
     },
-
-    batchCheck() {
+    sleep(ms) {
+      return new Promise((resolve) => setTimeout(resolve, ms));
+    },
+    async batchCheck() {
       this.progress = true;
       for (let variant of this.variants) {
         MutalyzerService.normalizeHgvs(variant.input)
@@ -372,6 +374,7 @@ export default {
             }
             this.updateStatus();
           });
+        await this.sleep(2000);
       }
     },
     updateStatus() {
