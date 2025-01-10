@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-progress-linear indeterminate v-if="progress"></v-progress-linear>
+    <v-progress-linear v-if="progress" indeterminate></v-progress-linear>
 
     <ViewVariantsCore
       v-if="view && !progress"

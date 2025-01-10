@@ -16,9 +16,9 @@
             <v-row class="pl-2 pr-2">
               <v-col cols="12" sm="6" lg="3">
                 <v-text-field
-                  :rules="rules"
                   ref="referenceId"
                   v-model="referenceId"
+                  :rules="rules"
                   :label="'Reference ID'"
                   :hint="'E.g. NC_000001.11'"
                   :clearable="true"
@@ -41,8 +41,8 @@
 
               <v-col cols="12" sm="6" lg="3">
                 <v-select
-                  :items="['g', 'c', 'n']"
                   v-model="fromCoordinateSystem"
+                  :items="['g', 'c', 'n']"
                   label="Coordinate system"
                   :clearable="true"
                 ></v-select>
@@ -50,9 +50,9 @@
 
               <v-col cols="12" sm="6" lg="3">
                 <v-text-field
-                  :rules="rules"
                   ref="position"
                   v-model="position"
+                  :rules="rules"
                   :label="'Position'"
                   :hint="'E.g. 100'"
                   :error-messages="errorPositionMessage"
@@ -98,7 +98,7 @@
             <v-row>
               <v-col>
                 <v-menu transition="slide-x-transition">
-                  <template v-slot:activator="{ on, attrs }">
+                  <template #activator="{ on, attrs }">
                     <span
                       class="example-link"
                       color="success"
@@ -112,9 +112,9 @@
                     <v-list-item v-for="(example, i) in examples" :key="i" link>
                       <v-list-item-title
                         color="success"
-                        v-text="example.item"
                         @click.prevent="setExample(example.fields)"
-                      ></v-list-item-title>
+                        >{{ example.item }}</v-list-item-title
+                      >
                     </v-list-item>
                   </v-list>
                 </v-menu>
@@ -150,17 +150,17 @@
             <v-progress-circular :size="50" indeterminate></v-progress-circular>
           </div>
           <div class="text-center">
-            <v-btn @click="loadingOverlay = false" class="mt-5"> Cancel </v-btn>
+            <v-btn class="mt-5" @click="loadingOverlay = false"> Cancel </v-btn>
           </div>
         </v-overlay>
 
         <v-alert
+          v-if="isConverted()"
           ref="successAlert"
           class="mt-10 mb-0"
           elevation="2"
           prominent
           tile
-          v-if="isConverted()"
           type="success"
         >
           <v-row align="center">
@@ -171,12 +171,12 @@
             </v-col>
             <v-col class="shrink">
               <v-tooltip bottom>
-                <template v-slot:activator="{ on, attrs }">
+                <template #activator="{ on, attrs }">
                   <v-btn
-                    v-bind="attrs"
-                    v-on="on"
-                    icon
                     v-clipboard="converted_description"
+                    v-bind="attrs"
+                    icon
+                    v-on="on"
                   >
                     <v-icon>mdi-content-copy</v-icon>
                   </v-btn>
@@ -184,13 +184,13 @@
                 <span>Copy</span>
               </v-tooltip>
             </v-col>
-            <v-col class="shrink" v-if="correctionsPerformed()">
+            <v-col v-if="correctionsPerformed()" class="shrink">
               <v-tooltip bottom>
-                <template v-slot:activator="{ on, attrs }">
+                <template #activator="{ on, attrs }">
                   <v-btn
                     v-bind="attrs"
-                    v-on="on"
                     icon
+                    v-on="on"
                     @click="showCorrections = !showCorrections"
                   >
                     <v-icon>
@@ -205,6 +205,7 @@
         </v-alert>
 
         <v-alert
+          v-if="connectionErrors"
           prominent
           type="error"
           tile
@@ -212,7 +213,6 @@
           class="mt-10"
           icon="mdi-network-off-outline"
           color="grey darken-4"
-          v-if="connectionErrors"
         >
           <v-row align="center">
             <v-col class="grow">
@@ -222,24 +222,24 @@
         </v-alert>
 
         <v-alert
+          v-if="errorsEncountered()"
           prominent
           type="error"
           tile
           elevation="2"
           class="mt-10 mb-0"
-          v-if="errorsEncountered()"
         >
           <v-row align="center">
             <v-col class="grow overline"
               >Conversion could not be performed</v-col
             >
-            <v-col class="shrink" v-if="correctionsPerformed()">
+            <v-col v-if="correctionsPerformed()" class="shrink">
               <v-tooltip bottom>
-                <template v-slot:activator="{ on, attrs }">
+                <template #activator="{ on, attrs }">
                   <v-btn
                     v-bind="attrs"
-                    v-on="on"
                     icon
+                    v-on="on"
                     @click="showCorrections = !showCorrections"
                   >
                     <v-icon>
@@ -255,46 +255,46 @@
 
         <v-expand-transition>
           <v-sheet
-            elevation="2"
             v-if="
               (correctionsPerformed() && showCorrections) || errorsEncountered()
             "
+            elevation="2"
           >
             <v-expand-transition>
               <v-sheet
+                v-if="correctionsPerformed() && showCorrections"
                 ref="refCorrections"
                 class="pt-5 pr-10 pb-5 pl-10"
                 color="grey lighten-5"
-                v-if="correctionsPerformed() && showCorrections"
               >
                 <div class="overline">Corrections</div>
                 <v-alert
+                  v-for="(info, index) in response.infos"
+                  :key="index"
                   color="light-blue lighten-5"
                   tile
                   border="left"
                   class="ml-2"
-                  v-for="(info, index) in response.infos"
-                  :key="index"
                 >
                   {{ getMessage(info) }}
                 </v-alert>
               </v-sheet>
             </v-expand-transition>
             <v-sheet
+              v-if="errorsEncountered()"
               class="pt-10 pr-10 pb-8 pl-10"
               color="red lighten-5"
-              v-if="errorsEncountered()"
             >
               <v-alert
+                v-for="(error, index) in errorMessages"
+                :key="index"
                 color="red lighten-1"
                 tile
                 border="left"
                 dark
-                v-for="(error, index) in errorMessages"
-                :key="index"
               >
                 <div v-if="error.code == 'EPOSITIONSYNTAX'">
-                  <SyntaxError :errorModel="error" />
+                  <SyntaxError :error-model="error" />
                 </div>
                 <div v-else>
                   {{ getMessage(error) }}
@@ -305,32 +305,28 @@
         </v-expand-transition>
 
         <v-expansion-panels
+          v-if="response && response.overlap"
           focusable
           hover
           class="mt-5 mb-5"
           tile
-          v-if="response && response.overlap"
         >
           <v-expansion-panel>
             <v-expansion-panel-header class="overline"
               >Overlapping selectors</v-expansion-panel-header
             >
             <v-expansion-panel-content class="pt-5">
-              <div
-                class="ml-4"
-                v-for="(values, c_s) in response.overlap"
-                :key="c_s"
-              >
-                <v-subheader class="overline" v-if="c_s == 'c'"
+              <div v-for="(values, c_s) in response.overlap" :key="c_s">
+                <v-subheader v-if="c_s == 'c'" class="overline"
                   >Coding</v-subheader
                 >
-                <v-subheader class="overline" v-else-if="c_s == 'n'"
+                <v-subheader v-else-if="c_s == 'n'" class="overline"
                   >Noncoding</v-subheader
                 >
-                <v-subheader class="overline" v-else-if="c_s == 'g'"
+                <v-subheader v-else-if="c_s == 'g'" class="overline"
                   >Genomic</v-subheader
                 >
-                <v-subheader class="overline" v-else> {{ c_s }} </v-subheader>
+                <v-subheader v-else class="overline"> {{ c_s }} </v-subheader>
                 <v-sheet v-for="(overlap_model, index) in values" :key="index">
                   <v-hover v-slot="{ hover }">
                     <v-sheet
@@ -352,7 +348,7 @@
           </v-expansion-panel>
         </v-expansion-panels>
 
-        <v-expansion-panels focusable hover class="mt-10 mb-10" v-if="response">
+        <v-expansion-panels v-if="response" focusable hover class="mt-10 mb-10">
           <v-expansion-panel>
             <v-expansion-panel-header>Raw Response</v-expansion-panel-header>
             <v-expansion-panel-content>
@@ -455,9 +451,6 @@ export default {
       },
     ],
   }),
-  created: function () {
-    this.run();
-  },
   watch: {
     $route() {
       this.run();
@@ -477,6 +470,9 @@ export default {
     position() {
       this.updatePositionErrorMessage();
     },
+  },
+  created: function () {
+    this.run();
   },
   methods: {
     run: function () {
@@ -581,7 +577,7 @@ export default {
 
               if (this.isConverted()) {
                 this.converted_description = this.modelToDescription(
-                  this.response.converted_model
+                  this.response.converted_model,
                 );
                 this.$nextTick(() => {
                   this.$vuetify.goTo(this.$refs.successAlert, this.options);
@@ -658,7 +654,7 @@ export default {
         } else if (entry.code === "EOUTOFBOUNDARY") {
           this.errorPosition = this.position;
           this.updatePositionErrorMessage(
-            "Position out of sequence boundaries."
+            "Position out of sequence boundaries.",
           );
         }
       }

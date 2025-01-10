@@ -1,21 +1,21 @@
 <template>
   <div>
     <v-progress-linear
+      v-if="progress"
       indeterminate
       class="mt-5"
-      v-if="progress"
     ></v-progress-linear>
     <div v-if="!progress && no_response">
       Reference information not retrieved.
     </div>
     <div v-if="!progress && !no_response">
       <v-expansion-panels
+        v-if="record"
+        v-model="panel"
         multiple
         flat
         class="mt-5"
         tile
-        v-if="record"
-        v-model="panel"
       >
         <v-expansion-panel v-if="record">
           <v-expansion-panel-header class="overline blue-grey--text text"
@@ -77,11 +77,11 @@
       </v-expansion-panels>
 
       <v-expansion-panels
+        v-if="record && false"
         focusable
         hover
         flat
         class="mt-10 mb-10"
-        v-if="record && false"
       >
         <v-expansion-panel>
           <v-expansion-panel-header>View as a tree</v-expansion-panel-header>

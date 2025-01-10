@@ -51,7 +51,7 @@ export default {
       values.unknown = {
         view: model.description.slice(
           pos_in_stream + 1,
-          model.description.length
+          model.description.length,
         ),
       };
       return values;

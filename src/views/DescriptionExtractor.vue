@@ -12,9 +12,9 @@
             <v-row>
               <v-col cols="12">
                 <v-text-field
-                  :rules="rules"
                   ref="reference"
                   v-model="reference"
+                  :rules="rules"
                   :label="'Reference sequence'"
                   :hint="'E.g. AATTTCCCGGG'"
                   :clearable="true"
@@ -25,9 +25,9 @@
             <v-row>
               <v-col cols="12">
                 <v-text-field
-                  :rules="rules"
                   ref="observed"
                   v-model="observed"
+                  :rules="rules"
                   :label="'Observed Sequence'"
                   :hint="'E.g. AATCCGG'"
                   :clearable="true"
@@ -59,7 +59,7 @@
             </v-row>
           </v-form>
         </v-sheet>
-        <v-sheet elevation="2" class="pa-10 mt-10" v-if="summary">
+        <v-sheet v-if="summary" elevation="2" class="pa-10 mt-10">
           <Description :description="summary" />
         </v-sheet>
       </v-flex>
@@ -86,13 +86,13 @@ export default {
     responseApi: null,
     example: { reference: "AAA", observed: "ATA" },
   }),
-  created: function () {
-    this.run();
-  },
   watch: {
     $route() {
       this.run();
     },
+  },
+  created: function () {
+    this.run();
   },
   methods: {
     run: function () {

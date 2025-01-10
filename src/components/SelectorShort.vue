@@ -1,6 +1,6 @@
 <template>
   <div>
-    <v-expansion-panels multiple flat class="mb-5" tile v-model="panel">
+    <v-expansion-panels v-model="panel" multiple flat class="mb-5" tile>
       <v-expansion-panel>
         <v-expansion-panel-header
           class="overline blue-grey--text text--lighten-2"
@@ -119,7 +119,7 @@ export default {
             { text: "End (g.)", value: "g_e" },
             { text: "Start (c.)", value: "c_s", sortable: false },
             { text: "End (c.)", value: "c_e", sortable: false },
-          ]
+          ],
         );
       } else if (this.selector.exon.n) {
         output.push(
@@ -132,7 +132,7 @@ export default {
             { text: "End (g.)", value: "g_e" },
             { text: "Start (n.)", value: "n_s" },
             { text: "End (n.)", value: "n_e" },
-          ]
+          ],
         );
       }
       this.exon_headers = output;
@@ -146,7 +146,7 @@ export default {
             { text: "End (g.)", value: "g_e", sortable: false },
             { text: "Start (c.)", value: "c_s", sortable: false },
             { text: "End (c.)", value: "c_e", sortable: false },
-          ]
+          ],
         );
       }
       this.cds_headers = output;

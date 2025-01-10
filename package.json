@@ -8,51 +8,62 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
+    "@vue/runtime-dom": "^3.5.13",
+    "axios": "^1.7.9",
     "core-js": "^3.9.1",
-    "d3-graphviz": "^4.4.0",
-    "postgresql-client": "^1.16.4",
+    "d3-graphviz": "^5.6.0",
     "v-clipboard": "^2.2.3",
-    "vue": "^2.6.12",
-    "vue-json-pretty": "^1.7.1",
+    "vue": "^2.7.16",
+    "vue-json-pretty": "^1.9.5",
     "vue-router": "^3.5.1",
-    "vuetify": "^2.4.5",
+    "vuetify": "^2.7.2",
     "vuex": "^3.6.2"
   },
   "devDependencies": {
-    "@vue/cli-plugin-babel": "^4.5.11",
-    "@vue/cli-plugin-eslint": "^4.5.11",
-    "@vue/cli-plugin-router": "^4.5.11",
-    "@vue/cli-plugin-vuex": "^4.5.11",
-    "@vue/cli-service": "^4.5.11",
-    "@vue/eslint-config-prettier": "^6.0.0",
-    "axios": "^0.21.1",
-    "babel-eslint": "^10.1.0",
-    "eslint": "^7.21.0",
-    "eslint-plugin-prettier": "^3.3.1",
-    "eslint-plugin-vue": "^7.6.0",
-    "prettier": "^2.2.1",
-    "sass": "^1.32.8",
-    "sass-loader": "^10.1.1",
+    "@babel/eslint-parser": "^7.25.9",
+    "@vue/cli-plugin-babel": "^5.0.8",
+    "@vue/cli-plugin-eslint": "^5.0.8",
+    "@vue/cli-plugin-router": "^5.0.8",
+    "@vue/cli-plugin-vuex": "^5.0.8",
+    "@vue/cli-service": "^5.0.8",
+    "@vue/eslint-config-prettier": "^10.1.0",
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^9.1.0",
+    "eslint-plugin-prettier": "^5.2.1",
+    "eslint-plugin-vue": "^8.0.0",
+    "prettier": "^3.4.2",
+    "sass": "^1.63.6",
+    "sass-loader": "^12.2.0",
     "vue-cli-plugin-axios": "0.0.4",
     "vue-cli-plugin-vuetify": "^2.0.9",
     "vue-template-compiler": "^2.6.12",
-    "vuetify-loader": "^1.7.2"
+    "vuetify-loader": "^1.9.2"
   },
   "eslintConfig": {
-    "root": true,
-    "env": {
-      "node": true
-    },
-    "extends": [
-      "plugin:vue/essential",
-      "eslint:recommended",
-      "@vue/prettier"
-    ],
-    "parserOptions": {
-      "parser": "babel-eslint"
-    },
-    "rules": {}
+  "root": true,
+  "env": {
+    "browser": true,
+    "node": true,
+    "es6": true
   },
+  "extends": [
+    "eslint:recommended",
+    "plugin:vue/recommended",
+    "plugin:prettier/recommended"
+  ],
+  "parserOptions": {
+    "parser": "@babel/eslint-parser",
+    "ecmaVersion": 2020,
+    "sourceType": "module"
+  },
+  "rules": {
+    "prettier/prettier": "error",
+    "vue/multi-word-component-names": "off",
+    "vue/prop-name-casing": "off",
+    "comma-dangle": "off"
+  }
+}
+,
   "browserslist": [
     "> 1%",
     "last 2 versions",

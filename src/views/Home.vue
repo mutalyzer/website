@@ -15,7 +15,7 @@
         </v-row>
         <v-row class="pl-10 pr-10 mb-5">
           <v-col cols="12">
-            <v-hover v-slot:default="{ hover }">
+            <v-hover v-slot="{ hover }">
               <v-card
                 class="mx-auto transition-swing pb-7"
                 color="grey lighten-5"
@@ -40,14 +40,14 @@
                       <div class="font-weight-light mb-2">
                         Examples:
                         <span
-                          class="example-item"
                           v-for="(example, index) in descriptionExamples"
                           :key="index"
+                          class="example-item"
                           @click.prevent="selectDescriptionExample(index)"
                           >{{ example }}</span
                         >
                         <v-menu transition="slide-x-transition">
-                          <template v-slot:activator="{ on, attrs }">
+                          <template #activator="{ on, attrs }">
                             <span
                               class="example-link"
                               color="success"
@@ -89,10 +89,13 @@
                   </v-row>
                   <v-row class="ml-5 mr-5 mt-0 pl-0">
                     <v-text-field
+                      ref="refInputDescriptionTextBox"
+                      v-model="inputDescriptionTextBox"
                       class="mr-5"
                       background-color="grey lighten-5"
-                      ref="refInputDescriptionTextBox"
-                      v-on:keydown.enter="
+                      label="HGVS Description"
+                      :clearable="true"
+                      @keydown.enter="
                         $router.push({
                           name: 'Normalizer',
                           params: {
@@ -100,9 +103,6 @@
                           },
                         })
                       "
-                      v-model="inputDescriptionTextBox"
-                      label="HGVS Description"
-                      :clearable="true"
                     ></v-text-field>
                     <v-btn
                       ref="normalize"
@@ -127,7 +127,7 @@
 
         <v-row class="pl-10 pr-10">
           <v-col cols="12" sm="6" lg="6">
-            <v-hover v-slot:default="{ hover }">
+            <v-hover v-slot="{ hover }">
               <v-card
                 class="mx-auto transition-swing"
                 color="grey lighten-4"
@@ -147,7 +147,7 @@
           </v-col>
 
           <v-col cols="12" sm="6" lg="6">
-            <v-hover v-slot:default="{ hover }">
+            <v-hover v-slot="{ hover }">
               <v-card
                 class="mx-auto transition-swing"
                 color="grey lighten-3"

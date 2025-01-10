@@ -31,7 +31,7 @@
           <v-row class="pt-1 pr-0">
             <v-spacer></v-spacer>
             <v-menu open-on-hover bottom left content-class="elevation-2">
-              <template v-slot:activator="{ on, attrs }">
+              <template #activator="{ on, attrs }">
                 <v-btn color="blue" icon v-bind="attrs" v-on="on">
                   <v-icon>mdi-dots-vertical</v-icon>
                 </v-btn>
@@ -46,36 +46,36 @@
               </v-list>
             </v-menu>
           </v-row>
-          <v-row class="pt-5 pr-5 pl-5" v-if="mode == 'hgvs'">
+          <v-row v-if="mode == 'hgvs'" class="pt-5 pr-5 pl-5">
             <v-text-field
-              class="pa-0 ma-0"
-              :rules="rules"
               ref="refInputDescriptionTextBox"
               v-model="inputDescriptionTextBox"
+              class="pa-0 ma-0"
+              :rules="rules"
               :label="inputDescriptionTextBoxLabel"
-              v-on:keydown.enter="
+              :clearable="true"
+              autofocus
+              @keydown.enter="
                 $router.push({
                   name: 'Normalizer',
                   params: { descriptionRouter: inputDescriptionTextBox },
                 })
               "
-              :clearable="true"
-              autofocus
             ></v-text-field>
           </v-row>
 
-          <v-row class="pl-5 pr-5 mt-2" v-if="mode == 'hgvs'">
+          <v-row v-if="mode == 'hgvs'" class="pl-5 pr-5 mt-2">
             <div class="examples-list">
               <span class="example-text">Examples:</span>
               <span
-                class="example-item"
                 v-for="(example, index) in descriptionExamples"
                 :key="index"
+                class="example-item"
                 @click.prevent="selectDescriptionExample(index)"
                 >{{ example }}</span
               >
               <v-menu transition="slide-x-transition">
-                <template v-slot:activator="{ on, attrs }">
+                <template #activator="{ on, attrs }">
                   <span
                     class="example-link"
                     color="success"
@@ -137,28 +137,28 @@
             </div>
           </v-row>
 
-          <v-row class="pt-5 pr-5 pl-5" v-if="mode == 'sequence'">
+          <v-row v-if="mode == 'sequence'" class="pt-5 pr-5 pl-5">
             <v-text-field
+              v-model="sequence"
               class="pa-0 ma-0"
               :rules="rules"
-              v-model="sequence"
               label="Reference Sequence"
               :clearable="true"
             ></v-text-field>
           </v-row>
 
-          <v-row class="pl-5 pr-5" v-if="mode == 'sequence'">
+          <v-row v-if="mode == 'sequence'" class="pl-5 pr-5">
             <v-text-field
-              class="pa-0 ma-0"
-              :rules="rules"
               ref="refInputDescriptionTextBox"
               v-model="inputDescriptionTextBox"
+              class="pa-0 ma-0"
+              :rules="rules"
               label="Variants"
               :clearable="true"
             ></v-text-field>
           </v-row>
 
-          <v-row class="pl-5" v-if="mode == 'sequence'">
+          <v-row v-if="mode == 'sequence'" class="pl-5">
             <div class="examples-list">
               <span class="example-link" @click="setSequenceExample()"
                 >Example</span
@@ -188,17 +188,17 @@
             <v-progress-circular :size="50" indeterminate></v-progress-circular>
           </div>
           <div class="text-center">
-            <v-btn @click="loadingOverlay = false" class="mt-5"> Cancel </v-btn>
+            <v-btn class="mt-5" @click="loadingOverlay = false"> Cancel </v-btn>
           </div>
         </v-overlay>
 
         <v-alert
+          v-if="isNormalized()"
           ref="successAlert"
           class="mt-10 mb-0"
           elevation="2"
           prominent
           tile
-          v-if="isNormalized()"
           :color="getNormalizedColor()"
           type="success"
         >
@@ -222,16 +222,16 @@
                   descriptionRouter: response.normalized_description,
                 }"
                 :to_query="getParams()"
-                :tag="this.response.tag"
+                :tag="response.tag"
               />
             </v-col>
-            <v-col class="shrink" v-if="infoMessages()">
+            <v-col v-if="infoMessages()" class="shrink">
               <v-tooltip bottom>
-                <template v-slot:activator="{ on, attrs }">
+                <template #activator="{ on, attrs }">
                   <v-btn
                     v-bind="attrs"
-                    v-on="on"
                     icon
+                    v-on="on"
                     @click="showCorrections = !showCorrections"
                   >
                     <v-icon>
@@ -246,6 +246,7 @@
         </v-alert>
 
         <v-alert
+          v-if="connectionErrors"
           prominent
           type="error"
           tile
@@ -253,7 +254,6 @@
           class="mt-10"
           icon="mdi-network-off-outline"
           color="grey darken-4"
-          v-if="connectionErrors"
         >
           <v-row align="center">
             <v-col class="grow">
@@ -263,24 +263,24 @@
         </v-alert>
 
         <v-alert
+          v-if="response && response.errors"
           prominent
           type="error"
           tile
           elevation="2"
           class="mt-10 mb-0"
-          v-if="response && response.errors"
         >
           <v-row align="center">
             <v-col class="grow overline"
               >Description could not be interpreted</v-col
             >
-            <v-col class="shrink" v-if="infoMessages()">
+            <v-col v-if="infoMessages()" class="shrink">
               <v-tooltip bottom>
-                <template v-slot:activator="{ on, attrs }">
+                <template #activator="{ on, attrs }">
                   <v-btn
                     v-bind="attrs"
-                    v-on="on"
                     icon
+                    v-on="on"
                     @click="showCorrections = !showCorrections"
                   >
                     <v-icon>
@@ -296,15 +296,15 @@
 
         <v-expand-transition>
           <v-sheet
-            elevation="2"
             v-if="(infoMessages() && showCorrections) || errorsEncountered()"
+            elevation="2"
           >
             <v-expand-transition>
               <v-sheet
+                v-if="infoMessages() && showCorrections"
                 ref="refCorrections"
                 class="pt-5 pr-10 pb-5 pl-10"
                 color="grey lighten-5"
-                v-if="infoMessages() && showCorrections"
               >
                 <div v-if="correctionsPerformed()" class="overline">
                   Input Description
@@ -318,12 +318,12 @@
                 <div v-if="response.infos">
                   <div class="overline">Corrections / Info Messages</div>
                   <v-alert
+                    v-for="(info, index) in response.infos"
+                    :key="index"
                     color="light-blue lighten-5"
                     tile
                     border="left"
                     class="ml-2"
-                    v-for="(info, index) in response.infos"
-                    :key="index"
                   >
                     {{ getMessage(info) }}
                     <span v-if="info.code == 'IMRNAGENOMICDIFFERENCE'"
@@ -355,20 +355,20 @@
             </v-expand-transition>
 
             <v-sheet
+              v-if="errorsEncountered()"
               class="pt-10 pr-10 pb-8 pl-10"
               color="red lighten-5"
-              v-if="errorsEncountered()"
             >
               <v-alert
+                v-for="(error, index) in response.errors"
+                :key="index"
                 color="red lighten-1"
                 tile
                 border="left"
                 dark
-                v-for="(error, index) in response.errors"
-                :key="index"
               >
                 <div v-if="syntaxError()">
-                  <SyntaxError :errorModel="getSyntaxError()" />
+                  <SyntaxError :error-model="getSyntaxError()" />
                 </div>
                 <div v-else>
                   {{ getMessage(error) }}
@@ -379,11 +379,11 @@
         </v-expand-transition>
 
         <v-expansion-panels
+          v-if="response && response.chromosomal_descriptions"
           focusable
           hover
           class="mt-5 mb-5"
           tile
-          v-if="response && response.chromosomal_descriptions"
           :value="genomic_open"
         >
           <v-expansion-panel>
@@ -392,9 +392,9 @@
             >
             <v-expansion-panel-content class="pt-5">
               <div
-                class="ml-4"
                 v-for="(pair, index) in response.chromosomal_descriptions"
                 :key="index"
+                class="ml-4"
               >
                 <span>{{ pair.assembly }}</span>
                 <Description
@@ -415,28 +415,28 @@
                   :to_params="{ descriptionRouter: pair.g }"
                 />
                 <v-expansion-panels
+                  v-if="pair.errors"
+                  v-model="panel"
                   multiple
                   flat
                   tile
-                  v-if="pair.errors"
-                  v-model="panel"
                 >
                   <v-expansion-panel>
                     <v-expansion-panel-header class="overline red--text text"
                       >Unsuccessful mapping
-                      <template v-slot:actions>
+                      <template #actions>
                         <v-icon color="error"> mdi-alert-circle </v-icon>
                       </template>
                     </v-expansion-panel-header>
                     <v-expansion-panel-content>
                       <v-alert
+                        v-for="(error, index_errors) in pair.errors"
+                        :key="index_errors"
                         color="red lighten-1"
                         tile
                         border="left"
                         dark
                         class="mt-5"
-                        v-for="(error, index) in pair.errors"
-                        :key="index"
                       >
                         <div>
                           {{ getMessage(error) }}
@@ -451,11 +451,11 @@
         </v-expansion-panels>
 
         <v-expansion-panels
+          v-if="response && (response.rna || response.protein)"
           focusable
           hover
           class="mt-5 mb-5"
           tile
-          v-if="response && (response.rna || response.protein)"
           :value="consequences_open"
         >
           <v-expansion-panel>
@@ -488,12 +488,12 @@
                 <div class="overline">Predictions</div>
                 <v-sheet>
                   <v-alert
+                    v-for="(error, index) in response.rna.errors"
+                    :key="index"
                     color="red lighten-1"
                     tile
                     border="left"
                     dark
-                    v-for="(error, index) in response.rna.errors"
-                    :key="index"
                   >
                     <div>
                       {{ getMessage(error) }}
@@ -532,11 +532,11 @@
         </v-expansion-panels>
 
         <v-expansion-panels
+          v-if="showTranscripts()"
           focusable
           hover
           class="mt-5 mb-5"
           tile
-          v-if="this.showTranscripts()"
           :value="equivalent_open"
         >
           <v-expansion-panel>
@@ -546,7 +546,7 @@
             <v-expansion-panel-content class="pt-5">
               <v-sheet
                 v-for="equivalent in getEquivalentDescriptions(
-                  response.equivalent_descriptions
+                  response.equivalent_descriptions,
                 )"
                 :key="equivalent.type"
               >
@@ -582,11 +582,11 @@
         </v-expansion-panels>
 
         <v-expansion-panels
+          v-if="showEquivalentProtein()"
           focusable
           hover
           class="mt-5 mb-5"
           tile
-          v-if="this.showEquivalentProtein()"
           :value="equivalent_open"
         >
           <v-expansion-panel>
@@ -595,24 +595,22 @@
             >
             <v-expansion-panel-content class="pt-5">
               <Description
-                :description="
-                  this.response.equivalent_descriptions.p[0].description
-                "
+                :description="response.equivalent_descriptions.p[0].description"
                 :css_class="'ok-description-link'"
                 :to_name="'Normalizer'"
                 :to_params="{
-                  descriptionRouter: this.response.equivalent_descriptions.p[0]
-                    .description,
+                  descriptionRouter:
+                    response.equivalent_descriptions.p[0].description,
                 }"
               /> </v-expansion-panel-content
           ></v-expansion-panel>
         </v-expansion-panels>
         <v-expansion-panels
+          v-if="response && response.back_translated_descriptions"
           focusable
           hover
           class="mt-5 mb-5"
           tile
-          v-if="response && response.back_translated_descriptions"
           :value="back_translated_open"
         >
           <v-expansion-panel>
@@ -640,18 +638,18 @@
         </v-expansion-panels>
 
         <v-expansion-panels
+          v-if="showReferenceInformation()"
           focusable
           hover
           class="mt-5 mb-5"
           tile
-          v-if="showReferenceInformation()"
         >
           <v-expansion-panel>
             <v-expansion-panel-header class="overline"
               >Reference Sequence Information</v-expansion-panel-header
             >
             <v-expansion-panel-content>
-              <ReferenceInformation :model="this.response.corrected_model" />
+              <ReferenceInformation :model="response.corrected_model" />
               <SelectorShort
                 v-if="response && response.selector_short"
                 :selector="response.selector_short"
@@ -661,10 +659,6 @@
         </v-expansion-panels>
 
         <v-expansion-panels
-          focusable
-          hover
-          class="mt-5 mb-5"
-          tile
           v-if="
             response &&
             response.normalized_description &&
@@ -672,6 +666,10 @@
             response.normalized_model.reference &&
             !['p'].includes(response.normalized_model.coordinate_system)
           "
+          focusable
+          hover
+          class="mt-5 mb-5"
+          tile
         >
           <v-expansion-panel>
             <v-expansion-panel-header class="overline"
@@ -679,23 +677,23 @@
             >
             <v-expansion-panel-content class="pt-5">
               <Related
-                :model="this.response.normalized_model"
-                :description="this.response.normalized_description"
+                :model="response.normalized_model"
+                :description="response.normalized_description"
               />
             </v-expansion-panel-content>
           </v-expansion-panel>
         </v-expansion-panels>
 
         <v-expansion-panels
-          focusable
-          hover
-          class="mt-5 mb-5"
-          tile
           v-if="
             response &&
             response.normalized_description &&
             response.normalized_model
           "
+          focusable
+          hover
+          class="mt-5 mb-5"
+          tile
         >
           <v-expansion-panel>
             <v-expansion-panel-header class="overline"
@@ -703,11 +701,11 @@
             >
             <v-expansion-panel-content class="pt-2 pb-2">
               <ViewVariants
-                :description="this.response.normalized_description"
-                :only_variants="this.response.only_variants"
-                :sequence="this.response.sequence"
+                :description="response.normalized_description"
+                :only_variants="response.only_variants"
+                :sequence="response.sequence"
                 :d_type="'normalized'"
-                :selector="this.response.selector_short"
+                :selector="response.selector_short"
                 :c_s_var="get_c_s_var()"
                 :c_s_seq="get_c_s_seq()"
               />
@@ -715,7 +713,7 @@
           </v-expansion-panel>
         </v-expansion-panels>
 
-        <v-expansion-panels focusable hover class="mt-10 mb-10" v-if="response">
+        <v-expansion-panels v-if="response" focusable hover class="mt-10 mb-10">
           <v-expansion-panel>
             <v-expansion-panel-header>Raw Response</v-expansion-panel-header>
             <v-expansion-panel-content>
@@ -774,13 +772,13 @@ export default {
     consequences_open: 1,
     back_translated_open: 1,
   }),
-  created: function () {
-    this.run();
-  },
   watch: {
     $route() {
       this.run();
     },
+  },
+  created: function () {
+    this.run();
   },
   methods: {
     run: function () {
@@ -892,7 +890,7 @@ export default {
 
         MutalyzerService.normalizeSequence(
           this.inputDescriptionTextBox,
-          this.getParams()
+          this.getParams(),
         )
           .then((response) => {
             if (response.data) {
@@ -937,7 +935,7 @@ export default {
           .then((response) => {
             if (response.data.normalized_description) {
               MutalyzerService.normalizeHgvs(
-                response.data.normalized_description
+                response.data.normalized_description,
               ).then((response) => {
                 if (response.data) {
                   this.loadingOverlay = false;

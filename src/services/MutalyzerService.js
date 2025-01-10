@@ -53,7 +53,7 @@ export default {
   },
   relatedReferences(reference_id) {
     return apiClient.get(
-      "/related_references/" + encodeURIComponent(reference_id)
+      "/related_references/" + encodeURIComponent(reference_id),
     );
   },
   spdiConverter(description) {

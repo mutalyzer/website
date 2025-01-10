@@ -10,7 +10,7 @@
               <strong class="overline">{{ getTitleText() }}</strong>
               <v-spacer></v-spacer>
               <v-menu open-on-hover bottom left content-class="elevation-2">
-                <template v-slot:activator="{ on, attrs }">
+                <template #activator="{ on, attrs }">
                   <v-btn color="blue" icon v-bind="attrs" v-on="on">
                     <v-icon>mdi-dots-vertical</v-icon>
                   </v-btn>
@@ -31,8 +31,8 @@
               <v-row v-if="mode == 'sequence'" class="pl-2 pr-2">
                 <v-col cols="12">
                   <v-text-field
-                    :rules="rules"
                     v-model="reference"
+                    :rules="rules"
                     :label="'Reference sequence'"
                     :hint="'E.g. ATTAAA'"
                     :clearable="true"
@@ -42,8 +42,8 @@
               <v-row v-if="mode == 'sequence'" class="pl-2 pr-2">
                 <v-col cols="12" sm="9" lg="9">
                   <v-text-field
-                    :rules="rules"
                     v-model="lhs"
+                    :rules="rules"
                     :label="'LHS'"
                     :hint="getLhsHintText(lhs_type)"
                     :clearable="true"
@@ -64,8 +64,8 @@
               <v-row v-if="mode == 'hgvs'" class="pl-2 pr-2">
                 <v-col cols="12">
                   <v-text-field
-                    :rules="rules"
                     v-model="lhs"
+                    :rules="rules"
                     :label="'LHS'"
                     :hint="getLhsHintText(lhs_type)"
                     :clearable="true"
@@ -98,8 +98,8 @@
               <v-row v-if="mode == 'hgvs'" class="pl-2 pr-2">
                 <v-col cols="12">
                   <v-text-field
-                    :rules="rules"
                     v-model="rhs"
+                    :rules="rules"
                     :label="'RHS'"
                     :hint="getLhsHintText(rhs_type)"
                     :clearable="true"
@@ -133,17 +133,17 @@
             <v-progress-circular :size="50" indeterminate></v-progress-circular>
           </div>
           <div class="text-center">
-            <v-btn @click="loadingOverlay = false" class="mt-5"> Cancel </v-btn>
+            <v-btn class="mt-5" @click="loadingOverlay = false"> Cancel </v-btn>
           </div>
         </v-overlay>
 
         <v-alert
+          v-if="relation"
           ref="successAlert"
           class="mt-10 mb-0"
           elevation="2"
           prominent
           tile
-          v-if="relation"
           :color="'green'"
           type="success"
         >
@@ -151,12 +151,12 @@
         </v-alert>
 
         <v-alert
+          v-if="response && response.errors"
           prominent
           type="error"
           tile
           elevation="2"
           class="mt-10 mb-0"
-          v-if="response && response.errors"
         >
           <v-row align="center">
             <v-col class="grow overline"
@@ -166,20 +166,20 @@
         </v-alert>
 
         <v-sheet
+          v-if="errorsEncountered()"
           class="pt-10 pr-10 pb-8 pl-10 mb-10"
           elevation="2"
           color="red lighten-5"
-          v-if="errorsEncountered()"
         >
           <div v-for="(errors, key) in response.errors" :key="key">
             <div class="overline">{{ key }}</div>
             <v-alert
+              v-for="(error, index) in errors"
+              :key="index"
               color="red lighten-1"
               tile
               border="left"
               dark
-              v-for="(error, index) in errors"
-              :key="index"
             >
               <div>
                 {{ getMessage(error) }}
@@ -189,10 +189,6 @@
         </v-sheet>
 
         <v-expansion-panels
-          focusable
-          hover
-          class="mt-5 mb-10"
-          tile
           v-if="
             response &&
             (response.ref_seq ||
@@ -203,6 +199,10 @@
               response.view_lhs_supremal ||
               response.view_rhs_supremal)
           "
+          focusable
+          hover
+          class="mt-5 mb-10"
+          tile
         >
           <v-expansion-panel>
             <v-expansion-panel-header class="overline"
@@ -274,6 +274,7 @@
         </v-expansion-panels>
 
         <v-alert
+          v-if="connectionErrors"
           prominent
           type="error"
           tile
@@ -281,7 +282,6 @@
           class="mt-10"
           icon="mdi-network-off-outline"
           color="grey darken-4"
-          v-if="connectionErrors"
         >
           <v-row align="center">
             <v-col class="grow">
@@ -290,7 +290,7 @@
           </v-row>
         </v-alert>
 
-        <v-expansion-panels focusable hover class="mt-10 mb-10" v-if="response">
+        <v-expansion-panels v-if="response" focusable hover class="mt-10 mb-10">
           <v-expansion-panel>
             <v-expansion-panel-header>Raw Response</v-expansion-panel-header>
             <v-expansion-panel-content>
@@ -339,13 +339,13 @@ export default {
     response: null,
     connectionErrors: null,
   }),
-  created: function () {
-    this.run();
-  },
   watch: {
     $route() {
       this.run();
     },
+  },
+  created: function () {
+    this.run();
   },
   methods: {
     run: function () {

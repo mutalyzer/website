@@ -14,8 +14,8 @@
           <v-row class="pl-2 pr-2 mt-1">
             <v-col>
               <v-text-field
-                :rules="rules"
                 v-model="description"
+                :rules="rules"
                 :hint="'NG_012337.1:g.7125G>T'"
                 label="HGVS Description"
                 :clearable="true"
@@ -33,9 +33,9 @@
           <v-row class="pl-2 pr-2 mt-1">
             <v-col cols="12" sm="6" lg="6">
               <v-text-field
+                v-model="reference_id"
                 :rules="rules"
                 :hint="'NG_012337.3'"
-                v-model="reference_id"
                 label="Reference ID"
                 :clearable="true"
               ></v-text-field>
@@ -102,17 +102,17 @@
             <v-progress-circular :size="50" indeterminate></v-progress-circular>
           </div>
           <div class="text-center">
-            <v-btn @click="loadingOverlay = false" class="mt-5"> Cancel </v-btn>
+            <v-btn class="mt-5" @click="loadingOverlay = false"> Cancel </v-btn>
           </div>
         </v-overlay>
 
         <v-alert
+          v-if="isMapped()"
           ref="successAlert"
           class="mt-10 mb-0"
           elevation="2"
           prominent
           tile
-          v-if="isMapped()"
           color="green"
           type="success"
         >
@@ -127,13 +127,13 @@
                 }"
               />
             </v-col>
-            <v-col class="shrink" v-if="infoMessages()">
+            <v-col v-if="infoMessages()" class="shrink">
               <v-tooltip bottom>
-                <template v-slot:activator="{ on, attrs }">
+                <template #activator="{ on, attrs }">
                   <v-btn
                     v-bind="attrs"
-                    v-on="on"
                     icon
+                    v-on="on"
                     @click="showCorrections = !showCorrections"
                   >
                     <v-icon>
@@ -148,6 +148,7 @@
         </v-alert>
 
         <v-alert
+          v-if="connectionErrors"
           prominent
           type="error"
           tile
@@ -155,7 +156,6 @@
           class="mt-10"
           icon="mdi-network-off-outline"
           color="grey darken-4"
-          v-if="connectionErrors"
         >
           <v-row align="center">
             <v-col class="grow">
@@ -165,29 +165,29 @@
         </v-alert>
 
         <v-alert
+          v-if="response && response.errors"
           prominent
           type="error"
           tile
           elevation="2"
           class="mt-10 mb-0"
-          v-if="response && response.errors"
         >
           <v-row align="center">
             <v-col
-              class="grow overline"
               v-if="response.source && response.source == 'output'"
+              class="grow overline"
               >Unsuccessful mapping</v-col
             >
-            <v-col class="grow overline" v-else
+            <v-col v-else class="grow overline"
               >Description could not be interpreted
             </v-col>
-            <v-col class="shrink" v-if="infoMessages()">
+            <v-col v-if="infoMessages()" class="shrink">
               <v-tooltip bottom>
-                <template v-slot:activator="{ on, attrs }">
+                <template #activator="{ on, attrs }">
                   <v-btn
                     v-bind="attrs"
-                    v-on="on"
                     icon
+                    v-on="on"
                     @click="showCorrections = !showCorrections"
                   >
                     <v-icon>
@@ -203,15 +203,15 @@
 
         <v-expand-transition>
           <v-sheet
-            elevation="2"
             v-if="(infoMessages() && showCorrections) || errorsEncountered()"
+            elevation="2"
           >
             <v-expand-transition>
               <v-sheet
+                v-if="infoMessages() && showCorrections"
                 ref="refCorrections"
                 class="pt-5 pr-10 pb-5 pl-10"
                 color="grey lighten-5"
-                v-if="infoMessages() && showCorrections"
               >
                 <div v-if="correctionsPerformed()" class="overline">
                   Input Description
@@ -225,12 +225,12 @@
                 <div v-if="response.infos">
                   <div class="overline">Corrections / Info Messages</div>
                   <v-alert
+                    v-for="(info, index) in response.infos"
+                    :key="index"
                     color="light-blue lighten-5"
                     tile
                     border="left"
                     class="ml-2"
-                    v-for="(info, index) in response.infos"
-                    :key="index"
                   >
                     {{ getMessage(info) }}
                   </v-alert>
@@ -245,20 +245,20 @@
             </v-expand-transition>
 
             <v-sheet
+              v-if="errorsEncountered()"
               class="pt-10 pr-10 pb-8 pl-10"
               color="red lighten-5"
-              v-if="errorsEncountered()"
             >
               <v-alert
+                v-for="(error, index) in response.errors"
+                :key="index"
                 color="red lighten-1"
                 tile
                 border="left"
                 dark
-                v-for="(error, index) in response.errors"
-                :key="index"
               >
                 <div v-if="syntaxError()">
-                  <SyntaxError :errorModel="getSyntaxError()" />
+                  <SyntaxError :error-model="getSyntaxError()" />
                 </div>
                 <div v-else>
                   {{ getMessage(error) }}
@@ -268,7 +268,7 @@
           </v-sheet>
         </v-expand-transition>
 
-        <v-expansion-panels focusable hover class="mt-10 mb-10" v-if="response">
+        <v-expansion-panels v-if="response" focusable hover class="mt-10 mb-10">
           <v-expansion-panel>
             <v-expansion-panel-header>Raw Response</v-expansion-panel-header>
             <v-expansion-panel-content>
@@ -308,9 +308,6 @@ export default {
     showCorrections: false,
     availableSelectors: {},
   }),
-  created: function () {
-    this.run();
-  },
   watch: {
     $route() {
       this.run();
@@ -320,6 +317,9 @@ export default {
         this.availableSelectors = {};
       }
     },
+  },
+  created: function () {
+    this.run();
   },
   methods: {
     run: function () {

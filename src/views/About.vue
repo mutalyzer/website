@@ -91,13 +91,13 @@ export default {
     mutalyzer_version: "N/A",
     api_version: "N/A",
   }),
-  created: function () {
-    this.mutalyzerVersion();
-  },
   computed: {
     version() {
       return process.env.VUE_APP_VERSION;
     },
+  },
+  created: function () {
+    this.mutalyzerVersion();
   },
   methods: {
     mutalyzerVersion: function () {

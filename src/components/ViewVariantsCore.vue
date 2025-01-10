@@ -4,6 +4,11 @@
       <span v-for="(v, v_i) in view.views" :key="v_i">
         <span
           v-if="v.type == 'variant'"
+          :class="
+            hover_variants[v_i] || hover_sequence[v_i]
+              ? 'variant-s-hover'
+              : 'variant-s'
+          "
           @mouseover="
             hover_variants[v_i] = true;
             hover_sequence[v_i] = true;
@@ -12,22 +17,17 @@
             hover_variants[v_i] = false;
             hover_sequence[v_i] = false;
           "
-          :class="
-            hover_variants[v_i] || hover_sequence[v_i]
-              ? 'variant-s-hover'
-              : 'variant-s'
-          "
           @click="scroll_to_variant(v_i)"
           >{{ v.description }}</span
         >
         <span v-if="v.type == 'variant' && v_i < view.views.length - 2">;</span>
       </span>
     </div>
-    <div class="wrapper" id="parent-div">
-      <v-icon v-if="!view.inverted" class="mr-2" :id="d_id + '_sense-arrow'"
+    <div id="parent-div" class="wrapper">
+      <v-icon v-if="!view.inverted" :id="d_id + '_sense-arrow'" class="mr-2"
         >mdi-arrow-right-bold</v-icon
       >
-      <v-icon v-if="view.inverted" class="mr-2" :id="d_id + '_sense-arrow'"
+      <v-icon v-if="view.inverted" :id="d_id + '_sense-arrow'" class="mr-2"
         >mdi-arrow-left-bold</v-icon
       >
       <div v-for="(v, v_i) in view.views" :key="'v' + v_i" class="seq">
@@ -35,8 +35,8 @@
         <div v-if="v.type == 'outside' && v.sequence">
           <span
             v-for="(s, s_i) in v.sequence"
-            :key="'s' + s_i"
             :id="get_html_id(get_position(v, s_i, 'sequence'))"
+            :key="'s' + s_i"
             :ref="get_html_id(get_position(v, s_i, 'sequence'))"
           >
             <v-list-item-action class="ma-0 pa-0" style="min-width: unset">
@@ -59,8 +59,8 @@
           <!-- left -->
           <span
             v-for="(s, s_i) in v.left"
-            :key="'l' + s_i"
             :id="get_html_id(get_position(v, s_i, 'sequence'))"
+            :key="'l' + s_i"
             :ref="get_html_id(get_position(v, s_i, 'sequence'))"
           >
             <v-tooltip top>
@@ -77,11 +77,11 @@
           </span>
           <!-- middle dots -->
           <div
-            class="seq"
             :id="get_html_id(get_position_other(v, null, 'other'))"
+            class="seq"
           >
             <v-tooltip top>
-              <template v-slot:activator="{ on, attrs }">
+              <template #activator="{ on, attrs }">
                 <span
                   :ref="get_html_id(get_position_other(v, null, 'other'))"
                   class="seq-elem"
@@ -98,8 +98,8 @@
           </div>
           <!-- right -->
           <span
-            :id="get_html_id(get_position(v, s_i, 'right'))"
             v-for="(s, s_i) in v.right"
+            :id="get_html_id(get_position(v, s_i, 'right'))"
             :key="'r' + s_i"
           >
             <v-list-item-action class="ma-0 pa-0" style="min-width: unset">
@@ -119,10 +119,11 @@
         </div>
         <!-- variant: deleted & inserted -->
         <div
-          class="seq"
+          v-if="v.type == 'variant'"
           :id="d_id + '_variant_' + v_i"
           :ref="d_id + '_variant_' + v_i"
-          v-if="v.type == 'variant'"
+          class="seq"
+          :class="get_variant_seq_class(v_i)"
           @mouseover="
             hover_variants[v_i] = true;
             hover_sequence[v_i] = true;
@@ -131,7 +132,6 @@
             hover_variants[v_i] = false;
             hover_sequence[v_i] = false;
           "
-          :class="get_variant_seq_class(v_i)"
         >
           <div
             v-if="
@@ -141,16 +141,16 @@
             "
           >
             <!-- deleted sequence -->
-            <div class="seqdel" v-if="v.deleted && v.deleted.sequence">
+            <div v-if="v.deleted && v.deleted.sequence" class="seqdel">
               <span
-                class="seq-elem"
                 v-for="(s, s_i) in v.deleted.sequence"
-                :key="'ds' + s_i"
                 :id="get_html_id(get_position(v, s_i, 'sequence'))"
+                :key="'ds' + s_i"
                 :ref="get_html_id(get_position(v, s_i, 'sequence'))"
+                class="seq-elem"
               >
                 <v-tooltip top>
-                  <template v-slot:activator="{ on, attrs }">
+                  <template #activator="{ on, attrs }">
                     <span v-bind="attrs" v-on="on">
                       <span>{{ s }}</span></span
                     ></template
@@ -163,16 +163,16 @@
             </div>
 
             <!-- deleted left-->
-            <div class="seqdel" v-if="v.deleted && v.deleted.left">
+            <div v-if="v.deleted && v.deleted.left" class="seqdel">
               <span
-                class="seq-elem"
                 v-for="(s, s_i) in v.deleted.left"
-                :key="s_i"
                 :id="get_html_id(get_position(v, s_i, 'left'))"
+                :key="s_i"
                 :ref="get_html_id(get_position(v, s_i, 'left'))"
+                class="seq-elem"
               >
                 <v-tooltip top>
-                  <template v-slot:activator="{ on, attrs }">
+                  <template #activator="{ on, attrs }">
                     <span v-bind="attrs" v-on="on">
                       <span>{{ s }}</span></span
                     ></template
@@ -185,12 +185,12 @@
             </div>
             <!-- deleted middle dots-->
             <div
-              class="seqdel"
               v-if="v.deleted && v.deleted.right"
               :id="get_html_id(get_position_other(v, null, 'other-deleted'))"
+              class="seqdel"
             >
               <v-tooltip top>
-                <template v-slot:activator="{ on, attrs }">
+                <template #activator="{ on, attrs }">
                   <span
                     :ref="'seq-' + get_position_other(v, null, 'other-deleted')"
                     class="seq-elem"
@@ -208,16 +208,16 @@
               </v-tooltip>
             </div>
             <!-- deleted right-->
-            <div class="seqdel" v-if="v.deleted && v.deleted.right">
+            <div v-if="v.deleted && v.deleted.right" class="seqdel">
               <span
-                class="seq-elem"
                 v-for="(s, s_i) in v.deleted.right"
-                :key="s_i"
                 :id="get_html_id(get_position(v, s_i, 'right-deleted'))"
+                :key="s_i"
                 :ref="get_html_id(get_position(v, s_i, 'right-deleted'))"
+                class="seq-elem"
               >
                 <v-tooltip top>
-                  <template v-slot:activator="{ on, attrs }">
+                  <template #activator="{ on, attrs }">
                     <span v-bind="attrs" v-on="on">
                       <span>{{ s }}</span></span
                     ></template
@@ -234,27 +234,27 @@
             </div>
             <v-divider></v-divider>
             <!-- inserted sequence -->
-            <div class="seqins" v-if="v.inserted && v.inserted.sequence">
+            <div v-if="v.inserted && v.inserted.sequence" class="seqins">
               <span
-                class="seq-elem"
                 v-for="(s, s_i) in v.inserted.sequence"
                 :key="s_i"
+                class="seq-elem"
                 >{{ s }}</span
               >
             </div>
             <!-- inserted left-->
-            <div class="seqins" v-if="v.inserted && v.inserted.left">
+            <div v-if="v.inserted && v.inserted.left" class="seqins">
               <span
-                class="seq-elem"
                 v-for="(s, s_i) in v.inserted.left"
                 :key="s_i"
+                class="seq-elem"
                 >{{ s }}</span
               >
             </div>
             <!-- inserted middle dots-->
-            <div class="seqins" v-if="v.inserted && v.inserted.right">
+            <div v-if="v.inserted && v.inserted.right" class="seqins">
               <v-tooltip top>
-                <template v-slot:activator="{ on, attrs }">
+                <template #activator="{ on, attrs }">
                   <span class="seq-elem" v-bind="attrs" v-on="on">
                     <span>...</span></span
                   ></template
@@ -267,11 +267,11 @@
               </v-tooltip>
             </div>
             <!-- inserted right-->
-            <div class="seqins" v-if="v.inserted && v.inserted.right">
+            <div v-if="v.inserted && v.inserted.right" class="seqins">
               <span
-                class="seq-elem"
                 v-for="(s, s_i) in v.inserted.right"
                 :key="s_i"
+                class="seq-elem"
                 >{{ s }}</span
               >
             </div>
@@ -282,15 +282,15 @@
           </div>
           <div v-else>
             <!-- equal -->
-            <div class="seqdelequal" v-if="v.deleted && v.deleted.sequence">
+            <div v-if="v.deleted && v.deleted.sequence" class="seqdelequal">
               <span
-                class="seq-elem"
-                :id="get_html_id(get_position(v, s_i, 'sequence'))"
                 v-for="(s, s_i) in v.deleted.sequence"
+                :id="get_html_id(get_position(v, s_i, 'sequence'))"
                 :key="'ds' + s_i"
+                class="seq-elem"
               >
                 <v-tooltip top>
-                  <template v-slot:activator="{ on, attrs }">
+                  <template #activator="{ on, attrs }">
                     <span v-bind="attrs" v-on="on">
                       <span>{{ s }}</span></span
                     ></template
@@ -302,15 +302,15 @@
               </span>
             </div>
             <!-- equal left-->
-            <div class="seqdelequal" v-if="v.deleted && v.deleted.left">
+            <div v-if="v.deleted && v.deleted.left" class="seqdelequal">
               <span
-                class="seq-elem"
-                :id="get_html_id(get_position(v, s_i, 'left'))"
                 v-for="(s, s_i) in v.deleted.left"
+                :id="get_html_id(get_position(v, s_i, 'left'))"
                 :key="s_i"
+                class="seq-elem"
               >
                 <v-tooltip top>
-                  <template v-slot:activator="{ on, attrs }">
+                  <template #activator="{ on, attrs }">
                     <span v-bind="attrs" v-on="on">
                       <span>{{ s }}</span></span
                     ></template
@@ -323,12 +323,12 @@
             </div>
             <!-- equal middle dots-->
             <div
-              class="seqdelequal"
               v-if="v.deleted && v.deleted.right"
               :id="get_html_id(get_position_other(v, null, 'other-deleted'))"
+              class="seqdelequal"
             >
               <v-tooltip top>
-                <template v-slot:activator="{ on, attrs }">
+                <template #activator="{ on, attrs }">
                   <span class="seq-elem" v-bind="attrs" v-on="on">
                     <span>...</span></span
                   ></template
@@ -341,15 +341,15 @@
               </v-tooltip>
             </div>
             <!-- equal right-->
-            <div class="seqdelequal" v-if="v.deleted && v.deleted.right">
+            <div v-if="v.deleted && v.deleted.right" class="seqdelequal">
               <span
-                class="seq-elem"
-                :id="get_html_id(get_position(v, s_i, 'right-deleted'))"
                 v-for="(s, s_i) in v.deleted.right"
+                :id="get_html_id(get_position(v, s_i, 'right-deleted'))"
                 :key="s_i"
+                class="seq-elem"
               >
                 <v-tooltip bottom>
-                  <template v-slot:activator="{ on, attrs }">
+                  <template #activator="{ on, attrs }">
                     <span v-bind="attrs" v-on="on">
                       <span>{{ s }}</span></span
                     ></template
@@ -365,15 +365,15 @@
       </div>
       <v-icon v-if="!view.inverted" class="ml-2">mdi-arrow-right-bold</v-icon>
       <v-icon v-if="view.inverted" class="ml-2">mdi-arrow-left-bold</v-icon>
-      <div class="mt-3 mb-3" v-if="features_boundaries">
+      <div v-if="features_boundaries" class="mt-3 mb-3">
         <div
-          style="display: inline"
           v-for="(f, f_i) in features_boundaries"
           :key="f_i"
+          style="display: inline"
         >
           <v-tooltip bottom>
-            <template v-slot:activator="{ on, attrs }">
-              <div v-bind="attrs" v-on="on" :style="f.style"></div
+            <template #activator="{ on, attrs }">
+              <div v-bind="attrs" :style="f.style" v-on="on"></div
             ></template>
             <span> {{ get_feature_tooltip(f) }}</span>
           </v-tooltip>
@@ -563,7 +563,7 @@ export default {
           this.exons,
           this.cds,
           this.inverted,
-          true
+          true,
         );
         var pos = coding[0];
         var offset = coding[1];
@@ -594,7 +594,6 @@ export default {
         //   this.exons,
         //   this.inverted
         // );
-        // console.log(noncoding);
         // if (this.c_s_var && this.c_s_seq) {
         //   output = this.c_s_var + output + " | " + this.c_s_seq + position;
         // } else if (this.c_s_var) {
@@ -782,7 +781,7 @@ export default {
               let f_intron = this._intron(exons[i - 1], exons[i]);
               let width_intron = this.get_width_intron(
                 f_intron.start_seq,
-                f_intron.end_seq
+                f_intron.end_seq,
               );
               // width_intron -= this.get_dotted_extra(f_intron.start_seq);
               f_intron.style += "width: " + width_intron + "px;";
@@ -831,7 +830,7 @@ export default {
                 let f_intron = this._intron(exons[i - 1], exons[i]);
                 let width_intron = this.get_width_intron(
                   f_intron.start_seq,
-                  f_intron.end_seq
+                  f_intron.end_seq,
                 );
                 if (this.is_dotted(exon.start_seq)) {
                   width_intron += this.get_dotted_extra(exon.start_seq);
@@ -1114,7 +1113,7 @@ export default {
       const location = this.locusToPosition(
         coordinate,
         locations[index],
-        inverted
+        inverted,
       );
 
       return [
@@ -1128,7 +1127,7 @@ export default {
       exons,
       cds,
       inverted = false,
-      degenerate = false
+      degenerate = false,
     ) {
       const b0 = this.multiLocusToPosition(cds[0], exons, inverted);
       const b1 = this.multiLocusToPosition(cds[1], exons, inverted);

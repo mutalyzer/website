@@ -1,8 +1,8 @@
 <template>
   <div>
     <v-progress-linear
-      indeterminate
       v-if="progress_related_references_retriever"
+      indeterminate
     ></v-progress-linear>
 
     <div v-if="related_references_retriever">

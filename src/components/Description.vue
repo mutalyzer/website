@@ -3,7 +3,7 @@
     <v-row align="center">
       <v-col v-if="tooltip && to_name" class="grow">
         <v-tooltip bottom>
-          <template v-slot:activator="{ on, attrs }">
+          <template #activator="{ on, attrs }">
             <router-link
               v-if="to_name"
               :class="css_class"
@@ -40,48 +40,48 @@
         </div>
       </v-col>
       <v-col v-if="tag" class="shrink">
-        <v-tooltip bottom v-if="this.css_class == 'ok-description-link'">
-          <template v-slot:activator="{ on, attrs }">
+        <v-tooltip v-if="css_class == 'ok-description-link'" bottom>
+          <template #activator="{ on, attrs }">
             <v-chip
               v-bind="attrs"
-              v-on="on"
               color="green darken-4"
               text-color="green darken-4"
               outlined
               label
               small
+              v-on="on"
             >
               {{ tag.details }}
             </v-chip>
           </template>
           <span
-            >{{ this.tag.id }} is the representative transcript as part of the
-            MANE project.</span
+            >{{ tag.id }} is the representative transcript as part of the MANE
+            project.</span
           >
         </v-tooltip>
         <v-tooltip v-else bottom>
-          <template v-slot:activator="{ on, attrs }">
+          <template #activator="{ on, attrs }">
             <v-chip
               v-bind="attrs"
-              v-on="on"
               color="white"
               text-color="white"
               outlined
               label
               small
+              v-on="on"
             >
               {{ tag.details }}
             </v-chip>
           </template>
           <span
-            >{{ this.tag.id }} is the representative transcript as part of the
-            MANE project.</span
+            >{{ tag.id }} is the representative transcript as part of the MANE
+            project.</span
           >
         </v-tooltip>
       </v-col>
       <v-col v-if="selector && !mapping_checked" class="shrink">
         <v-tooltip bottom>
-          <template v-slot:activator="{ on, attrs }">
+          <template #activator="{ on, attrs }">
             <v-btn
               color="primary"
               outlined
@@ -94,13 +94,13 @@
               Map
             </v-btn>
           </template>
-          <span> Map this description to {{ this.selector.id }}. </span>
+          <span> Map this description to {{ selector.id }}. </span>
         </v-tooltip>
       </v-col>
       <v-col class="shrink">
         <v-tooltip bottom>
-          <template v-slot:activator="{ on, attrs }">
-            <v-btn v-bind="attrs" v-on="on" icon v-clipboard="description">
+          <template #activator="{ on, attrs }">
+            <v-btn v-clipboard="description" v-bind="attrs" icon v-on="on">
               <v-icon>mdi-content-copy</v-icon>
             </v-btn>
           </template>
@@ -108,27 +108,27 @@
         </v-tooltip>
       </v-col>
     </v-row>
-    <v-row v-if="this.mapped_description">
+    <v-row v-if="mapped_description">
       <v-col>
         <v-card tile elevation="0" color="grey lighten-5">
           <v-card-subtitle class="grey--text ml-2"
-            >Mapped description to {{ this.selector.id }}</v-card-subtitle
+            >Mapped description to {{ selector.id }}</v-card-subtitle
           >
           <v-card-text
             ><v-row
               ><v-col>
                 <div :class="css_class">
-                  {{ this.mapped_description }}
+                  {{ mapped_description }}
                 </div></v-col
               >
               <v-col class="shrink">
                 <v-tooltip bottom>
-                  <template v-slot:activator="{ on, attrs }">
+                  <template #activator="{ on, attrs }">
                     <v-btn
-                      v-bind="attrs"
-                      v-on="on"
-                      icon
                       v-clipboard="mapped_description"
+                      v-bind="attrs"
+                      icon
+                      v-on="on"
                     >
                       <v-icon>mdi-content-copy</v-icon>
                     </v-btn>
@@ -144,20 +144,20 @@
     <v-row v-if="mapping_errors">
       <v-col>
         <div class="grey--text ml-2">
-          Mapping description to {{ this.selector.id }} was unsuccessful.
+          Mapping description to {{ selector.id }} was unsuccessful.
         </div>
       </v-col>
     </v-row>
     <v-row v-if="mapping_errors">
       <v-col class="pl-4 pr-4">
         <v-alert
+          v-for="(error, index) in mapping_errors.errors"
+          :key="index"
           color="red lighten-1"
           tile
           border="left"
           dark
           dense
-          v-for="(error, index) in mapping_errors.errors"
-          :key="index"
         >
           <div>
             {{ getMessage(error) }}

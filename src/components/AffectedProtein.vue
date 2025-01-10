@@ -6,11 +6,11 @@
       </v-col>
       <v-col class="shrink">
         <v-tooltip bottom>
-          <template v-slot:activator="{ on, attrs }">
+          <template #activator="{ on, attrs }">
             <v-btn
               v-bind="attrs"
-              v-on="on"
               icon
+              v-on="on"
               @click="showSequences = !showSequences"
             >
               <v-icon>
@@ -31,17 +31,17 @@
         <v-row>
           <v-col class="grow" style="overflow-x: auto">
             <div class="protein-seq">
-              <pre v-html="this.fancy_protein_reference"></pre>
+              <pre v-html="fancy_protein_reference"></pre>
             </div>
           </v-col>
           <v-col class="shrink" align-self="start">
             <v-tooltip bottom>
-              <template v-slot:activator="{ on, attrs }">
+              <template #activator="{ on, attrs }">
                 <v-btn
-                  v-bind="attrs"
-                  v-on="on"
-                  icon
                   v-clipboard="protein.reference"
+                  v-bind="attrs"
+                  icon
+                  v-on="on"
                 >
                   <v-icon>mdi-content-copy</v-icon>
                 </v-btn>
@@ -54,17 +54,17 @@
         <v-row>
           <v-col class="grow" style="overflow-x: auto">
             <div class="protein-seq">
-              <pre v-html="this.fancy_protein_predicted"></pre>
+              <pre v-html="fancy_protein_predicted"></pre>
             </div>
           </v-col>
           <v-col class="shrink" align-self="start">
             <v-tooltip bottom>
-              <template v-slot:activator="{ on, attrs }">
+              <template #activator="{ on, attrs }">
                 <v-btn
-                  v-bind="attrs"
-                  v-on="on"
-                  icon
                   v-clipboard="protein.predicted"
+                  v-bind="attrs"
+                  icon
+                  v-on="on"
                 >
                   <v-icon>mdi-content-copy</v-icon>
                 </v-btn>
@@ -101,14 +101,14 @@ export default {
       this.block_length,
       this.columns,
       this.protein.position_first,
-      this.protein.position_last_original
+      this.protein.position_last_original,
     );
     this.fancy_protein_predicted = this.fancyFormat(
       this.protein.predicted,
       this.block_length,
       this.columns,
       this.protein.position_first,
-      this.protein.position_last_predicted
+      this.protein.position_last_predicted,
     );
   },
   methods: {
@@ -117,7 +117,7 @@ export default {
       block_length,
       columns,
       position_change_first = null,
-      position_change_last = null
+      position_change_last = null,
     ) {
       let blocks = this.blockSplit(sequence, block_length);
 
@@ -138,7 +138,7 @@ export default {
       blocks[before_i] = this.insertInto(
         blocks[before_i],
         before_i_i,
-        '<b style="color:#990000">'
+        '<b style="color:#990000">',
       );
       let rows = this.addPositions(
         sequence,
@@ -146,7 +146,7 @@ export default {
         block_length,
         columns,
         position_change_first,
-        position_change_last
+        position_change_last,
       );
       return rows.join("<br>");
     },
@@ -159,7 +159,7 @@ export default {
       block_length,
       columns,
       position_change_first = null,
-      position_change_last = null
+      position_change_last = null,
     ) {
       let last_column_position =
         Math.floor(sequence.length / (block_length * columns)) *
@@ -191,7 +191,7 @@ export default {
             blocks[row_i * columns] = this.insertInto(
               blocks[row_i * columns],
               0,
-              '<b style="color:#990000">'
+              '<b style="color:#990000">',
             );
           }
           if (
@@ -203,7 +203,7 @@ export default {
             blocks[row_i * columns + columns - 1] = this.insertInto(
               blocks[row_i * columns + columns - 1],
               blocks[row_i * columns + columns - 1].length,
-              "</b>"
+              "</b>",
             );
           }
         }

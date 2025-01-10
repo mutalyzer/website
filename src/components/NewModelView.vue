@@ -1,16 +1,16 @@
 <template>
   <div>
     <div>
-      <span class="description" v-if="description">
+      <span v-if="description" class="description">
         {{ description }}
       </span>
     </div>
     <div>
       <span
+        v-if="model.reference.id"
+        :class="descriptionClasses['reference.id']"
         @mouseover="setHovers('reference.id')"
         @mouseleave="resetHovers('reference.id')"
-        :class="descriptionClasses['reference.id']"
-        v-if="model.reference.id"
       >
         {{ model.reference.id }}
       </span>
@@ -18,8 +18,8 @@
       <span v-if="model.reference.selector">(</span>
 
       <span
-        :class="[getDescriptionClass('reference.selector.id')]"
         v-if="model.reference.selector"
+        :class="[getDescriptionClass('reference.selector.id')]"
       >
         {{ model.reference.selector.id }}
       </span>
@@ -27,65 +27,65 @@
       <span class="description">:</span>
 
       <span
+        v-if="model.coordinate_system"
+        :class="[getDescriptionClass('coordinate_system')]"
         @mouseover="setHovers('coordinate_system')"
         @mouseleave="resetHovers('coordinate_system')"
-        :class="[getDescriptionClass('coordinate_system')]"
-        v-if="model.coordinate_system"
       >
         {{ model.coordinate_system }}
       </span>
       <span v-if="model.coordinate_system">.</span>
 
       <span
-        class="description"
         v-if="model.variants && model.variants.length > 1"
+        class="description"
         >[</span
       >
 
-      <span class="description" v-if="model.location">
+      <span v-if="model.location" class="description">
         <span
-          class="description"
           v-if="model.location.type == 'point' && model.location.uncertain"
+          class="description"
         >
           ?
         </span>
         <span
-          class="description"
           v-if="model.location.type == 'point' && !model.location.uncertain"
+          class="description"
         >
           ?
         </span>
       </span>
 
-      <span class="description" v-if="model.variants">
+      <span v-if="model.variants" class="description">
         <span v-for="(variant, index) in model.variants" :key="index">
-          <span class="description" v-if="variant.location">
+          <span v-if="variant.location" class="description">
             <span
-              class="description"
               v-if="
                 variant.location.type == 'point' && variant.location.uncertain
               "
+              class="description"
             >
               ?
             </span>
             <span
-              class="description"
               v-if="
                 variant.location.type == 'point' && !variant.location.uncertain
               "
+              class="description"
             >
               {{ variant.location.position }}
             </span>
           </span>
-          <span class="description" v-if="variant.type != 'substitution'">
+          <span v-if="variant.type != 'substitution'" class="description">
             {{ getVariantOperation(variant) }}
           </span>
         </span>
       </span>
 
       <span
-        class="description"
         v-if="model.variants && model.variants.length > 1"
+        class="description"
         >]</span
       >
     </div>
@@ -122,9 +122,8 @@ export default {
     };
   },
   created: function () {
-    this.descriptionClasses["reference.id"] = this.getDescriptionClass(
-      "reference.id"
-    );
+    this.descriptionClasses["reference.id"] =
+      this.getDescriptionClass("reference.id");
   },
   methods: {
     getMessage: function (message) {
