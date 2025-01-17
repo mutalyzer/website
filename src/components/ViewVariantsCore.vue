@@ -924,7 +924,7 @@ export default {
     get_width_exon: function (start_seq, end_seq) {
       var start_el = document.getElementById(start_seq);
       var end_el = document.getElementById(end_seq);
-      if (start_el) {
+      if (start_el && end_el) {
         const start_rect = start_el.getBoundingClientRect();
         const end_rect = end_el.getBoundingClientRect();
         if (this.is_dotted(start_seq) && this.is_dotted(end_seq)) {
