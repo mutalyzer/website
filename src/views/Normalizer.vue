@@ -826,106 +826,83 @@ export default {
     },
     normalizeHgvs: function () {
       if (this.inputDescriptionTextBox !== null) {
-        this.loadingOverlay = true;
-        this.inputDescription = null;
-        this.response = null;
-        this.connectionErrors = null;
-        this.showCorrections = false;
-        this.inputDescriptionTextBox = this.inputDescriptionTextBox.trim();
-
+        this.prepareForRequest();
         MutalyzerService.normalizeHgvs(this.inputDescriptionTextBox)
-          .then((response) => {
-            if (response.data) {
-              this.loadingOverlay = false;
-              this.response = response.data;
-              this.inputDescription = this.inputDescriptionTextBox;
-              if (this.isNormalized()) {
-                this.$nextTick(() => {
-                  this.$vuetify.goTo(this.$refs.successAlert, this.options);
-                });
-                this.openPanels();
-              }
-            }
-          })
-          .catch((error) => {
-            this.loadingOverlay = false;
-            if (error.response) {
-              if (
-                error.response.status == 422 &&
-                error.response.data &&
-                error.response.data.custom
-              ) {
-                let errors = error.response.data.custom.errors;
-                if (
-                  (errors.length === 1 && errors[0].code === "ESYNTAXUEOF") ||
-                  errors[0].code === "ESYNTAXUC"
-                ) {
-                  this.spdiToHgvs(error.response.data.custom);
-                } else {
-                  this.response = error.response.data.custom;
-                }
-              } else {
-                this.connectionErrors = {
-                  details: "Some response error occured.",
-                };
-              }
-            } else if (error.request) {
-              this.connectionErrors = {
-                details: "Some connection or server error occured.",
-              };
-            } else {
-              this.connectionErrors = { details: "Some error occured." };
-            }
+          .then(this.handleSuccess)
+          .catch(this.handleError);
+      }
+    },
+    prepareForRequest: function () {
+      this.loadingOverlay = true;
+      this.inputDescription = null;
+      this.response = null;
+      this.connectionErrors = null;
+      this.showCorrections = false;
+      this.inputDescriptionTextBox = this.inputDescriptionTextBox.trim();
+    },
+    handleSuccess: function (response) {
+      if (response.data) {
+        this.loadingOverlay = false;
+        this.response = response.data;
+        this.inputDescription = this.inputDescriptionTextBox;
+        if (this.isNormalized()) {
+          this.$nextTick(() => {
+            this.$vuetify.goTo(this.$refs.successAlert, this.options);
           });
+          this.openPanels();
+        }
+      }
+    },
+    handleError: function (error) {
+      this.loadingOverlay = false;
+      if (error.response) {
+        if (
+          error.response.status === 422 &&
+          error.response.data &&
+          error.response.data.custom
+        ) {
+          let errors = error.response.data.custom.errors;
+          if (
+            (errors.length === 1 && errors[0].code === "ESYNTAXUEOF") ||
+            errors[0].code === "ESYNTAXUC"
+          ) {
+            this.spdiToHgvs(error.response.data.custom);
+          } else {
+            this.response = error.response.data.custom;
+          }
+        } else if (error.response.status === 504) {
+          this.connectionErrors = {
+            details:
+              "Operation Timeout: This normalization appears too resource-intensive for the server. We recommend using a local installation to proceed.",
+          };
+        } else {
+          this.connectionErrors = {
+            details:
+              "Internal Server Error: An unexpected error occurred. Please try again later or contact us if the issue persists.",
+          };
+        }
+      } else if (error.request) {
+        this.connectionErrors = {
+          details:
+            "An unexpected error occurred. Please try again later or contact us if the issue persists.",
+        };
+      } else {
+        this.connectionErrors = {
+          details:
+            "An unexpected error occurred. Please try again later or contact us if the issue persists.",
+        };
       }
     },
     normalizeSequence: function () {
       if (this.inputDescriptionTextBox !== null) {
-        this.loadingOverlay = true;
-        this.inputDescription = null;
-        this.response = null;
-        this.connectionErrors = null;
-        this.showCorrections = false;
-        this.inputDescriptionTextBox = this.inputDescriptionTextBox.trim();
+        this.prepareForRequest();
 
         MutalyzerService.normalizeSequence(
           this.inputDescriptionTextBox,
           this.getParams(),
         )
-          .then((response) => {
-            if (response.data) {
-              this.loadingOverlay = false;
-              this.response = response.data;
-              this.inputDescription = this.inputDescriptionTextBox;
-              if (this.isNormalized()) {
-                this.$nextTick(() => {
-                  this.$vuetify.goTo(this.$refs.successAlert, this.options);
-                });
-              }
-            }
-          })
-          .catch((error) => {
-            this.loadingOverlay = false;
-            if (error.response) {
-              if (
-                error.response.status == 422 &&
-                error.response.data &&
-                error.response.data.custom
-              ) {
-                this.response = error.response.data.custom;
-              } else {
-                this.connectionErrors = {
-                  details: "Some response error occured.",
-                };
-              }
-            } else if (error.request) {
-              this.connectionErrors = {
-                details: "Some connection or server error occured.",
-              };
-            } else {
-              this.connectionErrors = { details: "Some error occured." };
-            }
-          });
+          .then(this.handleSuccess)
+          .catch.catch(this.handleError);
       }
     },
     spdiToHgvs: function (hgvs_error) {
@@ -936,19 +913,7 @@ export default {
             if (response.data.normalized_description) {
               MutalyzerService.normalizeHgvs(
                 response.data.normalized_description,
-              ).then((response) => {
-                if (response.data) {
-                  this.loadingOverlay = false;
-                  this.response = response.data;
-                  this.inputDescription = this.inputDescriptionTextBox;
-                  if (this.isNormalized()) {
-                    this.$nextTick(() => {
-                      this.$vuetify.goTo(this.$refs.successAlert, this.options);
-                    });
-                    this.openPanels();
-                  }
-                }
-              });
+              ).then(this.handleSuccess);
             }
           })
           .catch(() => {
