@@ -873,23 +873,23 @@ export default {
         } else if (error.response.status === 504) {
           this.connectionErrors = {
             details:
-              "Operation Timeout: This normalization appears too resource-intensive for the server. We recommend using a local installation to proceed.",
+              "Operation Timeout: This normalization appears too resource-intensive for the server. We recommend using a local installation.",
           };
         } else {
           this.connectionErrors = {
             details:
-              "Internal Server Error: An unexpected error occurred. Please try again later or contact us if the issue persists.",
+              "Internal Server Error: An unexpected error occurred. Please contact us if you think that the description should be processed.",
           };
         }
       } else if (error.request) {
         this.connectionErrors = {
           details:
-            "An unexpected error occurred. Please try again later or contact us if the issue persists.",
+            "Internal Server Error: An unexpected error occurred. Please contact us if you think that the description should be processed.",
         };
       } else {
         this.connectionErrors = {
           details:
-            "An unexpected error occurred. Please try again later or contact us if the issue persists.",
+            "Internal Server Error: An unexpected error occurred. Please contact us if you think that the description should be processed.",
         };
       }
     },
