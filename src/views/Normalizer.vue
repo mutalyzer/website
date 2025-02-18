@@ -379,73 +379,22 @@
         </v-expand-transition>
 
         <v-expansion-panels
-          v-if="response && response.chromosomal_descriptions"
+          v-if="response && get_chromosomal_descriptions()"
           focusable
           hover
           class="mt-5 mb-5"
           tile
-          :value="genomic_open"
+          :value="chromosomal_open"
         >
           <v-expansion-panel>
             <v-expansion-panel-header class="overline"
               >Chromosomal Descriptions</v-expansion-panel-header
             >
             <v-expansion-panel-content class="pt-5">
-              <div
-                v-for="(pair, index) in response.chromosomal_descriptions"
-                :key="index"
-                class="ml-4"
-              >
-                <span>{{ pair.assembly }}</span>
-                <Description
-                  v-if="pair.c"
-                  :description="pair.c"
-                  :css_class="'ok-description-link'"
-                  :to_name="'Normalizer'"
-                  :to_params="{
-                    descriptionRouter: pair.c,
-                  }"
-                  :tag="pair.tag"
-                />
-                <Description
-                  v-if="pair.g"
-                  :description="pair.g"
-                  :css_class="'ok-description-link'"
-                  :to_name="'Normalizer'"
-                  :to_params="{ descriptionRouter: pair.g }"
-                />
-                <v-expansion-panels
-                  v-if="pair.errors"
-                  v-model="panel"
-                  multiple
-                  flat
-                  tile
-                >
-                  <v-expansion-panel>
-                    <v-expansion-panel-header class="overline red--text text"
-                      >Unsuccessful mapping
-                      <template #actions>
-                        <v-icon color="error"> mdi-alert-circle </v-icon>
-                      </template>
-                    </v-expansion-panel-header>
-                    <v-expansion-panel-content>
-                      <v-alert
-                        v-for="(error, index_errors) in pair.errors"
-                        :key="index_errors"
-                        color="red lighten-1"
-                        tile
-                        border="left"
-                        dark
-                        class="mt-5"
-                      >
-                        <div>
-                          {{ getMessage(error) }}
-                        </div>
-                      </v-alert>
-                    </v-expansion-panel-content>
-                  </v-expansion-panel>
-                </v-expansion-panels>
-              </div>
+              <ChromosomalDescriptions
+                v-if="response.normalized_description"
+                :description="response.normalized_description"
+              ></ChromosomalDescriptions>
             </v-expansion-panel-content>
           </v-expansion-panel>
         </v-expansion-panels>
@@ -736,6 +685,7 @@ import ReferenceInformation from "../components/ReferenceInformation.vue";
 import Related from "../components/Related.vue";
 import ViewVariants from "../components/ViewVariants.vue";
 import Description from "../components/Description.vue";
+import ChromosomalDescriptions from "../components/ChromosomalDescriptions.vue";
 
 export default {
   components: {
@@ -747,6 +697,7 @@ export default {
     Related,
     ViewVariants,
     Description,
+    ChromosomalDescriptions,
   },
   props: ["descriptionRouter"],
   data: () => ({
@@ -767,7 +718,7 @@ export default {
     sequence: null,
     only_variants: false,
     mode: "hgvs",
-    genomic_open: 0,
+    chromosomal_open: 1,
     equivalent_open: 0,
     consequences_open: 1,
     back_translated_open: 1,
@@ -1186,6 +1137,35 @@ export default {
         }
       }
       return null;
+    },
+    get_chromosomal_descriptions: function () {
+      if (!this.response) {
+        return false;
+      }
+
+      if (this.response.infos) {
+        for (var i = 0; i < this.response.infos.length; i++) {
+          var info = this.response.infos[i];
+          if (info.code && info.code === "IMRNAGENOMICTIP") {
+            return true;
+          }
+        }
+      }
+
+      if (
+        this.response.normalized_model &&
+        this.response.normalized_model.reference &&
+        this.response.normalized_model.reference.id &&
+        this.response.normalized_model.reference.id.indexOf("NG_") === 0 &&
+        this.response.normalized_model.reference.selector &&
+        this.response.normalized_model.reference.selector.id &&
+        this.response.normalized_model.reference.selector.id.indexOf("NM_") ===
+          0
+      ) {
+        return true;
+      }
+
+      return false;
     },
   },
 };
