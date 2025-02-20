@@ -132,6 +132,7 @@ export default {
             const response = await MutalyzerService.map({
               description: this.description,
               reference_id: assembly,
+              filter: true,
             });
 
             // Update the results if the response is successful
