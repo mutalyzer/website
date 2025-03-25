@@ -237,7 +237,7 @@ export default {
       };
       params.selector_id = this.selector.id;
       params.slice_to = "transcript";
-      params.filter = false;
+      params.filter_out = false;
       return params;
     },
     getMessage: function (message) {

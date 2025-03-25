@@ -3,7 +3,24 @@
     <v-layout>
       <v-flex xs12>
         <h1 class="display-1 mt-10">Mapper</h1>
-        <p>Map a description to another reference.</p>
+        <v-expansion-panels flat hover>
+          <v-expansion-panel>
+            <v-expansion-panel-header expand-icon="mdi-help" disable-icon-rotate
+              >Map a description to another reference.</v-expansion-panel-header
+            >
+            <v-expansion-panel-content color="grey lighten-5">
+              <p class="mt-5">
+                The Mapper takes an interpretable description and a reference ID
+                (which is related to the reference ID from the input
+                description) as input. It maps the description to the provided
+                reference sequence while incorporating reference differences,
+                rather than simply lifting over variants. Additionally, a
+                filtering procedure is available to handle variants introduced
+                by reference sequence differences.
+              </p>
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+        </v-expansion-panels>
         <v-sheet elevation="2" class="pa-5 mt-10">
           <v-row>
             <v-subheader>Map</v-subheader>
@@ -69,7 +86,7 @@
           <v-row class="pl-2 pr-2 mt-0 mb-0">
             <v-col cols="12" sm="6" lg="6">
               <v-switch
-                v-model="filter"
+                v-model="filter_out"
                 label="Filter non original variant operations"
                 color="primary"
               ></v-switch
@@ -301,7 +318,7 @@ export default {
     reference_id: null,
     selector_id: null,
     slice_to: null,
-    filter: null,
+    filter_out: null,
     not_run: null,
     response: null,
     connectionErrors: null,
@@ -359,11 +376,11 @@ export default {
       } else {
         this.not_run = false;
       }
-      if (this.$route.query.filter && this.$route.query.filter !== 0) {
-        if (this.$route.query.filter === "true") {
-          this.filter = true;
-        } else if (this.$route.query.filter === "false") {
-          this.filter = false;
+      if (this.$route.query.filter_out && this.$route.query.filter_out !== 0) {
+        if (this.$route.query.filter_out === "true") {
+          this.filter_out = true;
+        } else if (this.$route.query.filter_out === "false") {
+          this.filter_out = false;
         }
       }
     },
@@ -485,8 +502,8 @@ export default {
       if (this.slice_to) {
         params.slice_to = this.slice_to;
       }
-      if (this.filter == true || this.filter == false) {
-        params.filter = this.filter;
+      if (this.filter_out == true || this.filter_out == false) {
+        params.filter_out = this.filter_out;
       }
       return params;
     },
@@ -495,7 +512,7 @@ export default {
       this.reference_id = "NG_012337.3";
       this.selector_id = "NM_003002.4";
       this.slice_to = null;
-      this.filter = true;
+      this.filter_out = true;
     },
     getAvailableSelectors: function () {
       if (this.reference_id !== null && 0 !== this.reference_id.length) {

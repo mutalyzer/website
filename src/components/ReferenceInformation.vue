@@ -218,7 +218,6 @@ export default {
             output.cds = cds;
           }
         }
-        console.log(annotations);
         if (selector.qualifiers) {
           if (selector.qualifiers.added_annotation_id) {
             details.push({
