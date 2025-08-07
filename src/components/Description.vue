@@ -79,7 +79,7 @@
           >
         </v-tooltip>
       </v-col>
-      <v-col v-if="selector && !mapping_checked" class="shrink">
+      <v-col v-if="selector && selector.id && !mapping_checked" class="shrink">
         <v-tooltip bottom>
           <template #activator="{ on, attrs }">
             <v-btn

@@ -517,7 +517,7 @@
                           descriptionRouter: e_d.description,
                         }"
                         :tag="e_d.tag"
-                        :selector="e_d.selector"
+                        :selector="e_d.reference.selector"
                       />
                     </v-sheet>
                   </v-hover>
