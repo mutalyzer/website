@@ -4,7 +4,7 @@ const apiBaseUrl = process.env.VUE_APP_API_URL;
 
 const apiClient = axios.create({
   baseURL: apiBaseUrl,
-  withCredentials: false, // This is the default
+  withCredentials: false,
   headers: {
     Accept: "application/json",
     "Content-Type": "application/json",
@@ -12,54 +12,66 @@ const apiClient = axios.create({
 });
 
 export default {
-  compare(params) {
-    return apiClient.get("/compare/", { params });
+  compare(params, config = {}) {
+    return apiClient.get("/compare/", { params, ...config });
   },
-  normalizeHgvs(description) {
-    return apiClient.get("/normalize/" + encodeURIComponent(description));
-  },
-  normalizeSequence(description, params) {
-    return apiClient.get("/normalize/" + encodeURIComponent(description), {
-      params,
+  normalizeHgvs(description, config = {}) {
+    return apiClient.get(`/normalize/${encodeURIComponent(description)}`, {
+      ...config,
     });
   },
-  normalizeAltHgvs(description) {
-    return apiClient.get("/normalize_alt/" + encodeURIComponent(description));
-  },
-  normalizeAltSequence(description, params) {
-    return apiClient.get("/normalize_alt/" + encodeURIComponent(description), {
+  normalizeSequence(description, params, config = {}) {
+    return apiClient.get(`/normalize/${encodeURIComponent(description)}`, {
       params,
+      ...config,
     });
   },
-  positionConvert(params) {
-    return apiClient.get("/position_convert/", { params });
-  },
-  descriptionExtract(params) {
-    return apiClient.get("/description_extract/", { params });
-  },
-  referenceModel(params) {
-    return apiClient.get("/reference_model/", { params });
-  },
-  getSelectors(referenceId) {
-    return apiClient.get("/get_selectors/" + encodeURIComponent(referenceId));
-  },
-  map(params) {
-    return apiClient.get("/map/", { params });
-  },
-  view(description, params) {
-    return apiClient.get("/view_variants/" + encodeURIComponent(description), {
-      params,
+  normalizeAltHgvs(description, config = {}) {
+    return apiClient.get(`/normalize_alt/${encodeURIComponent(description)}`, {
+      ...config,
     });
   },
-  relatedReferences(reference_id) {
+  normalizeAltSequence(description, params, config = {}) {
+    return apiClient.get(`/normalize_alt/${encodeURIComponent(description)}`, {
+      params,
+      ...config,
+    });
+  },
+  positionConvert(params, config = {}) {
+    return apiClient.get("/position_convert/", { params, ...config });
+  },
+  descriptionExtract(params, config = {}) {
+    return apiClient.get("/description_extract/", { params, ...config });
+  },
+  referenceModel(params, config = {}) {
+    return apiClient.get("/reference_model/", { params, ...config });
+  },
+  getSelectors(referenceId, config = {}) {
+    return apiClient.get(`/get_selectors/${encodeURIComponent(referenceId)}`, {
+      ...config,
+    });
+  },
+  map(params, config = {}) {
+    return apiClient.get("/map/", { params, ...config });
+  },
+  view(description, params, config = {}) {
+    return apiClient.get(`/view_variants/${encodeURIComponent(description)}`, {
+      params,
+      ...config,
+    });
+  },
+  relatedReferences(reference_id, config = {}) {
     return apiClient.get(
-      "/related_references/" + encodeURIComponent(reference_id),
+      `/related_references/${encodeURIComponent(reference_id)}`,
+      { ...config },
     );
   },
-  spdiConverter(description) {
-    return apiClient.get("/spdi_converter/" + encodeURIComponent(description));
+  spdiConverter(description, config = {}) {
+    return apiClient.get(`/spdi_converter/${encodeURIComponent(description)}`, {
+      ...config,
+    });
   },
-  version() {
-    return apiClient.get("/version");
+  version(config = {}) {
+    return apiClient.get("/version", { ...config });
   },
 };

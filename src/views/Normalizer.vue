@@ -171,7 +171,7 @@
               ref="normalize"
               class="mt-5"
               color="primary"
-              :disabled="!valid"
+              :disabled="!valid || loadingOverlay"
               :to="{
                 name: 'Normalizer',
                 params: { descriptionRouter: inputDescriptionTextBox },
@@ -188,7 +188,7 @@
             <v-progress-circular :size="50" indeterminate></v-progress-circular>
           </div>
           <div class="text-center">
-            <v-btn class="mt-5" @click="loadingOverlay = false"> Cancel </v-btn>
+            <v-btn class="mt-5" @click="cancelRequest"> Cancel </v-btn>
           </div>
         </v-overlay>
 
@@ -713,6 +713,9 @@ export default {
     loadingOverlay: false,
     inputDescription: null, // The description for which the most recent call was sent.
     response: null,
+    currentController: null, // AbortController for the in-flight request.
+    currentRequestId: 0, // Increasing id for each request.
+    canceledRequestIds: new Set(), // Canceled request ids.
     connectionErrors: null,
     showCorrections: false,
     sequence: null,
@@ -730,6 +733,13 @@ export default {
   },
   created: function () {
     this.run();
+  },
+  beforeDestroy() {
+    try {
+      this.currentController?.abort();
+    } catch (e) {
+      /* empty */
+    }
   },
   methods: {
     run: function () {
@@ -778,9 +788,12 @@ export default {
     normalizeHgvs: function () {
       if (this.inputDescriptionTextBox !== null) {
         this.prepareForRequest();
-        MutalyzerService.normalizeHgvs(this.inputDescriptionTextBox)
-          .then(this.handleSuccess)
-          .catch(this.handleError);
+        const reqId = this.currentRequestId;
+        MutalyzerService.normalizeHgvs(this.inputDescriptionTextBox, {
+          signal: this.currentController.signal,
+        })
+          .then((res) => this.safeHandleSuccess(reqId, res))
+          .catch((err) => this.safeHandleError(reqId, err));
       }
     },
     prepareForRequest: function () {
@@ -790,6 +803,39 @@ export default {
       this.connectionErrors = null;
       this.showCorrections = false;
       this.inputDescriptionTextBox = this.inputDescriptionTextBox.trim();
+
+      // cancellation setup
+      this.canceledRequestIds.clear();
+      this.currentController?.abort();
+      this.currentController = new AbortController();
+      this.currentRequestId += 1;
+    },
+    cancelRequest() {
+      // mark current as canceled and abort the network call
+      this.canceledRequestIds.add(this.currentRequestId);
+      try {
+        this.currentController?.abort();
+      } catch (e) {
+        /* empty */
+      }
+      this.loadingOverlay = false;
+    },
+
+    safeHandleSuccess(reqId, response) {
+      if (this.canceledRequestIds.has(reqId)) return; // ignore late success
+      this.handleSuccess(response);
+    },
+
+    safeHandleError(reqId, error) {
+      if (
+        error?.name === "CanceledError" ||
+        error?.message === "canceled" ||
+        error?.code === "ERR_CANCELED" ||
+        this.canceledRequestIds.has(reqId)
+      ) {
+        return;
+      }
+      this.handleError(error);
     },
     handleSuccess: function (response) {
       if (response.data) {
@@ -847,27 +893,40 @@ export default {
     normalizeSequence: function () {
       if (this.inputDescriptionTextBox !== null) {
         this.prepareForRequest();
-
+        const reqId = this.currentRequestId;
         MutalyzerService.normalizeSequence(
           this.inputDescriptionTextBox,
           this.getParams(),
+          { signal: this.currentController.signal },
         )
-          .then(this.handleSuccess)
-          .catch.catch(this.handleError);
+          .then((res) => this.safeHandleSuccess(reqId, res))
+          .catch((err) => this.safeHandleError(reqId, err));
       }
     },
     spdiToHgvs: function (hgvs_error) {
       if (this.inputDescriptionTextBox !== null) {
-        this.loadingOverlay = true;
-        MutalyzerService.spdiConverter(this.inputDescriptionTextBox)
+        const reqId = this.currentRequestId;
+        MutalyzerService.spdiConverter(this.inputDescriptionTextBox, {
+          signal: this.currentController?.signal,
+        })
           .then((response) => {
+            if (this.canceledRequestIds.has(reqId)) return;
             if (response.data.normalized_description) {
-              MutalyzerService.normalizeHgvs(
+              return MutalyzerService.normalizeHgvs(
                 response.data.normalized_description,
-              ).then(this.handleSuccess);
+                { signal: this.currentController?.signal },
+              ).then((res) => this.safeHandleSuccess(reqId, res));
             }
           })
-          .catch(() => {
+          .catch((err) => {
+            if (
+              err?.name === "CanceledError" ||
+              err?.code === "ERR_CANCELED" ||
+              err?.message === "canceled" ||
+              this.canceledRequestIds.has(reqId)
+            ) {
+              return;
+            }
             this.loadingOverlay = false;
             this.response = hgvs_error;
           });
