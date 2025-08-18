@@ -606,19 +606,32 @@
             </v-expansion-panel-content>
           </v-expansion-panel>
         </v-expansion-panels>
-
-        <v-expansion-panels focusable·hover·class="mt-5·mb-5" tile>
-          <v-expansion-panel>
-            <v-expansion-panel-header class="overline"
-              >New related reference sequences</v-expansion-panel-header
-            >
-            <v-expansion-panel-content class="pt-5">
-              <NewRelated
-                :description="response.normalized_description"
-                :normalized_description_model="response.normalized_model"
-              />
-            </v-expansion-panel-content>
-          </v-expansion-panel>
+        <v-expansion-panels
+          v-if="
+            response &&
+            response.normalized_description &&
+            response.normalized_model &&
+            response.normalized_model.reference &&
+            !['p'].includes(response.normalized_model.coordinate_system)
+          "
+          focusable
+          hover
+          class="mt-5 mb-5"
+          tile
+        >
+          <v-expansion-panels focusable·hover·class="mt-5·mb-5" tile>
+            <v-expansion-panel>
+              <v-expansion-panel-header class="overline"
+                >New related reference sequences</v-expansion-panel-header
+              >
+              <v-expansion-panel-content class="pt-5">
+                <NewRelated
+                  :description="response.normalized_description"
+                  :normalized_description_model="response.normalized_model"
+                />
+              </v-expansion-panel-content>
+            </v-expansion-panel>
+          </v-expansion-panels>
         </v-expansion-panels>
 
         <v-expansion-panels
