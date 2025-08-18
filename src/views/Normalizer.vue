@@ -607,6 +607,20 @@
           </v-expansion-panel>
         </v-expansion-panels>
 
+        <v-expansion-panels focusable·hover·class="mt-5·mb-5" tile>
+          <v-expansion-panel>
+            <v-expansion-panel-header class="overline"
+              >New related reference sequences</v-expansion-panel-header
+            >
+            <v-expansion-panel-content class="pt-5">
+              <NewRelated
+                :description="response.normalized_description"
+                :normalized_description_model="response.normalized_model"
+              />
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+        </v-expansion-panels>
+
         <v-expansion-panels
           v-if="
             response &&
@@ -683,6 +697,7 @@ import SelectorShort from "../components/SelectorShort.vue";
 import SyntaxError from "../components/SyntaxError.vue";
 import ReferenceInformation from "../components/ReferenceInformation.vue";
 import Related from "../components/Related.vue";
+import NewRelated from "../components/NewRelated.vue";
 import ViewVariants from "../components/ViewVariants.vue";
 import Description from "../components/Description.vue";
 import ChromosomalDescriptions from "../components/ChromosomalDescriptions.vue";
@@ -695,6 +710,7 @@ export default {
     SyntaxError,
     ReferenceInformation,
     Related,
+    NewRelated,
     ViewVariants,
     Description,
     ChromosomalDescriptions,

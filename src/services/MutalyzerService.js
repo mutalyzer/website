@@ -66,6 +66,15 @@ export default {
       { ...config },
     );
   },
+  newRelatedReferences(reference_id, locations = [], config = {}) {
+    return apiClient.get(`/new_related/${encodeURIComponent(reference_id)}`, {
+      params: {
+        locations,
+        ...(config.params || {}),
+      },
+      ...config,
+    });
+  },
   spdiConverter(description, config = {}) {
     return apiClient.get(`/spdi_converter/${encodeURIComponent(description)}`, {
       ...config,
