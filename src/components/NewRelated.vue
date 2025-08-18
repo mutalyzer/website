@@ -9,6 +9,7 @@
             >{{ gene.name }}
           </a>
         </div>
+        <!--present gene id-->
         <div v-for="provider in gene.providers" :key="provider.accession">
           <v-row align="center">
             <v-col>
@@ -39,8 +40,82 @@
             Mapping successful!
           </v-alert>
         </div>
-      </div>
+        <!--present transcripts id-->
+        <div v-if="gene.transcripts && gene.transcripts.length"></div>
+        <div
+          v-for="(transcript, tag) in gene.transcripts"
+          :key="'transcript-' + tag"
+        >
+          <div
+            v-for="(provider, p_accession) in transcript.providers"
+            :key="'provider-' + p_accession"
+          >
+            <v-row align="center">
+              <v-col>
+                <div>
+                  <br />
+                  <div v-if="provider.transcript_id">
+                    <a
+                      :href="`https://www.ncbi.nlm.nih.gov/nuccore/${provider.transcript_id}`"
+                      target="_blank"
+                    >
+                      {{ provider.transcript_id }}
+                    </a>
+                  </div>
+                  <div v-if="provider.protein_id">
+                    <a
+                      :href="`https://www.ncbi.nlm.nih.gov/protein/${provider.protein_id}`"
+                      target="_blank"
+                    >
+                      {{ provider.protein_id }}
+                    </a>
+                  </div>
+                </div>
+              </v-col>
+              <!-- Transcript tag chip -->
+              <v-col v-if="transcript.tag" class="shrink">
+                <v-tooltip>
+                  <template #activator="{ on, attrs }">
+                    <v-chip
+                      v-bind="attrs"
+                      color="green darken-4"
+                      text-color="green darken-4"
+                      outlined
+                      label
+                      small
+                      v-on="on"
+                    >
+                      {{ transcript.tag.details || transcript.tag }}
+                    </v-chip>
+                  </template>
+                  <span>
+                    {{ transcript.tag.id || transcript.tag }} is the
+                    representative transcript as part of the MANE project.
+                  </span>
+                </v-tooltip>
+              </v-col>
 
+              <v-col class="shrink">
+                <v-tooltip bottom>
+                  <template #activator="{ on, attrs }">
+                    <v-btn
+                      color="primary"
+                      outlined
+                      small
+                      v-bind="attrs"
+                      v-on="on"
+                      @click="map()"
+                    >
+                      Map
+                    </v-btn>
+                  </template>
+                  <span>Map this transcript.</span>
+                </v-tooltip>
+              </v-col>
+            </v-row>
+          </div>
+        </div>
+      </div>
       <v-expansion-panels focusable hover flat class="mt-3 mb-3">
         <v-expansion-panel>
           <v-expansion-panel-header
