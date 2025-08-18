@@ -14,7 +14,11 @@
           <v-row align="center">
             <v-col>
               <a
-                :href="`https://www.ncbi.nlm.nih.gov/nuccore/${provider.accession}`"
+                :href="
+                  provider.name === 'ENSEMBL'
+                    ? `https://www.ensembl.org/Homo_sapiens/Gene/Summary?t=${provider.accession}`
+                    : `https://www.ncbi.nlm.nih.gov/nuccore/${provider.accession}`
+                "
                 >{{ provider.accession }}
               </a>
             </v-col>
@@ -55,8 +59,11 @@
                 <v-col>
                   <div v-if="provider.transcript_id">
                     <a
-                      :href="`https://www.ncbi.nlm.nih.gov/nuccore/${provider.transcript_id}`"
-                      target="_blank"
+                      :href="
+                        provider.name === 'ENSEMBL'
+                          ? `https://www.ensembl.org/Homo_sapiens/Transcript/Summary?t=${provider.transcript_id}`
+                          : `https://www.ncbi.nlm.nih.gov/nuccore/${provider.transcript_id}`
+                      "
                     >
                       {{ provider.transcript_id }}
                     </a>
@@ -113,8 +120,11 @@
                 <v-col>
                   <div v-if="provider.protein_id">
                     <a
-                      :href="`https://www.ncbi.nlm.nih.gov/protein/${provider.protein_id}`"
-                      target="_blank"
+                      :href="
+                        provider.name === 'ENSEMBL'
+                          ? `https://www.ensembl.org/Homo_sapiens/Transcript/ProteinSummary?t=${provider.protein_id}`
+                          : `https://www.ncbi.nlm.nih.gov/protein/${provider.protein_id}`
+                      "
                     >
                       {{ provider.protein_id }}
                     </a>
