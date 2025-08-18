@@ -1,9 +1,28 @@
 <template>
   <div>
     <div v-if="related && related.related">
+      <!-- assemblies -->
+      <div v-if="related && related.related && related.related.assemblies">
+        <div class="overline">Assemblies</div>
+        <v-row
+          v-for="(assembly, index) in related.related.assemblies"
+          :key="index"
+        >
+          <v-col>
+            {{ assembly.assembly_name }}
+            <a
+              :href="`https://www.ncbi.nlm.nih.gov/nuccore/${assembly.accession}`"
+            >
+              {{ assembly.accession }}
+            </a>
+          </v-col>
+        </v-row>
+      </div>
+
       <!--genes-->
       <div v-for="gene in related.related.genes" :key="gene.name">
-        <div class="overline">
+        <div class="overline">Genes</div>
+        <div>
           <a
             :href="`https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:${gene.hgnc_id}`"
             >{{ gene.name }}
