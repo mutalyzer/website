@@ -1,0 +1,332 @@
+{
+  "accession": "NC_000011.10",
+  "moltype": "dna",
+  "organism": "Homo sapiens",
+  "query": "NC_000011.9+[\n        [\n            112088970,\n            112088970\n        ],\n        [\n            100000000,\n            100000006\n        ]\n    ]",
+  "related": {
+    "assemblies": [
+      {
+        "accession": "NC_000011.10",
+        "assembly_name": "GRCh38.p14"
+      },
+      {
+        "accession": "NC_060935.1",
+        "assembly_name": "T2T-CHM13v2.0"
+      }
+    ],
+    "genes": [
+      {
+        "hgnc_id": "2175",
+        "name": "CNTN5",
+        "providers": [
+          {
+            "accession": "NG_047156.1",
+            "name": "NCBI"
+          }
+        ],
+        "transcripts": [
+          {
+            "providers": [
+              {
+                "name": "NCBI",
+                "protein_id": "NP_001230199.1",
+                "transcript_id": "NM_001243270.2"
+              },
+              {
+                "name": "ENSEMBL",
+                "protein_id": "ENSP00000436185.1",
+                "transcript_id": "ENST00000528682.5"
+              }
+            ],
+            "tag": null
+          },
+          {
+            "providers": [
+              {
+                "name": "NCBI",
+                "protein_id": "NP_001230200.1",
+                "transcript_id": "NM_001243271.2"
+              },
+              {
+                "name": "ENSEMBL",
+                "protein_id": "ENSP00000433575.1",
+                "transcript_id": "ENST00000527185.5"
+              }
+            ],
+            "tag": null
+          },
+          {
+            "providers": [
+              {
+                "name": "NCBI",
+                "protein_id": "NP_055176.1",
+                "transcript_id": "NM_014361.4"
+              },
+              {
+                "name": "ENSEMBL",
+                "protein_id": "ENSP00000435637.1",
+                "transcript_id": "ENST00000524871.6"
+              }
+            ],
+            "tag": "MANE_SELECT"
+          },
+          {
+            "providers": [
+              {
+                "name": "NCBI",
+                "protein_id": "NP_780775.1",
+                "transcript_id": "NM_175566.2"
+              },
+              {
+                "name": "ENSEMBL",
+                "protein_id": null,
+                "transcript_id": null
+              }
+            ],
+            "tag": null
+          },
+          {
+            "providers": [
+              {
+                "name": "NCBI",
+                "protein_id": "XP_011541173.1",
+                "transcript_id": "XM_011542871.2"
+              },
+              {
+                "name": "ENSEMBL",
+                "protein_id": null,
+                "transcript_id": null
+              }
+            ],
+            "tag": null
+          },
+          {
+            "providers": [
+              {
+                "name": "NCBI",
+                "protein_id": "XP_011541175.1",
+                "transcript_id": "XM_011542873.2"
+              },
+              {
+                "name": "ENSEMBL",
+                "protein_id": null,
+                "transcript_id": null
+              }
+            ],
+            "tag": null
+          },
+          {
+            "providers": [
+              {
+                "name": "NCBI",
+                "protein_id": "XP_016873415.1",
+                "transcript_id": "XM_017017926.2"
+              },
+              {
+                "name": "ENSEMBL",
+                "protein_id": null,
+                "transcript_id": null
+              }
+            ],
+            "tag": null
+          },
+          {
+            "providers": [
+              {
+                "name": "NCBI",
+                "protein_id": "XP_016873416.1",
+                "transcript_id": "XM_017017927.2"
+              },
+              {
+                "name": "ENSEMBL",
+                "protein_id": null,
+                "transcript_id": null
+              }
+            ],
+            "tag": null
+          },
+          {
+            "providers": [
+              {
+                "name": "NCBI",
+                "protein_id": "XP_016873417.1",
+                "transcript_id": "XM_017017928.2"
+              },
+              {
+                "name": "ENSEMBL",
+                "protein_id": null,
+                "transcript_id": null
+              }
+            ],
+            "tag": null
+          },
+          {
+            "providers": [
+              {
+                "name": "NCBI",
+                "protein_id": "XP_016873418.1",
+                "transcript_id": "XM_017017929.2"
+              },
+              {
+                "name": "ENSEMBL",
+                "protein_id": null,
+                "transcript_id": null
+              }
+            ],
+            "tag": null
+          },
+          {
+            "providers": [
+              {
+                "name": "NCBI",
+                "protein_id": "XP_047283086.1",
+                "transcript_id": "XM_047427130.1"
+              },
+              {
+                "name": "ENSEMBL",
+                "protein_id": null,
+                "transcript_id": null
+              }
+            ],
+            "tag": null
+          },
+          {
+            "providers": [
+              {
+                "name": "NCBI",
+                "protein_id": "XP_047283087.1",
+                "transcript_id": "XM_047427131.1"
+              },
+              {
+                "name": "ENSEMBL",
+                "protein_id": null,
+                "transcript_id": null
+              }
+            ],
+            "tag": null
+          },
+          {
+            "providers": [
+              {
+                "name": "NCBI",
+                "protein_id": "XP_054225119.1",
+                "transcript_id": "XM_054369144.1"
+              },
+              {
+                "name": "ENSEMBL",
+                "protein_id": null,
+                "transcript_id": null
+              }
+            ],
+            "tag": null
+          },
+          {
+            "providers": [
+              {
+                "name": "NCBI",
+                "protein_id": "XP_054225120.1",
+                "transcript_id": "XM_054369145.1"
+              },
+              {
+                "name": "ENSEMBL",
+                "protein_id": null,
+                "transcript_id": null
+              }
+            ],
+            "tag": null
+          },
+          {
+            "providers": [
+              {
+                "name": "NCBI",
+                "protein_id": "XP_054225121.1",
+                "transcript_id": "XM_054369146.1"
+              },
+              {
+                "name": "ENSEMBL",
+                "protein_id": null,
+                "transcript_id": null
+              }
+            ],
+            "tag": null
+          },
+          {
+            "providers": [
+              {
+                "name": "NCBI",
+                "protein_id": "XP_054225122.1",
+                "transcript_id": "XM_054369147.1"
+              },
+              {
+                "name": "ENSEMBL",
+                "protein_id": null,
+                "transcript_id": null
+              }
+            ],
+            "tag": null
+          },
+          {
+            "providers": [
+              {
+                "name": "NCBI",
+                "protein_id": "XP_054225123.1",
+                "transcript_id": "XM_054369148.1"
+              },
+              {
+                "name": "ENSEMBL",
+                "protein_id": null,
+                "transcript_id": null
+              }
+            ],
+            "tag": null
+          },
+          {
+            "providers": [
+              {
+                "name": "NCBI",
+                "protein_id": "XP_054225124.1",
+                "transcript_id": "XM_054369149.1"
+              },
+              {
+                "name": "ENSEMBL",
+                "protein_id": null,
+                "transcript_id": null
+              }
+            ],
+            "tag": null
+          },
+          {
+            "providers": [
+              {
+                "name": "NCBI",
+                "protein_id": "XP_054225125.1",
+                "transcript_id": "XM_054369150.1"
+              },
+              {
+                "name": "ENSEMBL",
+                "protein_id": null,
+                "transcript_id": null
+              }
+            ],
+            "tag": null
+          },
+          {
+            "providers": [
+              {
+                "name": "NCBI",
+                "protein_id": "XP_054225126.1",
+                "transcript_id": "XM_054369151.1"
+              },
+              {
+                "name": "ENSEMBL",
+                "protein_id": null,
+                "transcript_id": null
+              }
+            ],
+            "tag": null
+          }
+        ]
+      }
+    ]
+  }
+}
