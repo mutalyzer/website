@@ -2,18 +2,25 @@
   <div>
     <div v-if="related && related.related">
       <!-- assemblies -->
-      <v-sheet>
+      <v-sheet v-if="related.related.assemblies">
         <div class="overline">Assemblies</div>
         <v-hover v-slot="{ hover }">
           <v-sheet
             :color="hover ? 'grey lighten-3' : 'grey lighten-5'"
             class="pa-2 ma-1"
           >
-            <v-row align="center" no-gutters>
+            <v-row
+              v-for="(assembly, aindex) in related.related.assemblies"
+              :key="aindex"
+              align="center"
+              no-gutters
+            >
               <v-col class="py-0">
-                <div class="v-list-item__title">NC_000011.10</div>
+                <div class="v-list-item__title">
+                  {{ assembly.accession }}
+                </div>
                 <div class="v-list-item__subtitle">
-                  <v-chip small label> GRCh38.p14 </v-chip>
+                  <v-chip small label> {{ assembly.assembly_name }} </v-chip>
                   <v-chip class="ml-1" small label>
                     NCBI <v-icon right small> mdi-open-in-new </v-icon>
                   </v-chip>
@@ -74,79 +81,7 @@
             </v-row></v-sheet
           ></v-hover
         >
-
         <v-divider></v-divider>
-
-        <v-hover v-slot="{ hover }">
-          <v-sheet
-            :color="hover ? 'grey lighten-3' : 'grey lighten-5'"
-            class="pa-2 ma-1"
-          >
-            <v-row align="center" no-gutters>
-              <v-col class="py-0">
-                <div class="v-list-item__title">NC_060935.1</div>
-                <div class="v-list-item__subtitle">
-                  <v-chip small label>T2T-CHM13v2.0</v-chip>
-                  <v-chip class="ml-1" small label>
-                    NCBI <v-icon right small> mdi-open-in-new </v-icon>
-                  </v-chip>
-                </div>
-              </v-col>
-              <v-spacer />
-              <v-col cols="auto" class="py-0">
-                <v-tooltip bottom>
-                  <template #activator="{ on, attrs }">
-                    <v-btn
-                      color="primary"
-                      outlined
-                      small
-                      :loading="loading"
-                      v-bind="attrs"
-                      v-on="on"
-                      @click="map('NC_060935.1')"
-                    >
-                      Map
-                    </v-btn>
-                  </template>
-                  <span>Map this description to NC_060935.1.</span>
-                </v-tooltip>
-              </v-col>
-            </v-row>
-            <v-row v-if="mapped_description_assembly_2">
-              <v-col>
-                <v-card tile elevation="0" color="grey lighten-5">
-                  <v-card-subtitle class="grey--text ml-2"
-                    >Mapped description to NC_060935.1</v-card-subtitle
-                  >
-                  <v-card-text
-                    ><v-row
-                      ><v-col>
-                        <div :class="'ok-description-link'">
-                          {{ mapped_description_assembly_2 }}
-                        </div></v-col
-                      >
-                      <v-col class="shrink">
-                        <v-tooltip bottom>
-                          <template #activator="{ on, attrs }">
-                            <v-btn
-                              v-clipboard="mapped_description_assembly_2"
-                              v-bind="attrs"
-                              icon
-                              v-on="on"
-                            >
-                              <v-icon>mdi-content-copy</v-icon>
-                            </v-btn>
-                          </template>
-                          <span>Copy</span>
-                        </v-tooltip>
-                      </v-col></v-row
-                    >
-                  </v-card-text>
-                </v-card>
-              </v-col>
-            </v-row>
-          </v-sheet>
-        </v-hover>
       </v-sheet>
       <!-- genes -->
       <v-sheet>
