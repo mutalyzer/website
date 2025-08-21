@@ -1,0 +1,90 @@
+{
+  "accession": "NC_000011.10",
+  "moltype": "dna",
+  "organism": "Homo sapiens",
+  "query": "NC_000011.10+[[112088970, 112088970], [100000000, 100000006]]",
+  "related": {
+    "assemblies": [
+      {
+        "accession": "NC_000011.10",
+        "assembly_name": "GRCh38"
+      },
+      {
+        "accession": "NC_060935.1",
+        "assembly_name": "T2T-CHM13v2.0"
+      },
+      {
+        "accession": "NC_000011.9",
+        "assembly_name": "GRCh37"
+      }
+    ],
+    "genes": [
+      {
+        "hgnc_id": "10683",
+        "name": "SDHD",
+        "comment": "succinate dehydrogenase complex subunit D",
+        "providers": [
+          {
+            "accession": "NG_012337.3",
+            "name": "NCBI"
+          },
+          {
+            "accession": "ENSG00000204370",
+            "name": "ENSEMBL"
+          }          
+        ],
+        "transcripts": [
+          {
+            "providers": [
+              {
+                "name": "NCBI",
+                "transcript_id": "NM_003002.4",
+                "protein_id": "NP_002993.1"
+              },
+              {
+                "name": "ENSEMBL",
+                "transcript_id": "ENST00000375549.8",
+                "protein_id": "ENSP00000364699.3"
+              }
+            ],
+            "comment": "succinate dehydrogenase complex subunit D, transcript variant 1",
+            "tag": "MANE_SELECT"
+          }
+        ]
+      },
+      {
+        "hgnc_id": "2175",
+        "name": "CNTN5",
+        "comment": "contactin 5",
+        "providers": [
+          {
+            "accession": "NG_047156.1",
+            "name": "NCBI"
+          },
+          {
+            "accession": "ENSG00000149972",
+            "name": "ENSEMBL"
+          }          
+        ],
+        "transcripts": [
+          {
+            "providers": [
+              {
+                "name": "NCBI",
+                "transcript_id": "NM_014361.4",
+                "protein_id": "NP_055176.1"
+              },
+              {
+                "name": "ENSEMBL",
+                "transcript_id": "ENST00000524871.6",
+                "protein_id": "ENSP00000435637.1"
+              }              
+            ],
+            "comment": "contactin 5, transcript variant 1",
+            "tag": "MANE_SELECT"
+          }
+        ]
+      }
+    ]
+  }
+}

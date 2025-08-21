@@ -1,0 +1,44 @@
+{
+  "accession": "NC_000075.7",
+  "moltype": "dna",
+  "organism": "Mus musculus",
+  "query": "NC_000075.7+[[50507000, 50510000]]",
+  "related": {
+    "assemblies": [
+      {
+        "accession": "NC_000075.7",
+        "assembly_name": "GRCm39"
+      }
+    ],
+    "genes": [
+      {
+        "name": "Sdhd",
+        "comment": "succinate dehydrogenase complex, subunit D, integral membrane protein",
+        "providers": [
+          {
+            "accession": "ENSMUSG00000000171",
+            "name": "ENSEMBL"
+          }          
+        ],
+        "transcripts": [
+          {
+            "providers": [
+              {
+                "name": "NCBI",
+                "transcript_id": "NM_025848.3",
+                "protein_id": "NP_080124.1"
+              },
+              {
+                "name": "ENSEMBL",
+                "transcript_id": "ENSMUST00000000175.6",
+                "protein_id": "ENSMUSP00000000175.5"
+              }              
+            ],
+            "tag": "REFSEQ_SELECT"
+          }
+        ]
+      }   
+    ]
+  }
+}
+

@@ -1,0 +1,59 @@
+{
+  "accession": "ENST00000375549.8",
+  "moltype": "Unknown",
+  "organism": "Homo sapiens",
+  "query": "NM_003002.4",
+  "related": {
+    "assemblies": [
+      {
+        "accession": "NC_000011.10",
+        "assembly_name": "GRCh38"
+      },
+      {
+        "accession": "NC_060935.1",
+        "assembly_name": "T2T-CHM13v2.0"
+      },
+      {
+        "accession": "NC_000011.9",
+        "assembly_name": "GRCh37"
+      }
+    ],
+    "genes": [
+      {
+        "hgnc_id": "10683",
+        "name": "SDHD",
+        "comment": "succinate dehydrogenase complex subunit D",
+        "providers": [
+          {
+            "accession": "NG_012337.3",
+            "name": "NCBI"
+          },
+          {
+            "accession": "ENSG00000204370",
+            "name": "ENSEMBL"
+          }             
+
+        ],
+        "transcripts": [
+          {
+            "providers": [
+              {
+                "name": "NCBI",
+                "protein_id": "NP_002993.1",
+                "transcript_id": "NM_003002.4"
+
+              },
+              {
+                "name": "ENSEMBL",
+                "protein_id": "ENSP00000364699.3",
+                "transcript_id": "ENST00000375549.8"
+              }
+            ],
+            "comment": "succinate dehydrogenase complex subunit D, transcript variant 1",
+            "tag": "MANE_SELECT"
+          }
+        ]
+      }
+    ]
+  }
+}
