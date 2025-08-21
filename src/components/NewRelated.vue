@@ -2,176 +2,627 @@
   <div>
     <div v-if="related && related.related">
       <!-- assemblies -->
-      <div v-if="related && related.related && related.related.assemblies">
+      <v-sheet>
         <div class="overline">Assemblies</div>
-        <v-row
-          v-for="(assembly, index) in related.related.assemblies"
-          :key="index"
-        >
-          <v-col>
-            {{ assembly.assembly_name }}
-            <a
-              :href="`https://www.ncbi.nlm.nih.gov/nuccore/${assembly.accession}`"
-            >
-              {{ assembly.accession }}
-            </a>
-          </v-col>
-        </v-row>
-      </div>
-
-      <!--genes-->
-      <div v-for="gene in related.related.genes" :key="gene.name">
-        <div class="overline">Genes</div>
-        <div>
-          <a
-            :href="`https://www.genenames.org/data/gene-symbol-report/#!/hgnc_id/HGNC:${gene.hgnc_id}`"
-            >{{ gene.name }}
-          </a>
-        </div>
-        <!--present gene id-->
-        <div v-for="provider in gene.providers" :key="provider.accession">
-          <v-row align="center">
-            <v-col>
-              <a
-                :href="
-                  provider.name === 'ENSEMBL'
-                    ? `https://www.ensembl.org/Homo_sapiens/Gene/Summary?t=${provider.accession}`
-                    : `https://www.ncbi.nlm.nih.gov/nuccore/${provider.accession}`
-                "
-                >{{ provider.accession }}
-              </a>
-            </v-col>
-            <v-col class="shrink">
-              <v-tooltip bottom>
-                <template #activator="{ on, attrs }">
-                  <v-btn
-                    color="primary"
-                    outlined
-                    small
-                    v-bind="attrs"
-                    v-on="on"
-                    @click="map()"
-                  >
-                    Map
-                  </v-btn>
-                </template>
-                <span>Map to this sequence.</span>
-              </v-tooltip>
-            </v-col>
-          </v-row>
-          <v-alert type="success" v-if="mapsuccess" dismissible class="mt-3">
-            Mapping successful!
-          </v-alert>
-        </div>
-        <!--present transcripts id-->
-        <div v-if="gene.transcripts && gene.transcripts.length">
-          <div
-            v-for="(transcript, tIndex) in gene.transcripts"
-            :key="'transcript-' + tIndex"
-            style="border: 1px solid #ddd; border-radius: 6px"
+        <v-hover v-slot="{ hover }">
+          <v-sheet
+            :color="hover ? 'grey lighten-3' : 'grey lighten-5'"
+            class="pa-2 ma-1"
           >
-            <div
-              v-for="(provider, p_tag) in transcript.providers"
-              :key="'provider-' + p_tag"
-            >
-              <v-row align="center" class="mb-1">
-                <v-col>
-                  <div v-if="provider.transcript_id">
-                    <a
-                      :href="
-                        provider.name === 'ENSEMBL'
-                          ? `https://www.ensembl.org/Homo_sapiens/Transcript/Summary?t=${provider.transcript_id}`
-                          : `https://www.ncbi.nlm.nih.gov/nuccore/${provider.transcript_id}`
-                      "
+            <v-row align="center" no-gutters>
+              <v-col class="py-0">
+                <div class="v-list-item__title">NC_000011.10</div>
+                <div class="v-list-item__subtitle">
+                  <v-chip small label> GRCh38.p14 </v-chip>
+                  <v-chip class="ml-1" small label>
+                    NCBI <v-icon right small> mdi-open-in-new </v-icon>
+                  </v-chip>
+                </div>
+              </v-col>
+              <v-spacer />
+              <v-col cols="auto" class="py-0">
+                <v-tooltip bottom>
+                  <template #activator="{ on, attrs }">
+                    <v-btn
+                      color="primary"
+                      outlined
+                      small
+                      :loading="loading"
+                      v-bind="attrs"
+                      v-on="on"
+                      @click="map('NC_000011.10')"
                     >
-                      {{ provider.transcript_id }}
-                    </a>
-                  </div>
-                </v-col>
-
-                <v-col
-                  v-if="p_tag === 0 && transcript.tag"
-                  class="shrink"
-                  style="display: flex; align-items: center"
-                >
-                  <v-tooltip>
-                    <template #activator="{ on, attrs }">
-                      <v-chip
-                        v-bind="attrs"
-                        color="green darken-4"
-                        text-color="green darken-4"
-                        outlined
-                        label
-                        small
-                        v-on="on"
+                      Map
+                    </v-btn>
+                  </template>
+                  <span>Map this description to NC_000011.10.</span>
+                </v-tooltip>
+              </v-col>
+            </v-row>
+            <v-row v-if="mapped_description_assembly_1">
+              <v-col>
+                <v-card tile elevation="0" color="grey lighten-5">
+                  <v-card-subtitle class="grey--text ml-2"
+                    >Mapped description to NC_000011.10</v-card-subtitle
+                  >
+                  <v-card-text
+                    ><v-row
+                      ><v-col>
+                        <div :class="'ok-description-link'">
+                          {{ mapped_description_assembly_1 }}
+                        </div></v-col
                       >
-                        {{ transcript.tag.details || transcript.tag }}
-                      </v-chip>
-                    </template>
-                    <span>
-                      {{ transcript.tag.id || transcript.tag }} is the
-                      representative transcript as part of the MANE project.
-                    </span>
-                  </v-tooltip>
-                </v-col>
-
-                <v-col class="shrink">
-                  <v-tooltip bottom>
-                    <template #activator="{ on, attrs }">
-                      <v-btn
-                        color="primary"
-                        outlined
-                        small
-                        v-bind="attrs"
-                        v-on="on"
-                        @click="map()"
-                      >
-                        Map
-                      </v-btn>
-                    </template>
-                    <span>Map this transcript.</span>
-                  </v-tooltip>
-                </v-col>
-              </v-row>
-
-              <!-- present protein ID-->
-              <v-row align="center" class="mb-2">
-                <v-col>
-                  <div v-if="provider.protein_id">
-                    <a
-                      :href="
-                        provider.name === 'ENSEMBL'
-                          ? `https://www.ensembl.org/Homo_sapiens/Transcript/ProteinSummary?t=${provider.protein_id}`
-                          : `https://www.ncbi.nlm.nih.gov/protein/${provider.protein_id}`
-                      "
+                      <v-col class="shrink">
+                        <v-tooltip bottom>
+                          <template #activator="{ on, attrs }">
+                            <v-btn
+                              v-clipboard="mapped_description_assembly_1"
+                              v-bind="attrs"
+                              icon
+                              v-on="on"
+                            >
+                              <v-icon>mdi-content-copy</v-icon>
+                            </v-btn>
+                          </template>
+                          <span>Copy</span>
+                        </v-tooltip>
+                      </v-col></v-row
                     >
-                      {{ provider.protein_id }}
-                    </a>
-                  </div>
-                </v-col>
+                  </v-card-text>
+                </v-card>
+              </v-col>
+            </v-row></v-sheet
+          ></v-hover
+        >
 
-                <v-col class="shrink">
-                  <v-tooltip bottom>
-                    <template #activator="{ on, attrs }">
-                      <v-btn
-                        color="primary"
-                        outlined
-                        small
-                        v-bind="attrs"
-                        v-on="on"
-                        @click="map()"
+        <v-divider></v-divider>
+
+        <v-hover v-slot="{ hover }">
+          <v-sheet
+            :color="hover ? 'grey lighten-3' : 'grey lighten-5'"
+            class="pa-2 ma-1"
+          >
+            <v-row align="center" no-gutters>
+              <v-col class="py-0">
+                <div class="v-list-item__title">NC_060935.1</div>
+                <div class="v-list-item__subtitle">
+                  <v-chip small label>T2T-CHM13v2.0</v-chip>
+                  <v-chip class="ml-1" small label>
+                    NCBI <v-icon right small> mdi-open-in-new </v-icon>
+                  </v-chip>
+                </div>
+              </v-col>
+              <v-spacer />
+              <v-col cols="auto" class="py-0">
+                <v-tooltip bottom>
+                  <template #activator="{ on, attrs }">
+                    <v-btn
+                      color="primary"
+                      outlined
+                      small
+                      :loading="loading"
+                      v-bind="attrs"
+                      v-on="on"
+                      @click="map('NC_060935.1')"
+                    >
+                      Map
+                    </v-btn>
+                  </template>
+                  <span>Map this description to NC_060935.1.</span>
+                </v-tooltip>
+              </v-col>
+            </v-row>
+            <v-row v-if="mapped_description_assembly_2">
+              <v-col>
+                <v-card tile elevation="0" color="grey lighten-5">
+                  <v-card-subtitle class="grey--text ml-2"
+                    >Mapped description to NC_060935.1</v-card-subtitle
+                  >
+                  <v-card-text
+                    ><v-row
+                      ><v-col>
+                        <div :class="'ok-description-link'">
+                          {{ mapped_description_assembly_2 }}
+                        </div></v-col
                       >
-                        Map
-                      </v-btn>
-                    </template>
-                    <span>Map this protein.</span>
-                  </v-tooltip>
-                </v-col>
-              </v-row>
-            </div>
+                      <v-col class="shrink">
+                        <v-tooltip bottom>
+                          <template #activator="{ on, attrs }">
+                            <v-btn
+                              v-clipboard="mapped_description_assembly_2"
+                              v-bind="attrs"
+                              icon
+                              v-on="on"
+                            >
+                              <v-icon>mdi-content-copy</v-icon>
+                            </v-btn>
+                          </template>
+                          <span>Copy</span>
+                        </v-tooltip>
+                      </v-col></v-row
+                    >
+                  </v-card-text>
+                </v-card>
+              </v-col>
+            </v-row>
+          </v-sheet>
+        </v-hover>
+      </v-sheet>
+      <!-- genes -->
+      <v-sheet>
+        <div class="overline mt-3">Genes</div>
+        <v-sheet color="'grey lighten-3'" class="pa-2 ma-1">
+          <div class="v-list-item__title">CNTN5</div>
+          <div>
+            <v-chip small label class="ml-1">contactin 5 </v-chip>
+            <v-chip small label class="ml-1"
+              >HGNC:2175 <v-icon right small> mdi-open-in-new </v-icon>
+            </v-chip>
           </div>
-        </div>
-      </div>
+          <v-hover v-slot="{ hover }">
+            <v-sheet
+              :color="hover ? 'grey lighten-3' : 'grey lighten-5'"
+              class="pa-2 ma-1"
+            >
+              <v-row align="center" no-gutters>
+                <v-col class="py-0">
+                  <div class="v-list-item__title">NG_047156.1</div>
+                  <div class="v-list-item__subtitle">
+                    <v-chip small label>RefSeqGene</v-chip>
+                  </div>
+                </v-col>
+                <v-spacer />
+                <v-col cols="auto" class="py-0">
+                  <v-tooltip bottom>
+                    <template #activator="{ on, attrs }">
+                      <v-btn
+                        color="primary"
+                        outlined
+                        small
+                        :loading="loading"
+                        v-bind="attrs"
+                        v-on="on"
+                        @click="map('NG_047156.1')"
+                      >
+                        Map
+                      </v-btn>
+                    </template>
+                    <span>Map this description to NG_047156.1.</span>
+                  </v-tooltip>
+                </v-col>
+              </v-row>
+              <v-row v-if="mapped_description_assembly_3">
+                <v-col>
+                  <v-card tile elevation="0" color="grey lighten-5">
+                    <v-card-subtitle class="grey--text ml-2"
+                      >Mapped description to NG_047156.1</v-card-subtitle
+                    >
+                    <v-card-text
+                      ><v-row
+                        ><v-col>
+                          <div :class="'ok-description-link'">
+                            {{ mapped_description_assembly_3 }}
+                          </div></v-col
+                        >
+                        <v-col class="shrink">
+                          <v-tooltip bottom>
+                            <template #activator="{ on, attrs }">
+                              <v-btn
+                                v-clipboard="mapped_description_assembly_3"
+                                v-bind="attrs"
+                                icon
+                                v-on="on"
+                              >
+                                <v-icon>mdi-content-copy</v-icon>
+                              </v-btn>
+                            </template>
+                            <span>Copy</span>
+                          </v-tooltip>
+                        </v-col></v-row
+                      >
+                    </v-card-text>
+                  </v-card>
+                </v-col>
+              </v-row></v-sheet
+            ></v-hover
+          >
+          <v-divider></v-divider>
+          <v-hover v-slot="{ hover }">
+            <v-sheet
+              :color="hover ? 'grey lighten-3' : 'grey lighten-5'"
+              class="pa-2 ma-1"
+            >
+              <v-row align="center" no-gutters>
+                <v-col class="py-0">
+                  <div class="v-list-item__title">NM_014361.4</div>
+                  <div class="v-list-item__subtitle">
+                    <v-chip class="ml-1" label small>
+                      Coding transcript
+                    </v-chip>
+                    <v-chip class="ml-1" label small>
+                      NCBI <v-icon right small> mdi-open-in-new </v-icon>
+                    </v-chip>
+                    <v-chip
+                      class="ml-1"
+                      v-bind="attrs"
+                      color="green darken-4"
+                      text-color="green darken-4"
+                      outlined
+                      label
+                      small
+                      v-on="on"
+                    >
+                      Mane Select
+                    </v-chip>
+                  </div>
+                </v-col>
+                <v-spacer />
+                <v-col cols="auto" class="py-0">
+                  <v-tooltip bottom>
+                    <template #activator="{ on, attrs }">
+                      <v-btn
+                        color="primary"
+                        outlined
+                        small
+                        :loading="loading"
+                        v-bind="attrs"
+                        v-on="on"
+                        @click="map('NC_060935.1')"
+                      >
+                        Map
+                      </v-btn>
+                    </template>
+                    <span>Map this description to NM_014361.4.</span>
+                  </v-tooltip>
+                </v-col>
+              </v-row>
+              <v-row v-if="mapped_description_assembly_4">
+                <v-col>
+                  <v-card tile elevation="0" color="grey lighten-5">
+                    <v-card-subtitle class="grey--text ml-2"
+                      >Mapped description to NM_014361.4</v-card-subtitle
+                    >
+                    <v-card-text
+                      ><v-row
+                        ><v-col>
+                          <div :class="'ok-description-link'">
+                            {{ mapped_description_assembly_4 }}
+                          </div></v-col
+                        >
+                        <v-col class="shrink">
+                          <v-tooltip bottom>
+                            <template #activator="{ on, attrs }">
+                              <v-btn
+                                v-clipboard="mapped_description_assembly_4"
+                                v-bind="attrs"
+                                icon
+                                v-on="on"
+                                @click="map('NM_014361.4')"
+                              >
+                                <v-icon>mdi-content-copy</v-icon>
+                              </v-btn>
+                            </template>
+                            <span>Copy</span>
+                          </v-tooltip>
+                        </v-col></v-row
+                      >
+                    </v-card-text>
+                  </v-card>
+                </v-col>
+              </v-row>
+              <v-row align="center" no-gutters>
+                <v-col class="py-0 mt-2">
+                  <div class="v-list-item__title">ENST00000524871.6</div>
+                  <div class="v-list-item__subtitle">
+                    <v-chip class="ml-1" label small>
+                      Coding transcript
+                    </v-chip>
+                    <v-chip class="ml-1" label small>
+                      Ensembl <v-icon right small> mdi-open-in-new </v-icon>
+                    </v-chip>
+                    <v-chip
+                      class="ml-1"
+                      v-bind="attrs"
+                      color="green darken-4"
+                      text-color="green darken-4"
+                      outlined
+                      label
+                      small
+                      v-on="on"
+                    >
+                      Mane Select
+                    </v-chip>
+                  </div>
+                </v-col>
+                <v-spacer />
+                <v-col cols="auto" class="py-0">
+                  <v-tooltip bottom>
+                    <template #activator="{ on, attrs }">
+                      <v-btn
+                        color="primary"
+                        outlined
+                        small
+                        :loading="loading"
+                        v-bind="attrs"
+                        v-on="on"
+                        @click="map('NC_060935.1')"
+                      >
+                        Map
+                      </v-btn>
+                    </template>
+                    <span>Map this description to NC_060935.1.</span>
+                  </v-tooltip>
+                </v-col>
+              </v-row>
+              <v-row v-if="mapped_description_assembly_5">
+                <v-col>
+                  <v-card tile elevation="0" color="grey lighten-5">
+                    <v-card-subtitle class="grey--text ml-2"
+                      >Mapped description to NC_060935.1</v-card-subtitle
+                    >
+                    <v-card-text
+                      ><v-row
+                        ><v-col>
+                          <div :class="'ok-description-link'">
+                            {{ mapped_description_assembly_5 }}
+                          </div></v-col
+                        >
+                        <v-col class="shrink">
+                          <v-tooltip bottom>
+                            <template #activator="{ on, attrs }">
+                              <v-btn
+                                v-clipboard="mapped_description_assembly_5"
+                                v-bind="attrs"
+                                icon
+                                v-on="on"
+                              >
+                                <v-icon>mdi-content-copy</v-icon>
+                              </v-btn>
+                            </template>
+                            <span>Copy</span>
+                          </v-tooltip>
+                        </v-col></v-row
+                      >
+                    </v-card-text>
+                  </v-card>
+                </v-col>
+              </v-row>
+            </v-sheet>
+          </v-hover>
+        </v-sheet>
+        <v-sheet class="pa-2 ma-1">
+          <div class="v-list-item__title">SDHD</div>
+          <v-hover v-slot="{ hover }">
+            <v-sheet
+              :color="hover ? 'grey lighten-3' : 'grey lighten-5'"
+              class="pa-2 ma-1"
+            >
+              <v-row align="center" no-gutters>
+                <v-col class="py-0">
+                  <div class="v-list-item__title">NG_12337.3</div>
+                  <div class="v-list-item__subtitle">
+                    <v-chip small label>RefSeqGene</v-chip>
+                  </div>
+                </v-col>
+                <v-spacer />
+                <v-col cols="auto" class="py-0">
+                  <v-tooltip bottom>
+                    <template #activator="{ on, attrs }">
+                      <v-btn
+                        color="primary"
+                        outlined
+                        small
+                        :loading="loading"
+                        v-bind="attrs"
+                        v-on="on"
+                        @click="map('NG_12337.3')"
+                      >
+                        Map
+                      </v-btn>
+                    </template>
+                    <span>Map this description to NG_12337.3.</span>
+                  </v-tooltip>
+                </v-col>
+              </v-row>
+              <v-row v-if="mapped_description_assembly_6">
+                <v-col>
+                  <v-card tile elevation="0" color="grey lighten-5">
+                    <v-card-subtitle class="grey--text ml-2"
+                      >Mapped description to NC_000011.10</v-card-subtitle
+                    >
+                    <v-card-text
+                      ><v-row
+                        ><v-col>
+                          <div :class="'ok-description-link'">
+                            {{ mapped_description_assembly_6 }}
+                          </div></v-col
+                        >
+                        <v-col class="shrink">
+                          <v-tooltip bottom>
+                            <template #activator="{ on, attrs }">
+                              <v-btn
+                                v-clipboard="mapped_description_assembly_6"
+                                v-bind="attrs"
+                                icon
+                                v-on="on"
+                              >
+                                <v-icon>mdi-content-copy</v-icon>
+                              </v-btn>
+                            </template>
+                            <span>Copy</span>
+                          </v-tooltip>
+                        </v-col></v-row
+                      >
+                    </v-card-text>
+                  </v-card>
+                </v-col>
+              </v-row></v-sheet
+            ></v-hover
+          >
+          <v-divider></v-divider>
+          <v-hover v-slot="{ hover }">
+            <v-sheet
+              :color="hover ? 'grey lighten-3' : 'grey lighten-5'"
+              class="pa-2 ma-1"
+            >
+              <v-row align="center" no-gutters>
+                <v-col class="py-0">
+                  <div class="v-list-item__title">NM_003002.4</div>
+                  <div class="v-list-item__subtitle">
+                    <v-chip class="ml-1" label small>
+                      Coding transcript
+                    </v-chip>
+                    <v-chip class="ml-1" label small>
+                      NCBI <v-icon right small> mdi-open-in-new </v-icon>
+                    </v-chip>
+                    <v-chip
+                      class="ml-1"
+                      v-bind="attrs"
+                      color="green darken-4"
+                      text-color="green darken-4"
+                      outlined
+                      label
+                      small
+                      v-on="on"
+                    >
+                      Mane Select
+                    </v-chip>
+                  </div>
+                </v-col>
+                <v-spacer />
+                <v-col cols="auto" class="py-0">
+                  <v-tooltip bottom>
+                    <template #activator="{ on, attrs }">
+                      <v-btn
+                        color="primary"
+                        outlined
+                        small
+                        :loading="loading"
+                        v-bind="attrs"
+                        v-on="on"
+                        @click="map('NC_060935.1')"
+                      >
+                        Map
+                      </v-btn>
+                    </template>
+                    <span>Map this description to NM_003002.4</span>
+                  </v-tooltip>
+                </v-col>
+              </v-row>
+              <v-row v-if="mapped_description_assembly_7">
+                <v-col>
+                  <v-card tile elevation="0" color="grey lighten-5">
+                    <v-card-subtitle class="grey--text ml-2"
+                      >Mapped description to NM_003002.4</v-card-subtitle
+                    >
+                    <v-card-text
+                      ><v-row
+                        ><v-col>
+                          <div :class="'ok-description-link'">
+                            {{ mapped_description_assembly_7 }}
+                          </div></v-col
+                        >
+                        <v-col class="shrink">
+                          <v-tooltip bottom>
+                            <template #activator="{ on, attrs }">
+                              <v-btn
+                                v-clipboard="mapped_description_assembly_7"
+                                v-bind="attrs"
+                                icon
+                                v-on="on"
+                              >
+                                <v-icon>mdi-content-copy</v-icon>
+                              </v-btn>
+                            </template>
+                            <span>Copy</span>
+                          </v-tooltip>
+                        </v-col></v-row
+                      >
+                    </v-card-text>
+                  </v-card>
+                </v-col>
+              </v-row>
+              <v-row align="center" no-gutters>
+                <v-col class="py-0 mt-2">
+                  <div class="v-list-item__title">ENST00000524871.6</div>
+                  <div class="v-list-item__subtitle">
+                    <v-chip class="ml-1" label small>
+                      Coding transcript
+                    </v-chip>
+                    <v-chip class="ml-1" label small>
+                      Ensembl <v-icon right small> mdi-open-in-new </v-icon>
+                    </v-chip>
+                    <v-chip
+                      class="ml-1"
+                      v-bind="attrs"
+                      color="green darken-4"
+                      text-color="green darken-4"
+                      outlined
+                      label
+                      small
+                      v-on="on"
+                    >
+                      Mane Select
+                    </v-chip>
+                  </div>
+                </v-col>
+                <v-spacer />
+                <v-col cols="auto" class="py-0">
+                  <v-tooltip bottom>
+                    <template #activator="{ on, attrs }">
+                      <v-btn
+                        color="primary"
+                        outlined
+                        small
+                        :loading="loading"
+                        v-bind="attrs"
+                        v-on="on"
+                        @click="map('NC_060935.1')"
+                      >
+                        Map
+                      </v-btn>
+                    </template>
+                    <span>Map this description to ENST00000524871.6.</span>
+                  </v-tooltip>
+                </v-col>
+              </v-row>
+              <v-row v-if="mapped_description_assembly_8">
+                <v-col>
+                  <v-card tile elevation="0" color="grey lighten-5">
+                    <v-card-subtitle class="grey--text ml-2"
+                      >Mapped description to NC_060935.1</v-card-subtitle
+                    >
+                    <v-card-text
+                      ><v-row
+                        ><v-col>
+                          <div :class="'ok-description-link'">
+                            {{ mapped_description_assembly_8 }}
+                          </div></v-col
+                        >
+                        <v-col class="shrink">
+                          <v-tooltip bottom>
+                            <template #activator="{ on, attrs }">
+                              <v-btn
+                                v-clipboard="mapped_description_assembly_8"
+                                v-bind="attrs"
+                                icon
+                                v-on="on"
+                              >
+                                <v-icon>mdi-content-copy</v-icon>
+                              </v-btn>
+                            </template>
+                            <span>Copy</span>
+                          </v-tooltip>
+                        </v-col></v-row
+                      >
+                    </v-card-text>
+                  </v-card>
+                </v-col>
+              </v-row>
+            </v-sheet>
+          </v-hover>
+        </v-sheet>
+      </v-sheet>
       <v-expansion-panels focusable hover flat class="mt-3 mb-3">
         <v-expansion-panel>
           <v-expansion-panel-header
@@ -204,6 +655,14 @@ export default {
     related: null,
     mockupdata: true,
     mapsuccess: false,
+    mapped_description_assembly_1: null,
+    mapped_description_assembly_2: null,
+    mapped_description_assembly_3: null,
+    mapped_description_assembly_4: null,
+    mapped_description_assembly_5: null,
+    mapped_description_assembly_6: null,
+    mapped_description_assembly_7: null,
+    mapped_description_assembly_8: null,
   }),
   mounted: function () {
     this.get_accession();
@@ -267,8 +726,16 @@ export default {
 
       return locations;
     },
-    map() {
-      this.mapsuccess = true;
+    map(reference_id) {
+      if (reference_id == "NC_000011.10") {
+        this.mapped_description_assembly_1 = "NC_000011.10:g.726564125G>T";
+      } else if (reference_id == "NC_060935.1") {
+        this.mapped_description_assembly_2 = "NC_060935.1:g.71515125G>T";
+      } else if (reference_id == "NG_047156.1") {
+        this.mapped_description_assembly_3 = "NG_047156.1:g.5155G>T";
+      } else if (reference_id == "NM_014361.4") {
+        this.mapped_description_assembly_4 = "NM_014361.4:c.55G>T";
+      }
     },
   },
 };
