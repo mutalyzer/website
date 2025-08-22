@@ -39,7 +39,9 @@
               {
                 "name": "NCBI",
                 "transcript_id": "NM_003002.4",
-                "protein_id": "NP_002993.1"
+                "transcript_comment":"transcript 1",
+                "protein_id": "NP_002993.1",
+                "protein_comment":"succinate dehydrogenase [ubiquinone] cytochrome b small subunit, mitochondrial"
               },
               {
                 "name": "ENSEMBL",
@@ -47,7 +49,6 @@
                 "protein_id": "ENSP00000364699.3"
               }
             ],
-            "comment": "succinate dehydrogenase complex subunit D, transcript variant 1",
             "tag": "MANE_SELECT"
           }
         ]
