@@ -587,6 +587,141 @@
         </v-expansion-panels>
 
         <v-expansion-panels
+          v-if="
+            response &&
+            (response.supremal || response.dot || response.minimal_descriptions)
+          "
+          accordionfocusable
+          hover
+          class="mt-5 mb-5"
+          tile
+        >
+          <v-expansion-panel>
+            <v-expansion-panel-header class="overline"
+              >Internals</v-expansion-panel-header
+            >
+            <v-expansion-panel-content>
+              <div v-if="response.supremal" class="pl-5">
+                <div class="overline">Supremal variant</div>
+                <div class="pl-5 pr-5">
+                  <div class="overline">HGVS</div>
+                  <Description
+                    :description="response.supremal.hgvs"
+                    :css_class="'ok-description-link'"
+                    :to_name="'NormalizerAlt'"
+                    :to_params="{ descriptionRouter: response.supremal.hgvs }"
+                    :to_query="getParams()"
+                  />
+                  <div class="overline">SPDI</div>
+                  <Description
+                    :description="response.supremal.spdi"
+                    :css_class="'ok-description'"
+                  />
+                </div>
+              </div>
+
+              <v-expansion-panels
+                v-if="response.view_local_supremal"
+                multiple
+                flat
+                focusable
+                hover
+                tile
+                class="mt-5"
+              >
+                <v-expansion-panel>
+                  <v-expansion-panel-header
+                    class="overline blue-grey--text text"
+                    >View Local Supremal Variants</v-expansion-panel-header
+                  >
+                  <v-expansion-panel-content>
+                    <div class="overline"></div>
+                    <ViewVariantsCore
+                      :view="response.view_local_supremal"
+                      :d_id="'local_supremal'"
+                    />
+                  </v-expansion-panel-content>
+                </v-expansion-panel>
+              </v-expansion-panels>
+
+              <v-expansion-panels
+                v-if="response && response.dot"
+                multiple
+                flat
+                focusable
+                hover
+                tile
+              >
+                <v-expansion-panel id="dot-graph-container">
+                  <v-expansion-panel-header
+                    class="overline blue-grey--text text"
+                    >Minimal Representations Graph</v-expansion-panel-header
+                  >
+
+                  <v-expansion-panel-content class="mt-5">
+                    <DotGraph :dottext="response.dot" />
+                  </v-expansion-panel-content>
+                </v-expansion-panel>
+              </v-expansion-panels>
+
+              <v-expansion-panels
+                v-if="response && response.dot_complement"
+                multiple
+                flat
+                focusable
+                hover
+                tile
+              >
+                <v-expansion-panel id="dot-graph-container">
+                  <v-expansion-panel-header
+                    class="overline blue-grey--text text"
+                    >Minimal Representations Graph
+                    Complement</v-expansion-panel-header
+                  >
+
+                  <v-expansion-panel-content class="mt-5">
+                    <DotGraph :dottext="response.dot_complement" />
+                  </v-expansion-panel-content>
+                </v-expansion-panel>
+              </v-expansion-panels>
+
+              <v-expansion-panels
+                v-if="response && response.minimal_descriptions"
+                multiple
+                flat
+                focusable
+                hover
+                tile
+              >
+                <v-expansion-panel>
+                  <v-expansion-panel-header
+                    class="overline blue-grey--text text"
+                    >{{ minimalTitle() }}</v-expansion-panel-header
+                  >
+
+                  <v-expansion-panel-content class="pt-5">
+                    <div
+                      v-for="(
+                        minimal_description, index
+                      ) in response.minimal_descriptions"
+                      :key="index"
+                    >
+                      <Description
+                        :description="minimal_description"
+                        :css_class="'ok-description-link'"
+                        :to_name="'NormalizerAlt'"
+                        :to_params="{ descriptionRouter: minimal_description }"
+                        :to_query="getParams()"
+                      />
+                    </div>
+                  </v-expansion-panel-content>
+                </v-expansion-panel>
+              </v-expansion-panels>
+            </v-expansion-panel-content>
+          </v-expansion-panel>
+        </v-expansion-panels>
+
+        <v-expansion-panels
           v-if="showReferenceInformation()"
           focusable
           hover
@@ -684,8 +819,10 @@ import SyntaxError from "../components/SyntaxError.vue";
 import ReferenceInformation from "../components/ReferenceInformation.vue";
 import Related from "../components/Related.vue";
 import ViewVariants from "../components/ViewVariants.vue";
+import ViewVariantsCore from "../components/ViewVariantsCore.vue";
 import Description from "../components/Description.vue";
 import ChromosomalDescriptions from "../components/ChromosomalDescriptions.vue";
+import DotGraph from "../components/DotGraph.vue";
 
 export default {
   components: {
@@ -696,8 +833,10 @@ export default {
     ReferenceInformation,
     Related,
     ViewVariants,
+    ViewVariantsCore,
     Description,
     ChromosomalDescriptions,
+    DotGraph,
   },
   props: ["descriptionRouter"],
   data: () => ({

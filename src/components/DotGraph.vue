@@ -1,15 +1,20 @@
 <template>
   <div>
-    <v-btn icon color="primary" @click="getSvg">
+    <v-btn v-if="!tooComplex()" icon color="primary" @click="getSvg">
       <v-icon>mdi-download</v-icon>
     </v-btn>
-    <v-btn icon color="primary" @click="resetGraph">
+    <v-btn v-if="!tooComplex()" icon color="primary" @click="resetGraph">
       <v-icon>mdi-arrow-expand-all</v-icon>
     </v-btn>
+    <v-alert v-if="tooComplex()" dense outlined type="error">
+      {{ dottext.replace("//", "").trim() }}
+    </v-alert>
     <div
+      v-if="!tooComplex()"
       id="dot-graph"
       style="
         width: 100%;
+        max-height: 70vh;
         margin: auto;
         text-align: center;
         display: inline-block;
@@ -27,9 +32,10 @@ export default {
     dottext: null,
   },
   data: () => ({
-    width: document.getElementById("dot-graph-container").offsetWidth - 40,
+    width: 800,
   }),
   mounted() {
+    this.updateWidth();
     this.drawGraph();
     window.addEventListener("resize", this.handleResize);
   },
@@ -37,18 +43,25 @@ export default {
     window.removeEventListener("resize", this.handleResize);
   },
   methods: {
+    updateWidth() {
+      const container = document.getElementById("dot-graph-container");
+      if (container) {
+        this.width = container.offsetWidth - 40;
+      }
+    },
     drawGraph() {
-      graphviz("#dot-graph")
+      if (this.tooComplex()) {
+        return;
+      }
+      graphviz("#dot-graph", { useWorker: false })
         .fit(true)
         .width(this.width)
-        .height(this.width / 3)
         .dot(this.dottext)
         .render();
     },
     handleResize() {
-      if (document.getElementById("dot-graph")) {
-        this.width =
-          document.getElementById("dot-graph-container").offsetWidth - 40;
+      this.updateWidth();
+      if (!this.tooComplex()) {
         this.drawGraph();
       }
     },
@@ -92,6 +105,9 @@ export default {
     },
     resetGraph() {
       graphviz("#dot-graph").resetZoom();
+    },
+    tooComplex() {
+      return this.dottext.startsWith("// Graph too complex");
     },
   },
 };
