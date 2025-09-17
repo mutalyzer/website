@@ -608,7 +608,7 @@
                   <Description
                     :description="response.supremal.hgvs"
                     :css_class="'ok-description-link'"
-                    :to_name="'NormalizerAlt'"
+                    :to_name="'Normalizer'"
                     :to_params="{ descriptionRouter: response.supremal.hgvs }"
                     :to_query="getParams()"
                   />
@@ -616,6 +616,24 @@
                   <Description
                     :description="response.supremal.spdi"
                     :css_class="'ok-description'"
+                  />
+                </div>
+              </div>
+
+              <div
+                v-if="response.local_supremal && response.local_supremal.hgvs"
+                class="pl-5"
+              >
+                <div class="overline">Local Supremal</div>
+                <div class="pl-5 pr-5">
+                  <Description
+                    :description="response.local_supremal.hgvs"
+                    :css_class="'ok-description-link'"
+                    :to_name="'Normalizer'"
+                    :to_params="{
+                      descriptionRouter: response.local_supremal.hgvs,
+                    }"
+                    :to_query="getParams()"
                   />
                 </div>
               </div>
@@ -639,6 +657,9 @@
                     <ViewVariantsCore
                       :view="response.view_local_supremal"
                       :d_id="'local_supremal'"
+                      :selector="response.selector_short"
+                      :c_s_var="get_c_s_var()"
+                      :c_s_seq="get_c_s_seq()"
                     />
                   </v-expansion-panel-content>
                 </v-expansion-panel>
@@ -709,7 +730,7 @@
                       <Description
                         :description="minimal_description"
                         :css_class="'ok-description-link'"
-                        :to_name="'NormalizerAlt'"
+                        :to_name="'Normalizer'"
                         :to_params="{ descriptionRouter: minimal_description }"
                         :to_query="getParams()"
                       />
