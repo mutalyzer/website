@@ -510,6 +510,11 @@
                       class="pa-2 ma-1"
                     >
                       <Description
+                        v-if="
+                          e_d.reference &&
+                          e_d.reference.selector &&
+                          e_d.reference.selector.id
+                        "
                         :description="e_d.description"
                         :css_class="'ok-description-link'"
                         :to_name="'Normalizer'"
@@ -518,6 +523,16 @@
                         }"
                         :tag="e_d.tag"
                         :selector="e_d.reference.selector"
+                      />
+                      <Description
+                        v-else
+                        :description="e_d.description"
+                        :css_class="'ok-description-link'"
+                        :to_name="'Normalizer'"
+                        :to_params="{
+                          descriptionRouter: e_d.description,
+                        }"
+                        :tag="e_d.tag"
                       />
                     </v-sheet>
                   </v-hover>
