@@ -265,7 +265,7 @@
         <v-alert
           v-if="response && response.errors"
           prominent
-          type="error"
+          :type="isIntronicErrorSuggestions() ? 'warning' : 'error'"
           tile
           elevation="2"
           class="mt-10 mb-0"
@@ -355,25 +355,85 @@
             </v-expand-transition>
 
             <v-sheet
-              v-if="errorsEncountered()"
+              v-if="isIntronicErrorSuggestions()"
+              class="pt-10 pr-10 pb-8 pl-10"
+              color="orange lighten-5"
+            >
+              <div>
+                <p>
+                  The position{{
+                    response.errors[0].positions.length > 1 ? "s" : ""
+                  }}
+                  <span
+                    v-for="(pos, index) in response.errors[0].positions"
+                    :key="index"
+                  >
+                    <code>{{ pos }}</code>
+                    <span v-if="index < response.errors[0].positions.length - 2"
+                      >,
+                    </span>
+                    <span
+                      v-else-if="
+                        index === response.errors[0].positions.length - 2
+                      "
+                    >
+                      and
+                    </span>
+                  </span>
+                  {{ response.errors[0].positions.length > 1 ? "are" : "is" }}
+                  intronic and cannot be interpreted with the transcript
+                  reference sequence
+                  <code>{{ response.errors[0].reference_id }}</code
+                  >, which does not include intronic regions. Intronic positions
+                  require a genomic reference sequence, e.g.
+                  <code>NC_*(NM_*)</code>.
+                </p>
+                <p class="mt-4 font-weight-medium">
+                  Did you mean one of the following descriptions?
+                </p>
+                <div>
+                  <v-sheet
+                    v-for="(s_d, ind) in response.errors[0].suggestions"
+                    :key="ind"
+                    outlined
+                    class="pa-4 my-4"
+                  >
+                    <div class="text-subtitle-1">
+                      {{ s_d.assembly_id }}
+                    </div>
+                    <Description
+                      :description="s_d.description"
+                      css_class="other-description-link"
+                      :to_name="'Normalizer'"
+                      :to_params="{ descriptionRouter: s_d.description }"
+                    />
+                  </v-sheet>
+                </div>
+              </div>
+            </v-sheet>
+
+            <v-sheet
+              v-if="!isIntronicErrorSuggestions() && errorsEncountered()"
               class="pt-10 pr-10 pb-8 pl-10"
               color="red lighten-5"
             >
-              <v-alert
-                v-for="(error, index) in response.errors"
-                :key="index"
-                color="red lighten-1"
-                tile
-                border="left"
-                dark
-              >
-                <div v-if="syntaxError()">
-                  <SyntaxError :error-model="getSyntaxError()" />
-                </div>
-                <div v-else>
-                  {{ getMessage(error) }}
-                </div>
-              </v-alert>
+              <div>
+                <v-alert
+                  v-for="(error, index) in response.errors"
+                  :key="index"
+                  color="red lighten-1"
+                  tile
+                  border="left"
+                  dark
+                >
+                  <div v-if="syntaxError()">
+                    <SyntaxError :error-model="getSyntaxError()" />
+                  </div>
+                  <div v-else>
+                    {{ getMessage(error) }}
+                  </div>
+                </v-alert>
+              </div>
             </v-sheet>
           </v-sheet>
         </v-expand-transition>
@@ -1135,6 +1195,19 @@ export default {
     },
     infoMessages: function () {
       return this.response && this.response.infos;
+    },
+    isIntronicErrorSuggestions: function () {
+      if (this.response && this.response.errors) {
+        let errors = this.response.errors;
+        if (
+          errors.length === 1 &&
+          errors[0].code === "EINTRONIC" &&
+          errors[0].suggestions
+        ) {
+          return true;
+        }
+      }
+      return false;
     },
     syntaxError: function () {
       if (this.getSyntaxError()) {
