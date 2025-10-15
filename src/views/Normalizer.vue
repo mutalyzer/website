@@ -271,7 +271,11 @@
           class="mt-10 mb-0"
         >
           <v-row align="center">
-            <v-col class="grow overline"
+            <v-col v-if="isIntronicErrorSuggestions()" class="grow overline"
+              >Additional information is required to be able to interpret this
+              description</v-col
+            >
+            <v-col v-else class="grow overline"
               >Description could not be interpreted</v-col
             >
             <v-col v-if="infoMessages()" class="shrink">
@@ -851,17 +855,19 @@
           class="mt-5 mb-5"
           tile
         >
-          <v-expansion-panel>
-            <v-expansion-panel-header class="overline"
-              >Related reference sequences</v-expansion-panel-header
-            >
-            <v-expansion-panel-content class="pt-5">
-              <Related
-                :model="response.normalized_model"
-                :description="response.normalized_description"
-              />
-            </v-expansion-panel-content>
-          </v-expansion-panel>
+          <v-expansion-panels focusable·hover·class="mt-5·mb-5" tile>
+            <v-expansion-panel>
+              <v-expansion-panel-header class="overline"
+                >Related reference sequences</v-expansion-panel-header
+              >
+              <v-expansion-panel-content class="pt-5">
+                <Related
+                  :model="response.normalized_model"
+                  :description="response.normalized_description"
+                />
+              </v-expansion-panel-content>
+            </v-expansion-panel>
+          </v-expansion-panels>
         </v-expansion-panels>
 
         <v-expansion-panels
