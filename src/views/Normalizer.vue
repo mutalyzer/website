@@ -265,13 +265,23 @@
         <v-alert
           v-if="response && response.errors"
           prominent
-          :type="isIntronicErrorSuggestions() ? 'warning' : 'error'"
+          :type="
+            isIntronicErrorSuggestions() ||
+            isGeneMultipleTranscriptsErrorSuggestions()
+              ? 'warning'
+              : 'error'
+          "
           tile
           elevation="2"
           class="mt-10 mb-0"
         >
           <v-row align="center">
-            <v-col v-if="isIntronicErrorSuggestions()" class="grow overline"
+            <v-col
+              v-if="
+                isIntronicErrorSuggestions() ||
+                isGeneMultipleTranscriptsErrorSuggestions()
+              "
+              class="grow overline"
               >Additional information is required to be able to interpret this
               description</v-col
             >
@@ -417,7 +427,48 @@
             </v-sheet>
 
             <v-sheet
-              v-if="!isIntronicErrorSuggestions() && errorsEncountered()"
+              v-if="isGeneMultipleTranscriptsErrorSuggestions()"
+              class="pt-10 pr-10 pb-8 pl-10"
+              color="orange lighten-5"
+            >
+              <div>
+                <p>
+                  Reference
+                  <code>{{ response.errors[0].gene }}</code>
+                  has been identified as a gene on chromosome
+                  <code>{{ response.errors[0].chr_id }}</code
+                  >, but this gene has multiple associated transcripts.
+                </p>
+                <p class="mt-4 font-weight-medium">
+                  Did you mean one of the following descriptions?
+                </p>
+                <div>
+                  <v-sheet
+                    v-for="(option, ind) in getSortedOptions(
+                      response.errors[0].options,
+                    )"
+                    :key="ind"
+                    outlined
+                    class="pa-4 my-4"
+                  >
+                    <Description
+                      :description="option.description"
+                      css_class="other-description-link"
+                      :to_name="'Normalizer'"
+                      :to_params="{ descriptionRouter: option.description }"
+                      :tag="convertOptionToTag(option)"
+                    />
+                  </v-sheet>
+                </div>
+              </div>
+            </v-sheet>
+
+            <v-sheet
+              v-if="
+                !isIntronicErrorSuggestions() &&
+                !isGeneMultipleTranscriptsErrorSuggestions() &&
+                errorsEncountered()
+              "
               class="pt-10 pr-10 pb-8 pl-10"
               color="red lighten-5"
             >
@@ -1214,6 +1265,42 @@ export default {
         }
       }
       return false;
+    },
+    isGeneMultipleTranscriptsErrorSuggestions: function () {
+      if (this.response && this.response.errors) {
+        let errors = this.response.errors;
+        if (
+          errors.length === 1 &&
+          errors[0].code === "EGENEMULTIPLETRANSCRIPTS" &&
+          errors[0].options
+        ) {
+          return true;
+        }
+      }
+      return false;
+    },
+    getSortedOptions(options) {
+      if (!options) return [];
+
+      return [...options].sort((a, b) => {
+        if (a.tag && !b.tag) return -1;
+        if (!a.tag && b.tag) return 1;
+
+        if (a.description > b.description) return -1;
+        if (a.description < b.description) return 1;
+
+        return 0;
+      });
+    },
+    convertOptionToTag: function (option) {
+      if (!option.tag || !option.transcript_id) {
+        return null;
+      }
+
+      return {
+        id: option.transcript_id,
+        details: option.tag,
+      };
     },
     syntaxError: function () {
       if (this.getSyntaxError()) {

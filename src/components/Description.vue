@@ -40,13 +40,13 @@
         </div>
       </v-col>
       <v-col v-if="tag" class="shrink">
-        <v-tooltip v-if="css_class == 'ok-description-link'" bottom>
+        <v-tooltip bottom>
           <template #activator="{ on, attrs }">
             <v-chip
               v-bind="attrs"
-              color="green darken-4"
-              text-color="green darken-4"
-              outlined
+              :color="tagStyles.color"
+              :text-color="tagStyles.textColor"
+              :outlined="tagStyles.outlined"
               label
               small
               v-on="on"
@@ -54,29 +54,7 @@
               {{ tag.details }}
             </v-chip>
           </template>
-          <span
-            >{{ tag.id }} is the representative transcript as part of the MANE
-            project.</span
-          >
-        </v-tooltip>
-        <v-tooltip v-else bottom>
-          <template #activator="{ on, attrs }">
-            <v-chip
-              v-bind="attrs"
-              color="white"
-              text-color="white"
-              outlined
-              label
-              small
-              v-on="on"
-            >
-              {{ tag.details }}
-            </v-chip>
-          </template>
-          <span
-            >{{ tag.id }} is the representative transcript as part of the MANE
-            project.</span
-          >
+          <span>{{ tagTooltip }}</span>
         </v-tooltip>
       </v-col>
       <v-col v-if="selector && selector.id && !mapping_checked" class="shrink">
@@ -189,7 +167,41 @@ export default {
     mapping_checked: false,
     loading: null,
   }),
+  computed: {
+    tagStyles() {
+      if (this.css_class === "ok-description-link") {
+        return {
+          color: "green darken-4",
+          textColor: "green darken-4",
+          outlined: true,
+        };
+      } else if (this.css_class === "other-description-link") {
+        return {
+          color: "blue darken-1",
+          textColor: "blue darken-1",
+          outlined: true,
+        };
+      }
+      return {
+        color: "white",
+        textColor: "white",
+        outlined: true,
+      };
+    },
 
+    tagTooltip() {
+      if (!this.tag || !this.tag.details) {
+        return "";
+      }
+      const tagDetails = this.tag.details.toLowerCase();
+      if (tagDetails.includes("mane")) {
+        return `${this.tag.id} is a ${this.tag.details} representative transcript as part of the MANE project.`;
+      } else if (tagDetails.includes("refseq select")) {
+        return `${this.tag.id} is a ${this.tag.details} transcript.`;
+      }
+      return `${this.tag.id} - ${this.tag.details}`;
+    },
+  },
   methods: {
     map: function () {
       if (this.description && this.selector && this.selector.id) {
