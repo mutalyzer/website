@@ -384,8 +384,11 @@
 </template>
 
 <script>
+import converter from "@/mixins/converter.js";
+
 export default {
   name: "ViewVariantsCore",
+  mixins: [converter],
   props: {
     view: null,
     influence: null,
@@ -565,41 +568,28 @@ export default {
           this.inverted,
           true,
         );
-        var pos = coding[0];
-        var offset = coding[1];
-        var section = coding[2];
 
-        if (section == -1) {
-          pos = Math.abs(pos);
-          output += "-" + pos;
-        } else if (section == 1) {
-          output += "*" + pos;
-        } else {
-          if (offset < 0) {
-            output += pos + "-" + Math.abs(offset);
-          } else if (offset > 0) {
-            output += pos + "+" + Math.abs(offset);
-          } else {
-            output += pos;
-          }
-        }
+        var coding_position = this.formatCodingPosition(coding);
         if (this.c_s_var && this.c_s_seq) {
-          output = this.c_s_var + output + " | " + this.c_s_seq + position;
+          output =
+            this.c_s_var + coding_position + " | " + this.c_s_seq + position;
         } else if (this.c_s_var) {
-          output = this.c_s_var + output + " | " + position;
+          output = this.c_s_var + coding_position + " | " + position;
         }
-        //  else if (this.exons) {
-        // var noncoding = this.multiLocusToPosition(
-        //   position - 1,
-        //   this.exons,
-        //   this.inverted
-        // );
-        // if (this.c_s_var && this.c_s_seq) {
-        //   output = this.c_s_var + output + " | " + this.c_s_seq + position;
-        // } else if (this.c_s_var) {
-        //   output = this.c_s_var + output + " | " + position;
-        // }
-        // }
+      } else if (this.exons) {
+        const noncoding = this.coordinateToNoncoding(
+          position - 1,
+          this.exons,
+          this.inverted,
+        );
+
+        const noncoding_position = this.formatNoncodingPosition(noncoding);
+        if (this.c_s_var && this.c_s_seq) {
+          output =
+            this.c_s_var + noncoding_position + " | " + this.c_s_seq + position;
+        } else if (this.c_s_var) {
+          output = this.c_s_var + noncoding_position + " | " + position;
+        }
       } else {
         if (this.c_s_var && this.c_s_var == "g.") {
           output = this.c_s_var + position;
@@ -1007,161 +997,6 @@ export default {
       return this.hover_variants[v_i] || this.hover_sequence[v_i]
         ? "seq-variant" + influence_on
         : "seq-variant-hover" + influence_on;
-    },
-    nearestBoundary: function (lb, rb, c, p) {
-      const dl = c - lb + 1;
-      const dr = rb - c;
-
-      if (dl < dr) {
-        return 0;
-      }
-      if (dl > dr) {
-        return 1;
-      }
-      return p;
-    },
-    nearestLocation: function (ls, c, p = 0) {
-      let rb = ls.length - 1;
-      let lb = 0;
-      let i;
-
-      while (lb <= rb) {
-        i = Math.floor((lb + rb) / 2);
-
-        if (c < ls[i][0]) {
-          // `c` lies before this location.
-          rb = i - 1;
-        } else if (c >= ls[i][1]) {
-          // `c` lies after this location.
-          lb = i + 1;
-        } else {
-          // `c` lies in this location.
-          return i;
-        }
-      }
-
-      if (i && c < ls[i][0]) {
-        // `c` lies before this location.
-        return i - 1 + this.nearestBoundary(ls[i - 1][1], ls[i][0], c, p);
-      }
-      if (i < ls.length - 1) {
-        // `c` lies after this location.
-        return i + this.nearestBoundary(ls[i][1], ls[i + 1][0], c, p);
-      }
-
-      return i;
-    },
-    getOffsets: function (locations, orientation) {
-      let s = 0;
-      let output = [0];
-
-      let locs =
-        orientation === 1 ? locations.slice() : locations.slice().reverse();
-
-      for (let i = 0; i < locs.length - 1; i++) {
-        s += Math.abs(locs[i][0] - locs[i][1]);
-        output.push(s);
-      }
-      return output;
-    },
-    getOutside: function (coordinate, loci) {
-      if (coordinate < loci[0].boundary[0]) {
-        return coordinate - loci[0].boundary[0];
-      }
-      if (coordinate > loci[loci.length - 1].boundary[1]) {
-        return coordinate - loci[loci.length - 1].boundary[1];
-      }
-      return 0;
-    },
-    getDirection: function (index, offsets, inverted = false) {
-      if (inverted) {
-        return offsets.length - index - 1;
-      }
-      return index;
-    },
-    locusToPosition: function (coordinate, location, inverted = false) {
-      const boundary = [location[0], location[1] - 1];
-      const end = boundary[1] - boundary[0];
-
-      if (inverted) {
-        if (coordinate > boundary[1]) {
-          return [0, boundary[1] - coordinate];
-        }
-        if (coordinate < boundary[0]) {
-          return [end, boundary[0] - coordinate];
-        }
-        return [boundary[1] - coordinate, 0];
-      }
-
-      if (coordinate < boundary[0]) {
-        return [0, coordinate - boundary[0]];
-      }
-      if (coordinate > boundary[1]) {
-        return [end, coordinate - boundary[1]];
-      }
-      return [coordinate - boundary[0], 0];
-    },
-    multiLocusToPosition: function (coordinate, locations, inverted = false) {
-      const loci = locations.map((location) => ({
-        boundary: [location[0], location[1] - 1],
-        end: location[1] - 1 - location[0],
-      }));
-      const orientation = inverted ? -1 : 1;
-      const offsets = this.getOffsets(locations, orientation);
-      const index = this.nearestLocation(locations, coordinate, inverted);
-      const outside = orientation * this.getOutside(coordinate, loci);
-      const location = this.locusToPosition(
-        coordinate,
-        locations[index],
-        inverted,
-      );
-
-      return [
-        location[0] + offsets[this.getDirection(index, offsets, inverted)],
-        location[1],
-        outside,
-      ];
-    },
-    coordinateToCoding: function (
-      coordinate,
-      exons,
-      cds,
-      inverted = false,
-      degenerate = false,
-    ) {
-      const b0 = this.multiLocusToPosition(cds[0], exons, inverted);
-      const b1 = this.multiLocusToPosition(cds[1], exons, inverted);
-
-      let coding, cdsLen;
-      if (inverted) {
-        coding = [b1[0] + b1[1] + 1, b0[0] + b0[1] + 1];
-        cdsLen = b0[0] + b0[1] - (b1[0] + b1[1]);
-      } else {
-        coding = [b0[0] + b0[1], b1[0] + b1[1]];
-        cdsLen = b1[0] + b1[1] - (b0[0] + b0[1]);
-      }
-      let pos = this.multiLocusToPosition(coordinate, exons, inverted);
-      if (pos[0] < coding[0]) {
-        pos = [pos[0] - coding[0], pos[1], -1, pos[2]];
-      } else if (pos[0] >= coding[1]) {
-        pos = [pos[0] - coding[1] + 1, pos[1], 1, pos[2]];
-      } else {
-        pos = [pos[0] - coding[0] + 1, pos[1], 0, pos[2]];
-      }
-
-      if (degenerate && pos[3]) {
-        if (pos[2] === 0) {
-          if (pos[0] === 1 && pos[1] < 0) {
-            return [pos[1], 0, -1, pos[3]];
-          }
-          if (pos[0] === cdsLen && pos[1] > 0) {
-            return [pos[0] + pos[1] - cdsLen, 0, 1, pos[3]];
-          }
-        }
-        return [pos[0] + pos[1], 0, pos[2], pos[3]];
-      }
-
-      return pos;
     },
   },
 };

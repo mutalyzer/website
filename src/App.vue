@@ -3,13 +3,17 @@
     <nav>
       <v-app-bar color="primary" dark>
         <v-app-bar-nav-icon @click="drawer = true"></v-app-bar-nav-icon>
-
-        <v-toolbar-title>
+        <router-link to="/">
+          <v-btn icon>
+            <img src="@/assets/logo.svg" width="30" height="30" />
+          </v-btn>
+        </router-link>
+        <v-toolbar-title class="ml-2">
           <router-link to="/" class="title-link">LUMC Mutalyzer 3</router-link>
         </v-toolbar-title>
         <v-spacer></v-spacer>
         <v-tooltip bottom>
-          <template v-slot:activator="{ on, attrs }">
+          <template #activator="{ on, attrs }">
             <v-btn icon v-bind="attrs" v-on="on" @click="feedback = !feedback">
               <v-icon>mdi-message-alert</v-icon>
             </v-btn>
@@ -17,13 +21,13 @@
           <span>Feedback</span>
         </v-tooltip>
         <v-tooltip bottom>
-          <template v-slot:activator="{ on, attrs }">
+          <template #activator="{ on, attrs }">
             <v-btn
               icon
               v-bind="attrs"
-              v-on="on"
               href="https://github.com/mutalyzer/mutalyzer/"
               target="_blank"
+              v-on="on"
             >
               <v-icon>mdi-github</v-icon>
             </v-btn>

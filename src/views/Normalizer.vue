@@ -374,37 +374,65 @@
               color="orange lighten-5"
             >
               <div>
-                <p>
-                  The position{{
-                    response.errors[0].positions.length > 1 ? "s" : ""
+                <p class="font-weight-medium">
+                  Intronic
+                  {{
+                    getIntronicPositionCount() === 1 ? "position" : "positions"
                   }}
-                  <span
-                    v-for="(pos, index) in response.errors[0].positions"
-                    :key="index"
+                  {{ getIntronicPositionCount() === 1 ? "was" : "were" }}
+                  identified:
+                </p>
+
+                <v-list dense class="orange lighten-5 py-0">
+                  <v-list-item
+                    v-for="(positions, ref_id) in response.errors[0].positions"
+                    :key="ref_id"
+                    class="align-start px-0"
                   >
-                    <code>{{ pos }}</code>
-                    <span v-if="index < response.errors[0].positions.length - 2"
-                      >,
-                    </span>
-                    <span
-                      v-else-if="
-                        index === response.errors[0].positions.length - 2
-                      "
-                    >
-                      and
-                    </span>
-                  </span>
-                  {{ response.errors[0].positions.length > 1 ? "are" : "is" }}
-                  intronic and cannot be interpreted with the transcript
-                  reference sequence
-                  <code>{{ response.errors[0].reference_id }}</code
-                  >, which does not include intronic regions. Intronic positions
-                  require a genomic reference sequence, e.g.
+                    <v-list-item-icon class="mt-1 mr-2" style="min-width: 20px">
+                      <v-icon small>mdi-circle-small</v-icon>
+                    </v-list-item-icon>
+                    <v-list-item-content class="py-1">
+                      <v-list-item-title
+                        class="text-body-2"
+                        style="white-space: normal"
+                      >
+                        <span v-if="positions.length === 1">
+                          The position <code>{{ positions[0] }}</code> is
+                          intronic and cannot be interpreted with the transcript
+                          reference sequence <code>{{ ref_id }}</code
+                          >, which does not include intronic regions.
+                        </span>
+                        <span v-else-if="positions.length === 2">
+                          The positions <code>{{ positions[0] }}</code> and
+                          <code>{{ positions[1] }}</code> are intronic and
+                          cannot be interpreted with the transcript reference
+                          sequence <code>{{ ref_id }}</code
+                          >, which does not include intronic regions.
+                        </span>
+                        <span v-else>
+                          The positions
+                          <code>{{ positions.slice(0, -1).join(", ") }}</code>
+                          and
+                          <code>{{ positions[positions.length - 1] }}</code> are
+                          intronic and cannot be interpreted with the transcript
+                          reference sequence <code>{{ ref_id }}</code
+                          >, which does not include intronic regions.
+                        </span>
+                      </v-list-item-title>
+                    </v-list-item-content>
+                  </v-list-item>
+                </v-list>
+
+                <p class="mt-3 font-weight-medium">
+                  Intronic positions require a genomic reference sequence, e.g.
                   <code>NC_*(NM_*)</code>.
                 </p>
+
                 <p class="mt-4 font-weight-medium">
                   Did you mean one of the following descriptions?
                 </p>
+
                 <div>
                   <v-sheet
                     v-for="(s_d, ind) in response.errors[0].suggestions"
@@ -412,15 +440,101 @@
                     outlined
                     class="pa-4 my-4"
                   >
-                    <div class="text-subtitle-1">
+                    <div class="text-subtitle-1 font-weight-medium mb-2">
                       {{ s_d.assembly_id }}
                     </div>
-                    <Description
-                      :description="s_d.description"
-                      css_class="other-description-link"
-                      :to_name="'Normalizer'"
-                      :to_params="{ descriptionRouter: s_d.description }"
-                    />
+
+                    <div class="mb-3">
+                      <Description
+                        :description="s_d.description"
+                        css_class="other-description-link"
+                        :to_name="'Normalizer'"
+                        :to_params="{ descriptionRouter: s_d.description }"
+                      />
+                    </div>
+
+                    <v-divider class="my-3"></v-divider>
+
+                    <div class="text-caption grey--text text--darken-1 mb-1">
+                      Reference sequence compatibility:
+                    </div>
+
+                    <div
+                      v-for="(mapping, ref_id) in response.errors[0].assemblies[
+                        s_d.assembly_id
+                      ]"
+                      :key="ref_id"
+                      class="text-body-2 mb-1"
+                    >
+                      <v-icon
+                        v-if="mapping && !mapping.slices_differ"
+                        small
+                        color="success"
+                        class="mr-1"
+                      >
+                        mdi-check-circle
+                      </v-icon>
+                      <v-icon
+                        v-else-if="mapping && mapping.slices_differ"
+                        small
+                        color="warning"
+                        class="mr-1"
+                      >
+                        mdi-alert-circle
+                      </v-icon>
+
+                      <span v-if="mapping && !mapping.slices_differ">
+                        The exonic sequence of <code>{{ ref_id }}</code>
+                        is identical to
+                        <code>{{ mapping.chr_id }}({{ ref_id }})</code>.
+                        <v-tooltip
+                          v-if="mapping.tag && mapping.tag.details"
+                          bottom
+                        >
+                          <template #activator="{ on, attrs }">
+                            <v-chip
+                              v-bind="attrs"
+                              color="blue darken-1"
+                              text-color="blue darken-1"
+                              outlined
+                              label
+                              x-small
+                              class="ml-1"
+                              v-on="on"
+                            >
+                              {{ mapping.tag.details }}
+                            </v-chip>
+                          </template>
+                          <span>{{ tagTooltip(mapping.tag) }}</span>
+                        </v-tooltip>
+                      </span>
+
+                      <span v-else-if="mapping && mapping.slices_differ">
+                        The exonic sequence of <code>{{ ref_id }}</code>
+                        differs from
+                        <code>{{ mapping.chr_id }}({{ ref_id }})</code>.
+                        <v-tooltip
+                          v-if="mapping.tag && mapping.tag.details"
+                          bottom
+                        >
+                          <template #activator="{ on, attrs }">
+                            <v-chip
+                              v-bind="attrs"
+                              color="blue darken-1"
+                              text-color="blue darken-1"
+                              outlined
+                              label
+                              x-small
+                              class="ml-1"
+                              v-on="on"
+                            >
+                              {{ mapping.tag.details }}
+                            </v-chip>
+                          </template>
+                          <span>{{ tagTooltip(mapping.tag) }}</span>
+                        </v-tooltip>
+                      </span>
+                    </div>
                   </v-sheet>
                 </div>
               </div>
@@ -526,72 +640,9 @@
             <v-expansion-panel-header class="overline"
               >Biological Information Transfer</v-expansion-panel-header
             >
-            <v-expansion-panel-content class="pt-5">
-              <div
-                v-if="
-                  response &&
-                  response.equivalent_descriptions &&
-                  response.equivalent_descriptions.g
-                "
-              >
-                <div class="overline">Genomic Description</div>
-                <Description
-                  :description="
-                    response.equivalent_descriptions.g[0].description
-                  "
-                  :css_class="'ok-description-link'"
-                  :to_name="'Normalizer'"
-                  :to_params="{
-                    descriptionRouter:
-                      response.equivalent_descriptions.g[0].description,
-                  }"
-                />
-              </div>
-
-              <div v-if="response.rna && response.rna.errors">
-                <div class="overline">Predictions</div>
-                <v-sheet>
-                  <v-alert
-                    v-for="(error, index) in response.rna.errors"
-                    :key="index"
-                    color="red lighten-1"
-                    tile
-                    border="left"
-                    dark
-                  >
-                    <div>
-                      {{ getMessage(error) }}
-                    </div>
-                  </v-alert>
-                </v-sheet>
-              </div>
-
-              <div v-if="response.rna && response.rna.description">
-                <div class="overline">Predicted RNA Description</div>
-                <Description
-                  :description="response.rna.description"
-                  :css_class="'ok-description-link'"
-                  :to_name="'Normalizer'"
-                  :to_params="{ descriptionRouter: response.rna.description }"
-                />
-              </div>
-
-              <div v-if="response.protein && response.protein.description">
-                <div class="overline">Predicted Protein Description</div>
-                <Description
-                  :description="response.protein.description"
-                  :css_class="'ok-description-link'"
-                  :to_name="'Normalizer'"
-                  :to_params="{
-                    descriptionRouter: response.protein.description,
-                  }"
-                />
-                <AffectedProtein
-                  v-if="response.protein && response.protein.description"
-                  :protein="response.protein"
-                />
-              </div>
-            </v-expansion-panel-content>
+            <v-expansion-panel-content class="pt-5"
+              ><BioTransfer :response="response"
+            /></v-expansion-panel-content>
           </v-expansion-panel>
         </v-expansion-panels>
 
@@ -666,7 +717,7 @@
           hover
           class="mt-5 mb-5"
           tile
-          :value="equivalent_open"
+          :value="equivalent_protein_open"
         >
           <v-expansion-panel>
             <v-expansion-panel-header class="overline"
@@ -905,6 +956,7 @@
           hover
           class="mt-5 mb-5"
           tile
+          :value="related_open"
         >
           <v-expansion-panels focusable·hover·class="mt-5·mb-5" tile>
             <v-expansion-panel>
@@ -912,10 +964,7 @@
                 >Related reference sequences</v-expansion-panel-header
               >
               <v-expansion-panel-content class="pt-5">
-                <Related
-                  :model="response.normalized_model"
-                  :description="response.normalized_description"
-                />
+                <Related :normalized_response="response" />
               </v-expansion-panel-content>
             </v-expansion-panel>
           </v-expansion-panels>
@@ -966,7 +1015,7 @@
 <script>
 import MutalyzerService from "../services/MutalyzerService.js";
 import JsonPretty from "../components/JsonPretty.vue";
-import AffectedProtein from "../components/AffectedProtein.vue";
+import BioTransfer from "../components/BioTransfer.vue";
 import SelectorShort from "../components/SelectorShort.vue";
 import SyntaxError from "../components/SyntaxError.vue";
 import ReferenceInformation from "../components/ReferenceInformation.vue";
@@ -981,7 +1030,7 @@ export default {
   components: {
     JsonPretty,
     SelectorShort,
-    AffectedProtein,
+    BioTransfer,
     SyntaxError,
     ReferenceInformation,
     Related,
@@ -1014,7 +1063,9 @@ export default {
     only_variants: false,
     mode: "hgvs",
     chromosomal_open: 1,
-    equivalent_open: 0,
+    equivalent_open: 1,
+    equivalent_protein_open: 0,
+    related_open: 0,
     consequences_open: 1,
     back_translated_open: 1,
   }),
@@ -1485,6 +1536,7 @@ export default {
         this.response &&
         this.response.normalized_model &&
         (this.response.normalized_model.coordinate_system == "c" ||
+          this.response.normalized_model.coordinate_system == "n" ||
           this.response.normalized_model.coordinate_system == "r")
       ) {
         this.consequences_open = 0;
@@ -1566,6 +1618,33 @@ export default {
       }
 
       return false;
+    },
+    getIntronicPositionCount: function () {
+      if (
+        this.response &&
+        this.response.errors &&
+        this.response.errors[0] &&
+        this.response.errors[0].positions
+      ) {
+        let count = 0;
+        for (let ref_id in this.response.errors[0].positions) {
+          count += this.response.errors[0].positions[ref_id].length;
+        }
+        return count;
+      }
+      return 0;
+    },
+    tagTooltip: function (tag) {
+      if (!tag || !tag.details) {
+        return "";
+      }
+      const tagDetails = tag.details.toLowerCase();
+      if (tagDetails.includes("mane")) {
+        return `${tag.id} is a ${tag.details} representative transcript as part of the MANE project.`;
+      } else if (tagDetails.includes("refseq select")) {
+        return `${tag.id} is a ${tag.details} transcript.`;
+      }
+      return `${tag.id} - ${tag.details}`;
     },
   },
 };

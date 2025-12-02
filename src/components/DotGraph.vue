@@ -9,23 +9,11 @@
     <v-alert v-if="tooComplex()" dense outlined type="error">
       {{ dottext.replace("//", "").trim() }}
     </v-alert>
-    <div
-      v-if="!tooComplex()"
-      id="dot-graph"
-      style="
-        width: 100%;
-        max-height: 70vh;
-        margin: auto;
-        text-align: center;
-        display: inline-block;
-      "
-    ></div>
+    <div v-if="!tooComplex()" id="dot-graph" class="graph-container"></div>
   </div>
 </template>
-
 <script>
 import { graphviz } from "d3-graphviz";
-
 export default {
   name: "DotGraph",
   props: {
@@ -67,12 +55,10 @@ export default {
     },
     getSvg() {
       var svg = document.getElementById("dot-graph");
-
       var serializer = new XMLSerializer();
       var svg_content = serializer.serializeToString(svg);
       svg_content = svg_content.substring(svg_content.indexOf(">") + 1);
       svg_content = svg_content.replace("</div>", "");
-
       //add name spaces.
       if (
         !svg_content.match(/^<svg[^>]+xmlns="http:\/\/www\.w3\.org\/2000\/svg"/)
@@ -90,13 +76,10 @@ export default {
           '<svg xmlns:xlink="http://www.w3.org/1999/xlink"',
         );
       }
-
       //add xml declaration
       svg_content = '<?xml version="1.0" standalone="no"?>\r\n' + svg_content;
-
       var outputContent =
         "data:image/svg+xml;charset=utf-8," + encodeURIComponent(svg_content);
-
       var download_link = document.createElement("a");
       download_link.setAttribute("href", outputContent);
       download_link.setAttribute("download", "graph.svg");
@@ -112,3 +95,22 @@ export default {
   },
 };
 </script>
+<style scoped>
+.graph-container {
+  width: 100%;
+  max-height: 70vh;
+  margin: auto;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: auto;
+}
+
+.graph-container ::v-deep svg {
+  max-width: 100%;
+  height: auto !important;
+  width: auto !important;
+  display: block;
+}
+</style>
