@@ -3,9 +3,10 @@
     <div
       v-for="(assembly_i, index) in assemblies"
       :key="assembly_i"
-      :class="index === assemblies.length - 1 ? 'mt-5' : ''"
+      :class="index > 0 ? 'mt-5' : ''"
     >
-      <span>{{ assemblyNames[assembly_i] }}</span>
+      <v-divider v-if="index > 0" class="mb-4"></v-divider>
+      <span class="overline">{{ assemblyNames[assembly_i] }}</span>
       <v-progress-linear
         v-if="progress[assembly_i]"
         indeterminate
@@ -141,6 +142,18 @@
         </v-row>
       </v-alert>
     </div>
+    <v-divider v-if="showT2TButton" class="mt-5 mb-4"></v-divider>
+    <v-btn
+      v-if="showT2TButton"
+      text
+      small
+      color="primary"
+      class="text-uppercase"
+      @click="enableT2T"
+    >
+      Include T2T-CHM13
+      <v-icon right small>mdi-chevron-down</v-icon>
+    </v-btn>
   </div>
 </template>
 
@@ -158,10 +171,6 @@ export default {
       type: [String, null],
       default: null,
     },
-    assembly: {
-      type: [String, null],
-      default: null,
-    },
   },
   data() {
     return {
@@ -169,53 +178,63 @@ export default {
       responses: {},
       errors: {},
       connectionErrors: {},
-      assemblies: ["GRCH38", "GRCH37"],
-      showNotes: { GRCH38: false, GRCH37: false },
+      defaultAssemblies: ["GRCH38", "GRCH37"],
+      enabledAssemblies: ["GRCH38", "GRCH37"],
       assemblyNames: {
         GRCH38: "Genome Assembly GRCh38 (hg38)",
+        T2T: "Genome Assembly T2T-CHM13",
         GRCH37: "Genome Assembly GRCh37 (hg19)",
       },
     };
   },
+  computed: {
+    assemblies() {
+      const order = ["GRCH38", "GRCH37", "T2T"];
+      return order.filter((a) => this.enabledAssemblies.includes(a));
+    },
+    showT2TButton() {
+      return !this.enabledAssemblies.includes("T2T");
+    },
+  },
   created: function () {
-    this.map();
+    this.defaultAssemblies.forEach((assembly) => {
+      this.map(assembly);
+    });
   },
   methods: {
-    async map() {
-      if (this.description && this.assemblies.length > 0) {
-        this.assemblies.forEach((assembly) => {
-          this.progress[assembly] = true;
-          this.responses[assembly] = null;
-          this.errors[assembly] = null;
-          this.connectionErrors[assembly] = null;
+    async map(assembly) {
+      if (!this.description) return;
+
+      this.progress = { ...this.progress, [assembly]: true };
+      this.responses = { ...this.responses, [assembly]: null };
+      this.errors = { ...this.errors, [assembly]: null };
+      this.connectionErrors = { ...this.connectionErrors, [assembly]: null };
+
+      try {
+        const response = await MutalyzerService.map({
+          description: this.description,
+          reference_id: assembly,
+          filter_out: true,
         });
 
-        // Loop through assemblies and wait for each API call to finish before continuing
-        for (const assembly of this.assemblies) {
-          try {
-            const response = await MutalyzerService.map({
-              description: this.description,
-              reference_id: assembly,
-              filter_out: true,
-            });
-
-            // Update the results if the response is successful
-            if (response.data) {
-              this.responses = {
-                ...this.responses,
-                [assembly]: response.data,
-              };
-            }
-          } catch (error) {
-            this.handleError(error, assembly);
-          } finally {
-            this.progress = {
-              ...this.progress,
-              [assembly]: false,
-            };
-          }
+        if (response.data) {
+          this.responses = {
+            ...this.responses,
+            [assembly]: response.data,
+          };
         }
+      } catch (error) {
+        this.handleError(error, assembly);
+      } finally {
+        this.progress = {
+          ...this.progress,
+          [assembly]: false,
+        };
       }
+    },
+    enableT2T() {
+      this.enabledAssemblies = [...this.enabledAssemblies, "T2T"];
+      this.map("T2T");
     },
     handleError: function (error, assembly) {
       this.responses = {
