@@ -4,9 +4,14 @@
       <p>
         Reference
         <code>{{ error.gene }}</code>
-        has been identified as a gene on chromosome
-        <code>{{ error.chr_ids }}</code
-        >, but this gene has multiple associated transcripts.
+        has been identified as a gene on {{ chromosomeLabel }}
+        <span v-for="(chr, index) in error.chr_ids" :key="chr"
+          ><code>{{ chr }}</code
+          ><template v-if="index < error.chr_ids.length - 2">, </template
+          ><template v-else-if="index === error.chr_ids.length - 2">{{
+            error.chr_ids.length === 2 ? " and " : ", and "
+          }}</template></span
+        >. This gene has multiple associated transcripts.
       </p>
       <p class="mt-4 font-weight-medium">
         Did you mean one of the following descriptions?
@@ -85,6 +90,11 @@ export default {
     return {
       expandedAssemblies: {},
     };
+  },
+  computed: {
+    chromosomeLabel() {
+      return this.error.chr_ids.length === 1 ? "chromosome" : "chromosomes";
+    },
   },
   methods: {
     getOrderedAssemblies(options) {

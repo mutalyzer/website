@@ -266,7 +266,9 @@
           v-if="response && response.errors"
           prominent
           :type="
-            isIntronicPositionError() || isGeneAsReferenceIdError()
+            isIntronicPositionError() ||
+            isGeneAsReferenceIdError() ||
+            isSelectorOptionsError()
               ? 'warning'
               : 'error'
           "
@@ -276,7 +278,11 @@
         >
           <v-row align="center">
             <v-col
-              v-if="isIntronicPositionError() || isGeneAsReferenceIdError()"
+              v-if="
+                isIntronicPositionError() ||
+                isGeneAsReferenceIdError() ||
+                isSelectorOptionsError()
+              "
               class="grow overline"
               >Additional information is required to be able to interpret this
               description</v-col
@@ -375,10 +381,16 @@
               :error="response.errors[0]"
             />
 
+            <SelectorOptionsError
+              v-if="isSelectorOptionsError()"
+              :error="response.errors[0]"
+            />
+
             <v-sheet
               v-if="
                 !isIntronicPositionError() &&
                 !isGeneAsReferenceIdError() &&
+                !isSelectorOptionsError() &&
                 errorsEncountered()
               "
               class="pt-10 pr-10 pb-8 pl-10"
@@ -824,6 +836,7 @@ import Description from "../components/Description.vue";
 import ChromosomalDescriptions from "../components/ChromosomalDescriptions.vue";
 import DotGraph from "../components/DotGraph.vue";
 import GeneAsReferenceIdError from "../components/GeneAsReferenceIdError.vue";
+import SelectorOptionsError from "../components/SelectorOptionsError.vue";
 import IntronicPositionError from "../components/IntronicPositionError.vue";
 
 export default {
@@ -840,6 +853,7 @@ export default {
     ChromosomalDescriptions,
     DotGraph,
     GeneAsReferenceIdError,
+    SelectorOptionsError,
     IntronicPositionError,
   },
   props: ["descriptionRouter"],
@@ -1113,7 +1127,7 @@ export default {
         if (
           errors.length === 1 &&
           errors[0].code === "EINTRONIC" &&
-          errors[0].suggestions
+          errors[0].options
         ) {
           return true;
         }
@@ -1126,6 +1140,19 @@ export default {
         if (
           errors.length === 1 &&
           errors[0].code === "EGENEASREFERENCEID" &&
+          errors[0].options
+        ) {
+          return true;
+        }
+      }
+      return false;
+    },
+    isSelectorOptionsError: function () {
+      if (this.response && this.response.errors) {
+        let errors = this.response.errors;
+        if (
+          errors.length === 1 &&
+          errors[0].code === "ESELECTOROPTIONS" &&
           errors[0].options
         ) {
           return true;
