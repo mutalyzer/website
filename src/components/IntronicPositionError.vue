@@ -60,7 +60,7 @@
 
       <div>
         <v-sheet
-          v-for="(s_d, ind) in error.suggestions"
+          v-for="(s_d, ind) in error.options"
           :key="ind"
           outlined
           class="pa-4 my-4"
