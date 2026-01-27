@@ -465,9 +465,9 @@
           :value="equivalent_open"
         >
           <v-expansion-panel>
-            <v-expansion-panel-header class="overline"
-              >Other Annotated Transcripts</v-expansion-panel-header
-            >
+            <v-expansion-panel-header class="overline">{{
+              getTranscriptsPanelTitle()
+            }}</v-expansion-panel-header>
             <v-expansion-panel-content class="pt-5">
               <v-sheet
                 v-for="equivalent in getEquivalentDescriptions(
@@ -964,6 +964,12 @@ export default {
       this.showCorrections = false;
       this.inputDescriptionTextBox = this.inputDescriptionTextBox.trim();
 
+      // Reset panel states
+      this.equivalent_open = 1;
+      this.consequences_open = 1;
+      this.chromosomal_open = 1;
+      this.back_translated_open = 1;
+
       // cancellation setup
       this.canceledRequestIds.clear();
       this.currentController?.abort();
@@ -1000,6 +1006,7 @@ export default {
     handleSuccess: function (response) {
       if (response.data) {
         this.loadingOverlay = false;
+        this.connectionErrors = null;
         this.response = response.data;
         this.inputDescription = this.inputDescriptionTextBox;
         if (this.isNormalized()) {
@@ -1011,7 +1018,6 @@ export default {
       }
     },
     handleError: function (error) {
-      this.loadingOverlay = false;
       if (error.response) {
         if (
           error.response.status === 422 &&
@@ -1020,30 +1026,38 @@ export default {
         ) {
           let errors = error.response.data.custom.errors;
           if (
-            (errors.length === 1 && errors[0].code === "ESYNTAXUEOF") ||
-            errors[0].code === "ESYNTAXUC"
+            errors.length === 1 &&
+            (errors[0].code === "ESYNTAXUEOF" ||
+              errors[0].code === "ESYNTAXUC") &&
+            this.seemsSpdiFormat(this.inputDescriptionTextBox)
           ) {
+            // Keep loadingOverlay on - we're still processing
             this.spdiToHgvs(error.response.data.custom);
           } else {
+            this.loadingOverlay = false;
             this.response = error.response.data.custom;
           }
         } else if (error.response.status === 504) {
+          this.loadingOverlay = false;
           this.connectionErrors = {
             details:
               "Operation Timeout: This normalization appears too resource-intensive for the server. We recommend using a local installation.",
           };
         } else {
+          this.loadingOverlay = false;
           this.connectionErrors = {
             details:
               "Internal Server Error: An unexpected error occurred. Please contact us if you think that the description should be processed.",
           };
         }
       } else if (error.request) {
+        this.loadingOverlay = false;
         this.connectionErrors = {
           details:
             "Internal Server Error: An unexpected error occurred. Please contact us if you think that the description should be processed.",
         };
       } else {
+        this.loadingOverlay = false;
         this.connectionErrors = {
           details:
             "Internal Server Error: An unexpected error occurred. Please contact us if you think that the description should be processed.",
@@ -1369,6 +1383,9 @@ export default {
       ) {
         this.back_translated_open = 0;
       }
+      if (this.showTranscripts() && !this.showBioTransfer()) {
+        this.equivalent_open = 0;
+      }
     },
     showTranscripts: function () {
       if (this.response && this.response.equivalent_descriptions) {
@@ -1438,6 +1455,64 @@ export default {
       }
 
       return false;
+    },
+    hasInputTranscript: function () {
+      if (
+        this.response &&
+        this.response.normalized_model &&
+        this.response.normalized_model.reference &&
+        this.response.normalized_model.reference.selector &&
+        this.response.normalized_model.reference.selector.id
+      ) {
+        return true;
+      }
+      return false;
+    },
+
+    getTranscriptsPanelTitle: function () {
+      return this.hasInputTranscript()
+        ? "Other Annotated Transcripts"
+        : "Annotated Transcripts";
+    },
+    seemsSpdiFormat: function (input) {
+      // SPDI has exactly 4 parts: sequence:position:deleted:inserted
+      // Basic validation:
+      // - first part (sequence) should not be empty
+      // - second part (position) should be a number
+
+      if (!input || typeof input !== "string") {
+        return false;
+      }
+      var parts = input.split(":");
+      if (parts.length !== 4) {
+        return false;
+      }
+      var sequence = parts[0];
+      var position = parts[1];
+      if (!sequence || sequence.length === 0) {
+        return false;
+      }
+      if (!/^\d+$/.test(position)) {
+        return false;
+      }
+      return true;
+    },
+    showBioTransfer: function () {
+      return (
+        this.response &&
+        (this.response.rna || this.response.protein) &&
+        this.hasInputTranscript()
+      );
+    },
+    minimalTitle: function () {
+      if (
+        this.response &&
+        this.response.minimal_descriptions &&
+        this.response.minimal_descriptions.length === 1
+      ) {
+        return "Minimal Representation";
+      }
+      return "Minimal Representations";
     },
   },
 };

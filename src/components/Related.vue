@@ -53,7 +53,10 @@
                 </v-col>
                 <v-spacer />
                 <v-col
-                  v-if="!mapped_descriptions[assembly.accession]"
+                  v-if="
+                    !mapped_descriptions[assembly.accession] &&
+                    canMapToSpecificAssembly(assembly.accession)
+                  "
                   cols="auto"
                   class="py-0"
                 >
@@ -64,7 +67,6 @@
                         outlined
                         small
                         :loading="loading_accessions[assembly.accession]"
-                        :disabled="!canMapToAssembly()"
                         v-bind="attrs"
                         v-on="on"
                         @click="map(assembly.accession, true)"
@@ -72,11 +74,8 @@
                         Map
                       </v-btn>
                     </template>
-                    <span v-if="canMapToAssembly()">
+                    <span>
                       Map this description to {{ assembly.accession }}.
-                    </span>
-                    <span v-else>
-                      Cannot map: No valid selector available.
                     </span>
                   </v-tooltip>
                 </v-col>
@@ -160,9 +159,13 @@
         <v-hover
           v-for="(gene, gindex) in related.genes"
           :key="'gene-' + gindex"
+          v-slot="{ hover: geneHover }"
         >
           <div>
-            <v-sheet color="grey lighten-5" class="pa-2 ma-1">
+            <v-sheet
+              :color="geneHover ? 'grey lighten-4' : 'grey lighten-5'"
+              class="pa-2 ma-1"
+            >
               <v-row align="center" no-gutters>
                 <v-col class="py-0">
                   <div class="v-list-item__title">{{ gene.name }}</div>
@@ -272,7 +275,10 @@
                     </v-col>
                     <v-spacer />
                     <v-col
-                      v-if="!mapped_descriptions[gsource.accession]"
+                      v-if="
+                        !mapped_descriptions[gsource.accession] &&
+                        canMapToReference(gsource.accession)
+                      "
                       cols="auto"
                       class="py-0"
                     >
@@ -484,7 +490,8 @@
                       </v-col>
                       <v-col
                         v-if="
-                          !mapped_descriptions[tsource.transcript_accession]
+                          !mapped_descriptions[tsource.transcript_accession] &&
+                          canMapToReference(tsource.transcript_accession)
                         "
                         cols="auto"
                         class="py-0"
@@ -634,19 +641,23 @@ export default {
       accession: null,
       locations: null,
       related: null,
-      mockupdata: true,
       mapsuccess: false,
-      mapped_to: null,
       mapped_descriptions: {},
       mapping_errors: {},
       progress: true,
       loading_accessions: {},
+      retryTimeoutId: null,
     };
   },
   mounted: function () {
     this.get_accession();
     this.locations = this.get_locations();
     this.get_related_references_retriever();
+  },
+  beforeDestroy: function () {
+    if (this.retryTimeoutId) {
+      clearTimeout(this.retryTimeoutId);
+    }
   },
   methods: {
     get_related_references_retriever: function (retryCount) {
@@ -678,7 +689,7 @@ export default {
 
           if (error.response && error.response.status === 500) {
             if (retryCount < 2) {
-              setTimeout(
+              self.retryTimeoutId = setTimeout(
                 function () {
                   self.get_related_references_retriever(retryCount + 1);
                 },
@@ -691,7 +702,7 @@ export default {
             };
           } else if (error.message === "Network Error") {
             if (retryCount < 2) {
-              setTimeout(
+              self.retryTimeoutId = setTimeout(
                 function () {
                   self.get_related_references_retriever(retryCount + 1);
                 },
@@ -747,6 +758,10 @@ export default {
 
       var coordSystem =
         this.normalized_response.normalized_model.coordinate_system;
+
+      if (coordSystem === "g") {
+        return this.getGenomicLocations();
+      }
       if (coordSystem !== "c" && coordSystem !== "n") {
         return null;
       }
@@ -822,6 +837,54 @@ export default {
       return locationStrings.join(";");
     },
 
+    getGenomicLocations: function () {
+      var variants = this.normalized_response.normalized_model.variants;
+
+      if (!variants || variants.length === 0) {
+        return null;
+      }
+
+      var locationStrings = [];
+      var self = this;
+
+      variants.forEach(function (variant) {
+        if (!variant.location) {
+          return;
+        }
+
+        var location = variant.location;
+
+        if (location.type === "point") {
+          var pos = self.getGenomicPosition(location);
+          if (pos !== null) {
+            locationStrings.push(String(pos));
+          }
+        } else if (location.type === "range") {
+          var startPos = self.getGenomicPosition(location.start);
+          var endPos = self.getGenomicPosition(location.end);
+
+          if (startPos !== null && endPos !== null) {
+            var min = Math.min(startPos, endPos);
+            var max = Math.max(startPos, endPos);
+            locationStrings.push(min + "_" + max);
+          }
+        }
+      });
+
+      if (locationStrings.length === 0) {
+        return null;
+      }
+
+      return locationStrings.join(";");
+    },
+
+    getGenomicPosition: function (point) {
+      if (point && point.position !== undefined) {
+        return point.position;
+      }
+      return null;
+    },
+
     getSelector: function () {
       if (
         this.normalized_response &&
@@ -866,6 +929,7 @@ export default {
         if (hasSelector && this.isTranscriptSelector(hasSelector)) {
           return hasSelector;
         }
+        return null;
       }
 
       // NG_ reference -> Map using transcript from related
@@ -890,24 +954,40 @@ export default {
           }
           return hasSelector;
         }
+        return null;
       }
 
-      // NC_ with transcript selector
-      if (
-        refPrefix === "NC_" &&
-        hasSelector &&
-        this.isTranscriptSelector(hasSelector)
-      ) {
-        if (targetPrefix === "NG_") {
-          return hasSelector;
-        }
-
-        if (targetPrefix === "ENSG") {
-          var enstForNc = this.findENSTForTranscript(hasSelector);
-          if (enstForNc) {
-            return enstForNc;
+      // NC_ reference
+      if (refPrefix === "NC_") {
+        // NC_ with transcript selector
+        if (hasSelector && this.isTranscriptSelector(hasSelector)) {
+          if (targetPrefix === "NG_") {
+            return hasSelector;
+          }
+          if (targetPrefix === "ENSG") {
+            var enstForNc = this.findENSTForTranscript(hasSelector);
+            if (enstForNc) {
+              return enstForNc;
+            }
+          }
+          // For ENST targets, find the corresponding ENST for the current selector
+          if (targetPrefix === "ENST") {
+            var enstForMapping = this.findENSTForTranscript(hasSelector);
+            if (enstForMapping) {
+              return enstForMapping;
+            }
+          }
+          // For transcript targets (NM_, NR_, etc.), use the selector
+          if (this.isTranscriptSelector(targetAccession)) {
+            return hasSelector;
+          }
+          // For assembly targets (NC_), use the selector for liftover
+          if (targetPrefix === "NC_") {
+            return hasSelector;
           }
         }
+        // NC_ without transcript selector - cannot map to gene-level or transcript references
+        return null;
       }
 
       // Default logic for assemblies
@@ -923,7 +1003,12 @@ export default {
         return null;
       }
 
-      return targetAccession;
+      // For other cases, only return targetAccession if it can be used as a selector
+      if (this.isTranscriptSelector(targetAccession)) {
+        return targetAccession;
+      }
+
+      return null;
     },
 
     isTranscriptSelector: function (accession) {
@@ -1041,7 +1126,6 @@ export default {
 
       this.$set(this.mapping_errors, targetAccession, null);
       this.$set(this.loading_accessions, targetAccession, true);
-      this.mapped_to = targetAccession;
 
       var selectorId = this.determineSelectorId(isAssembly, targetAccession);
 
@@ -1091,7 +1175,8 @@ export default {
       var errorData;
 
       if (error.details) {
-        errorData = error;
+        // Wrap in errors array for consistent template rendering
+        errorData = { errors: [error] };
       } else if (error.response) {
         if (
           error.response.status === 422 &&
@@ -1101,15 +1186,15 @@ export default {
           errorData = error.response.data.custom;
         } else {
           errorData = {
-            details: "Some response error occurred.",
+            errors: [{ details: "Some response error occurred." }],
           };
         }
       } else if (error.request) {
         errorData = {
-          details: "Some connection or server error occurred.",
+          errors: [{ details: "Some connection or server error occurred." }],
         };
       } else {
-        errorData = { details: "Some error occurred." };
+        errorData = { errors: [{ details: "Some error occurred." }] };
       }
 
       this.$set(this.mapping_errors, targetAccession, errorData);
@@ -1131,6 +1216,25 @@ export default {
         (!referenceId.startsWith("LRG_") && hasSelector) ||
         this.canBeUsedAsSelector(referenceId)
       );
+    },
+
+    canMapToSpecificAssembly: function (assemblyAccession) {
+      if (!this.canMapToAssembly()) {
+        return false;
+      }
+
+      // Don't show Map button if the target is the same as the source reference
+      var referenceId = this.getReferenceId();
+      if (referenceId === assemblyAccession) {
+        return false;
+      }
+
+      return true;
+    },
+
+    canMapToReference: function (targetAccession) {
+      var selectorId = this.determineSelectorId(false, targetAccession);
+      return selectorId !== null;
     },
 
     getOriginalDescription: function () {
