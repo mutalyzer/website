@@ -115,6 +115,55 @@
                 </v-tooltip>
               </v-col></v-row
             >
+            <v-expansion-panels
+              v-if="mapped_response && mapped_response.ref_seq_differences"
+              class="my-2"
+              flat
+              tile
+            >
+              <v-expansion-panel>
+                <v-expansion-panel-header
+                  class="overline blue--text text"
+                  style="background: #e1f5fe"
+                  disable-icon-rotate
+                >
+                  There are differences between the mapped sequences
+                  <template #actions>
+                    <v-icon color="info"> mdi-alert-circle </v-icon>
+                  </template>
+                </v-expansion-panel-header>
+                <v-expansion-panel-content style="background: #e1f5fe">
+                  <span class="overline grey--text text"
+                    >Reference Sequences Description</span
+                  >
+                  <Description
+                    v-if="mapped_response.reference_sequences_description"
+                    :description="
+                      mapped_response.reference_sequences_description
+                    "
+                    :css_class="'ok-description-link'"
+                    :to_name="'Normalizer'"
+                    :to_params="{
+                      descriptionRouter:
+                        mapped_response.reference_sequences_description,
+                    }"
+                  />
+                  <span class="overline grey--text text"
+                    >Unfiltered Mapped Description</span
+                  >
+                  <Description
+                    v-if="mapped_response.unfiltered_mapped_description"
+                    :description="mapped_response.unfiltered_mapped_description"
+                    :css_class="'ok-description-link'"
+                    :to_name="'Normalizer'"
+                    :to_params="{
+                      descriptionRouter:
+                        mapped_response.unfiltered_mapped_description,
+                    }"
+                  />
+                </v-expansion-panel-content>
+              </v-expansion-panel>
+            </v-expansion-panels>
           </v-card-text>
         </v-card>
       </v-col>
@@ -162,6 +211,7 @@ export default {
     selector: null,
   },
   data: () => ({
+    mapped_response: null,
     mapped_description: null,
     mapping_errors: null,
     mapping_checked: false,
@@ -208,12 +258,14 @@ export default {
         this.mapping_errors = null;
         this.loading = true;
         this.mapped_description = null;
+        this.mapped_reponse = null;
 
         MutalyzerService.map(this.getMapParams())
           .then((response) => {
             if (response.data) {
               this.loading = false;
               this.mapping_checked = true;
+              this.mapped_response = response.data;
               this.mapped_description = response.data.mapped_description;
             }
           })
@@ -249,7 +301,7 @@ export default {
       };
       params.selector_id = this.selector.id;
       params.slice_to = "transcript";
-      params.filter_out = false;
+      params.filter_out = true;
       return params;
     },
     getMessage: function (message) {
