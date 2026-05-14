@@ -1,5 +1,4 @@
-import Vue from "vue";
-import VueRouter from "vue-router";
+import { createRouter, createWebHistory } from "vue-router";
 import Home from "../views/Home.vue";
 import About from "../views/About.vue";
 import Normalizer from "../views/Normalizer.vue";
@@ -10,19 +9,9 @@ import Mapper from "../views/Mapper.vue";
 import BatchProcessor from "../views/BatchProcessor.vue";
 import Algebra from "../views/Algebra.vue";
 
-Vue.use(VueRouter);
-
 const routes = [
-  {
-    path: "/",
-    name: "Home",
-    component: Home,
-  },
-  {
-    path: "/about",
-    name: "About",
-    component: About,
-  },
+  { path: "/", name: "Home", component: Home },
+  { path: "/about", name: "About", component: About },
   {
     path: "/normalizer/:descriptionRouter?",
     props: true,
@@ -39,45 +28,24 @@ const routes = [
     path: "/positionconverter",
     name: "PositionConverter",
     component: PositionConverter,
-    // Re-add the lazy loading stuff
   },
   {
     path: "/descriptionextractor",
     name: "DescriptionExtractor",
     component: DescriptionExtractor,
   },
-  {
-    path: "/mapper",
-    props: true,
-    name: "Mapper",
-    component: Mapper,
-  },
+  { path: "/mapper", props: true, name: "Mapper", component: Mapper },
   {
     path: "/batchprocessor",
     props: true,
     name: "BatchProcessor",
     component: BatchProcessor,
   },
-  {
-    path: "/algebra",
-    props: true,
-    name: "Algebra",
-    component: Algebra,
-  },
-  {
-    path: "/api",
-  },
-  {
-    path: "*",
-    name: "catchAll",
-    redirect: "/",
-  },
+  { path: "/algebra", props: true, name: "Algebra", component: Algebra },
+  { path: "/:pathMatch(.*)*", name: "catchAll", redirect: "/" },
 ];
 
-const router = new VueRouter({
-  mode: "history",
-  base: process.env.BASE_URL,
+export default createRouter({
+  history: createWebHistory(import.meta.env.BASE_URL),
   routes,
 });
-
-export default router;
